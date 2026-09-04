@@ -138,4 +138,24 @@ falls and the end state, and builds the contact sheets + `index.html`.
 
 - What: the three-stomp design as specified (env commit `65a0a5e`), 4096 envs × 2000 it, rtx-pro-6000, 75 min cap, ≈ $2.2.
 - Why: first run of the design; Rémi's go ("the plan is good, let's see what it does").
-- Result: (pending)
+- Curves (wandb `stomp_right`, `Episode_Reward/*` = weight × mean value per second; the lift term's ceiling is 0.72, the impact term's 0.6):
+
+  | it | mean reward | stomp_foot_lift | stomp_foot_impact | head_yaw_track | action_rate_l2 | fell_over/ep |
+  |---|---|---|---|---|---|---|
+  | 0 | 1.6 | 0.002 | 0.001 | 0.15 | −0.23 | 16.1 |
+  | 50 | 14.7 | **0.41** | 0.067 | 1.55 | −1.41 | 0.75 |
+  | 250 | 24.7 | 0.007 | 0.023 | 1.58 | −0.80 | 0.21 |
+  | 500 | 25.4 | 0.087 | 0.034 | 1.60 | −0.64 (tax → −0.3) | 0.08 |
+  | 900 | 25.1 | 0.13 | 0.049 | 1.72 | −0.70 | 0.04 |
+  | 1000 | 27.2 | **0.006** | 0.009 | 1.62 | −0.71 (tax → −0.6) | 0.08 |
+  | 1500 | 24.6 | 0.005 | 0.012 | 1.62 | −0.86 | 0.17 |
+  | 1999 | 23.4 | 0.011 | 0.016 | 1.61 | −0.88 | 0.08 |
+
+  `stomp_success` = 0 throughout; every penalty ≤ 0 throughout. Reading: at it 50 the policy
+  lifted the foot a lot (57 % of the lift ceiling) but fell in most episodes; once it learnt to
+  stand (it 250) the lifting vanished — the "just stand" attractor named in the spec's risks —
+  and crawled back to 21 % of the ceiling by it 900; then the action-rate tax step to −0.6 at
+  it 1000 wiped it out for good (a metric stepping DOWN exactly at a curriculum boundary is the
+  AGENTS.md signature of a tax introduced before the skill exists). Cost: 18 min bootstrap +
+  50 min training ≈ 68 min ≈ $3.1 (slow package downloads that day).
+- Rollouts (both engines, `motion/anger-rl/r1/index.html`): (pending)
