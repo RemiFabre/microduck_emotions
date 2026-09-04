@@ -185,4 +185,17 @@ falls and the end state, and builds the contact sheets + `index.html`.
   bootstrap, once the r1 rollouts showed the dead head term (≈ $0.3 lost, 70 min saved).
 - The 12:33 submission of this exact job (`6a9a9e8e259f8e97255ddf3b`) died in bootstrap on HF infrastructure
   (`apt` could not reach security.ubuntu.com, exit 100, ≈ $0.4); resubmitted unchanged at 12:43.
-- Result: (pending)
+- Curves (ceilings: lift 2.16, impact 1.8, head Gaussian 3.0):
+
+  | it | mean reward | ep. length | stomp_foot_lift | stomp_foot_impact | head_yaw_track | head_yaw_l1 | action_rate_l2 | foot_overspeed | fell_over/it |
+  |---|---|---|---|---|---|---|---|---|---|
+  | 50 | 15.9 | — | 1.72 | 0.28 | 1.95 | −0.49 | −1.62 | −0.005 | 1.0 |
+  | 300 | 21.4 | 149 | 1.85 | 0.82 | 2.15 | −0.44 | −1.31 | −0.04 | 0.6 |
+  | 1000 | 21.3 | 149 | 1.98 | 0.93 | 2.03 | −0.48 | −1.66 | −0.02 | 0.8 |
+  | 1999 | 25.3 | 149 | **2.01** (93 %) | **1.01** (56 %) | **2.44** (81 %) | −0.31 (mean head error ≈ 0.15 rad) | −1.64 | −0.02 | 0.5 |
+
+  Every penalty ≤ 0 throughout. The stomp terms are now most of what the policy earns and they hold
+  for the whole run (no collapse, no tax step); `stomp_success` stayed 0 (the all-or-nothing
+  metric: three ≥ 2 cm lifts + head ≥ 0.5 rad each way + upright at the last tick). Falls: ≈ 0.5–1
+  `fell_over` per iteration of 4096 envs, i.e. rare. Cost: 71 min running (18 min bootstrap) ≈ $3.3.
+- Rollouts (both engines, `/Users/remi/microduck/notes/emotions/motion/anger-rl/r2/index.html`): (pending)

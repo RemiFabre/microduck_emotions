@@ -1,7 +1,7 @@
 From 013c0c7f93206e819d5c1791c3f8d6112b38a259 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:43:22 +0200
-Subject: [PATCH 01/10] robot.rebootMotors: reboot servos in place, `robotctl
+Subject: [PATCH 01/12] robot.rebootMotors: reboot servos in place, `robotctl
  robot reboot-motors`, D-pad-up on the pad
 
 A servo that trips its shutdown mask (overload, overheating, electrical shock) latches with
@@ -580,7 +580,7 @@ index 1f04de3..3dc5c9f 100644
 From 9660d73c0f66750d87da02861c03ce88a14fbd8b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:16:16 +0200
-Subject: [PATCH 02/10] padd: reboot the servos on any D-pad-up press
+Subject: [PATCH 02/12] padd: reboot the servos on any D-pad-up press
 
 ---
  docs/robot/cheatsheet.md |  2 +-
@@ -645,7 +645,7 @@ index 10aea72..307d817 100644
 From a56532541ac05a2e1edeb5903581090feca32030 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:18:42 +0200
-Subject: [PATCH 03/10] padd: the servo reboot is D-pad right, D-pad up already
+Subject: [PATCH 03/12] padd: the servo reboot is D-pad right, D-pad up already
  has the mode-switch hold
 
 ---
@@ -707,7 +707,7 @@ index 307d817..56798b1 100644
 From e0f4b5489142d7911fcf54f59e21e22a2541c515 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 14:42:40 +0200
-Subject: [PATCH 04/10] padd: LB curious / RB peck head expressions, Select =
+Subject: [PATCH 04/12] padd: LB curious / RB peck head expressions, Select =
  robot.soften (gentle release), kicks on the D-pad
 
 - padd/src/expressions.rs: timed head-intent sequences played through the policy's command
@@ -1543,7 +1543,7 @@ index 3dc5c9f..c906860 100644
 From db2c70efe43c0562aec1fd2f614b0df706169aad Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:16:34 +0200
-Subject: [PATCH 05/10] padd: Start once stands the robot up (robot.init),
+Subject: [PATCH 05/12] padd: Start once stands the robot up (robot.init),
  Start again drives
 
 The first Start on a booted duck used to run the gait straight out of the home ramp. The pad
@@ -1656,7 +1656,7 @@ index 07489b5..2301850 100644
 From 5492ea602e3aef59b2a19d702977aab2da2cd88e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 20:25:46 +0200
-Subject: [PATCH 06/10] padd: R3 = startled (head up, a step back); expressions
+Subject: [PATCH 06/12] padd: R3 = startled (head up, a step back); expressions
  can drive the twist
 
 ---
@@ -1829,7 +1829,7 @@ index 2301850..c523949 100644
 From fdc09eef5c62abe6ead89edca323a4985a7d5d51 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 11:43:36 +0200
-Subject: [PATCH 07/10] padd: emotion mode on a DPad-Up tap, B = devastated
+Subject: [PATCH 07/12] padd: emotion mode on a DPad-Up tap, B = devastated
  (sit, droop, three sobs); robotd: a devastated sound tag
 
 ---
@@ -2276,7 +2276,7 @@ index c84d08d..fb4e027 100644
 From 67a6e37f03b70b83f122a79f2c67bc2eac217874 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:05:28 +0200
-Subject: [PATCH 08/10] robotd: load the policies from
+Subject: [PATCH 08/12] robotd: load the policies from
  /opt/robot/policies/current when that hub exists (newer releases ship none in
  the release dir)
 
@@ -2324,7 +2324,7 @@ index 5aa8ba0..109543a 100644
 From c9d0fedfbdd2c4bde3fec13c0d78d833044fe0d4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:17:09 +0200
-Subject: [PATCH 09/10] padd: emotion mode A = sad (standing droop with a small
+Subject: [PATCH 09/12] padd: emotion mode A = sad (standing droop with a small
  bow, two shakes, coo); robotd: a sad sound tag
 
 ---
@@ -2714,7 +2714,7 @@ index fb4e027..bf429f1 100644
 From 4bd8cc4df2db60641dc13ae1bae5834b5aa59c83 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:51:30 +0200
-Subject: [PATCH 10/10] padd: emotion mode Y = curious with quacks (head
+Subject: [PATCH 10/12] padd: emotion mode Y = curious with quacks (head
  forward, tilt right then left on two chirps); robotd: a curious sound tag
 
 ---
@@ -2958,6 +2958,255 @@ index bf429f1..0be480e 100644
          ]
          .into_iter()
          .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
+-- 
+2.53.0
+
+
+From 262a739ae903abbc8b1267e092e47325918dd252 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Fri, 4 Sep 2026 13:02:43 +0200
+Subject: [PATCH 11/12] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
+ =?UTF-8?q?=20lifts=20first,=20then=20droops=20to=20half=20depth=20(the=20?=
+ =?UTF-8?q?full=20droop=20was=20too=20heavy=20on=20the=20robot)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ padd/src/expressions.rs | 79 ++++++++++++++++++++++++++++-------------
+ 1 file changed, 54 insertions(+), 25 deletions(-)
+
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index 71c8b01..3f15a3b 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -88,13 +88,20 @@ const DEV_MOUTH: [f64; 67] = [
+     0.756, 1.000, 1.000, 1.000, 1.000, 1.000, 0.885, 0.753, 0.632, 0.499, 0.373, 0.245, 0.117,
+     0.005, 0.000,
+ ];
+-/// Sad, seconds from the press (simulation `sad_droop2.5`): droop over `SAD_DROOP_LEN`, two yaw
+-/// swings with extremes at `SAD_SWING_AT` (+, -) and 0.6 s fades (window 2.5-4.9 s), hold, then
+-/// the rise from `SAD_RISE` over `SAD_RISE_LEN`; head level at 7.5 s. Same head amplitudes as
+-/// devastated, plus a body pitch of `SAD_BODY_PITCH` on the pose slot (0.10 made the stand net
+-/// shake the head one way only).
++/// Sad, seconds from the press: the droop below over the first 2.5 s, two yaw swings with
++/// extremes at `SAD_SWING_AT` (+, -) and 0.6 s fades (window 2.5-4.9 s), hold, then the rise
++/// from `SAD_RISE` over `SAD_RISE_LEN`; head level at 7.5 s. The body pitch rides the pose slot
++/// (0.10 made the stand net shake the head one way only, hence 0.05).
+ const SAD_LEN: f64 = 7.5;
+-const SAD_DROOP_LEN: f64 = 2.5;
++/// The droop, v7 (Rémi, on the robot: the full droop made the head so heavy the duck walked
++/// forward to stay up). Same 2.5 s, half the depth: the head first LIFTS for `SAD_LIFT_LEN`
++/// (beak up to `SAD_LIFT_PITCH`, neck still, a quarter of the bow), then descends for the rest
++/// of the 2.5 s to half depth: head pitch `SAD_HEAD`, neck `SAD_NECK`, bow `SAD_BODY_PITCH`.
++const SAD_LIFT_LEN: f64 = 0.625;
++const SAD_LIFT_PITCH: f64 = -0.25;
++const SAD_DESCEND_LEN: f64 = 1.875;
++const SAD_NECK: f64 = 0.75;
++const SAD_HEAD: f64 = 0.5;
+ const SAD_RISE: f64 = 5.5;
+ const SAD_RISE_LEN: f64 = 2.0;
+ const SAD_SWING_AT: [f64; 2] = [3.1, 4.3];
+@@ -222,7 +229,7 @@ pub fn twist_at(kind: Kind, t: f64) -> Option<proto::MoveParams> {
+ pub fn pose_at(kind: Kind, t: f64) -> Option<proto::PoseParams> {
+     match kind {
+         Kind::Sad if (0.0..SAD_LEN).contains(&t) => Some(proto::PoseParams {
+-            pitch: SAD_BODY_PITCH * sad_down(t),
++            pitch: sad_droop(t).2,
+             active: true,
+             ..Default::default()
+         }),
+@@ -276,8 +283,22 @@ fn swings(t: f64, extremes: &[f64], amp: f64, fade: f64) -> f64 {
+     sign * amp * (1.0 - ramp(t - last, fade))
+ }
+ 
+-fn sad_down(t: f64) -> f64 {
+-    ramp(t, SAD_DROOP_LEN) * (1.0 - ramp(t - SAD_RISE, SAD_RISE_LEN))
++/// The sad droop as (neck, head_pitch, body_pitch) at `t`: lift, descend to half depth, hold,
++/// and everything back to level together over the rise.
++fn sad_droop(t: f64) -> (f64, f64, f64) {
++    let (neck, head, body) = if t < SAD_LIFT_LEN {
++        let r = ramp(t, SAD_LIFT_LEN);
++        (0.0, SAD_LIFT_PITCH * r, 0.25 * SAD_BODY_PITCH * r)
++    } else {
++        let r = ramp(t - SAD_LIFT_LEN, SAD_DESCEND_LEN);
++        (
++            -SAD_NECK * r,
++            SAD_LIFT_PITCH + (SAD_HEAD - SAD_LIFT_PITCH) * r,
++            0.25 * SAD_BODY_PITCH + 0.75 * SAD_BODY_PITCH * r,
++        )
++    };
++    let up = 1.0 - ramp(t - SAD_RISE, SAD_RISE_LEN);
++    (neck * up, head * up, body * up)
+ }
+ 
+ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+@@ -293,10 +314,10 @@ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+             }
+         }
+         Kind::Sad => {
+-            let down = sad_down(t);
++            let (neck_pitch, head_pitch, _) = sad_droop(t);
+             proto::HeadParams {
+-                neck_pitch: -DEV_NECK * down,
+-                head_pitch: DEV_HEAD * down,
++                neck_pitch,
++                head_pitch,
+                 head_yaw: swings(t, &SAD_SWING_AT, DEV_YAW, SAD_YAW_FADE),
+                 head_roll: 0.0,
+             }
+@@ -517,7 +538,7 @@ mod tests {
+     }
+ 
+     #[test]
+-    fn sad_droops_with_a_bow_shakes_twice_coos_and_comes_back_level_standing() {
++    fn sad_lifts_then_droops_to_half_depth_shakes_twice_coos_and_comes_back_level() {
+         assert_eq!(Expression::skill_at_start(Kind::Sad), None, "no sit");
+         assert_eq!(
+             Expression::sound_at_start(Kind::Sad),
+@@ -527,17 +548,22 @@ mod tests {
+         // Keyframes from the simulation (t, neck, head_pitch, head_yaw, body_pitch).
+         for (t, neck, pitch, yaw, body) in [
+             (0.0, 0.0, 0.0, 0.0, 0.0),
+-            (1.0, -0.518, 0.345, 0.0, 0.017),
+-            (2.5, -1.5, 1.0, 0.0, 0.05),
+-            (2.6, -1.5, 1.0, 0.027, 0.05),
+-            (3.1, -1.5, 1.0, 0.4, 0.05),
+-            (3.7, -1.5, 1.0, 0.0, 0.05),
+-            (4.3, -1.5, 1.0, -0.4, 0.05),
+-            (4.6, -1.5, 1.0, -0.2, 0.05),
+-            (4.9, -1.5, 1.0, 0.0, 0.05),
+-            (5.5, -1.5, 1.0, 0.0, 0.05),
+-            (6.5, -0.75, 0.5, 0.0, 0.025),
+-            (7.4, -0.009, 0.006, 0.0, 0.0),
++            (0.3, 0.0, -0.1172, 0.0, 0.0059),
++            (0.625, 0.0, -0.25, 0.0, 0.0125),
++            (1.0, -0.0716, -0.1784, 0.0, 0.0161),
++            (1.5, -0.3358, 0.0858, 0.0, 0.0293),
++            (2.0, -0.6259, 0.3759, 0.0, 0.0438),
++            (2.5, -0.75, 0.5, 0.0, 0.05),
++            (2.6, -0.75, 0.5, 0.027, 0.05),
++            (3.1, -0.75, 0.5, 0.4, 0.05),
++            (3.7, -0.75, 0.5, 0.0, 0.05),
++            (4.3, -0.75, 0.5, -0.4, 0.05),
++            (4.6, -0.75, 0.5, -0.2, 0.05),
++            (4.9, -0.75, 0.5, 0.0, 0.05),
++            (5.5, -0.75, 0.5, 0.0, 0.05),
++            (6.0, -0.6402, 0.4268, 0.0, 0.0427),
++            (6.5, -0.375, 0.25, 0.0, 0.025),
++            (7.4, -0.0046, 0.0031, 0.0, 0.0003),
+         ] {
+             let h = head_at(Kind::Sad, t);
+             let p = pose_at(Kind::Sad, t).expect("posing");
+@@ -563,7 +589,10 @@ mod tests {
+         for i in 0..(SAD_LEN * 100.0) as usize {
+             let t = i as f64 / 100.0;
+             let h = head_at(Kind::Sad, t);
+-            assert!(h.neck_pitch <= 0.0 && h.head_pitch >= 0.0 && h.head_yaw.abs() <= 0.4 + 1e-9);
++            assert!(
++                h.neck_pitch <= 0.0 && h.head_pitch >= -0.25 - 1e-9 && h.head_pitch <= 0.5 + 1e-9
++            );
++            assert!(h.head_yaw.abs() <= 0.4 + 1e-9);
+             assert!((0.0..=1.0).contains(&mouth_at(Kind::Sad, t)));
+         }
+         // The beak: open through the droop (the coo), shut from the first shake on.
+-- 
+2.53.0
+
+
+From bab9102a0e8f23f28d366af18096b0df7b95c5db Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Fri, 4 Sep 2026 13:05:27 +0200
+Subject: [PATCH 12/12] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
+ =?UTF-8?q?=E2=80=94=20the=20neck=20and=20the=20bow=20follow=20the=20beak?=
+ =?UTF-8?q?=20only=20below=20level?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ padd/src/expressions.rs | 47 +++++++++++++++++++++++------------------
+ 1 file changed, 27 insertions(+), 20 deletions(-)
+
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index 3f15a3b..550422d 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -283,22 +283,24 @@ fn swings(t: f64, extremes: &[f64], amp: f64, fade: f64) -> f64 {
+     sign * amp * (1.0 - ramp(t - last, fade))
+ }
+ 
+-/// The sad droop as (neck, head_pitch, body_pitch) at `t`: lift, descend to half depth, hold,
+-/// and everything back to level together over the rise.
++/// The sad droop as (neck, head_pitch, body_pitch) at `t`: the beak lifts, then descends to
++/// half depth; the neck and the bow follow the beak only once it is below level (as the v7
++/// simulation has it: neck = -1.5 x head pitch, bow = 0.1 x head pitch, never above level), so
++/// the neck stays still through the lift; everything comes back to level together over the rise.
+ fn sad_droop(t: f64) -> (f64, f64, f64) {
+-    let (neck, head, body) = if t < SAD_LIFT_LEN {
+-        let r = ramp(t, SAD_LIFT_LEN);
+-        (0.0, SAD_LIFT_PITCH * r, 0.25 * SAD_BODY_PITCH * r)
++    let head = if t < SAD_LIFT_LEN {
++        SAD_LIFT_PITCH * ramp(t, SAD_LIFT_LEN)
+     } else {
+-        let r = ramp(t - SAD_LIFT_LEN, SAD_DESCEND_LEN);
+-        (
+-            -SAD_NECK * r,
+-            SAD_LIFT_PITCH + (SAD_HEAD - SAD_LIFT_PITCH) * r,
+-            0.25 * SAD_BODY_PITCH + 0.75 * SAD_BODY_PITCH * r,
+-        )
++        SAD_LIFT_PITCH + (SAD_HEAD - SAD_LIFT_PITCH) * ramp(t - SAD_LIFT_LEN, SAD_DESCEND_LEN)
+     };
+     let up = 1.0 - ramp(t - SAD_RISE, SAD_RISE_LEN);
+-    (neck * up, head * up, body * up)
++    let head = head * up;
++    let below = head.max(0.0);
++    (
++        -(SAD_NECK / SAD_HEAD) * below,
++        head,
++        (SAD_BODY_PITCH / SAD_HEAD) * below,
++    )
+ }
+ 
+ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+@@ -545,14 +547,18 @@ mod tests {
+             Some(proto::SoundTag::Sad)
+         );
+         assert!(Expression::has_pose(Kind::Sad));
+-        // Keyframes from the simulation (t, neck, head_pitch, head_yaw, body_pitch).
++        // Keyframes from the v7 simulation JSON (t, neck, head_pitch, head_yaw, body_pitch).
+         for (t, neck, pitch, yaw, body) in [
+             (0.0, 0.0, 0.0, 0.0, 0.0),
+-            (0.3, 0.0, -0.1172, 0.0, 0.0059),
+-            (0.625, 0.0, -0.25, 0.0, 0.0125),
+-            (1.0, -0.0716, -0.1784, 0.0, 0.0161),
+-            (1.5, -0.3358, 0.0858, 0.0, 0.0293),
+-            (2.0, -0.6259, 0.3759, 0.0, 0.0438),
++            (0.3, 0.0, -0.117, 0.0, 0.0),
++            (0.6, 0.0, -0.249, 0.0, 0.0),
++            (1.0, 0.0, -0.178, 0.0, 0.0),
++            (1.3, 0.0, -0.035, 0.0, 0.0),
++            (1.4, -0.036, 0.024, 0.0, 0.002),
++            (1.5, -0.129, 0.086, 0.0, 0.009),
++            (1.9, -0.489, 0.326, 0.0, 0.033),
++            (2.0, -0.564, 0.376, 0.0, 0.038),
++            (2.3, -0.719, 0.479, 0.0, 0.048),
+             (2.5, -0.75, 0.5, 0.0, 0.05),
+             (2.6, -0.75, 0.5, 0.027, 0.05),
+             (3.1, -0.75, 0.5, 0.4, 0.05),
+@@ -561,9 +567,10 @@ mod tests {
+             (4.6, -0.75, 0.5, -0.2, 0.05),
+             (4.9, -0.75, 0.5, 0.0, 0.05),
+             (5.5, -0.75, 0.5, 0.0, 0.05),
+-            (6.0, -0.6402, 0.4268, 0.0, 0.0427),
++            (6.0, -0.640, 0.427, 0.0, 0.043),
+             (6.5, -0.375, 0.25, 0.0, 0.025),
+-            (7.4, -0.0046, 0.0031, 0.0, 0.0003),
++            (7.0, -0.110, 0.073, 0.0, 0.007),
++            (7.4, -0.005, 0.003, 0.0, 0.0),
+         ] {
+             let h = head_at(Kind::Sad, t);
+             let p = pose_at(Kind::Sad, t).expect("posing");
 -- 
 2.53.0
 

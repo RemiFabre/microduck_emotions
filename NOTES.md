@@ -183,3 +183,8 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   keyframes to 0.003. Build bab9102-local ready in target/docker; the first scp dropped ("Connection closed")
   and the robot then answered "Host is down": the install did NOT happen, robot still on 4bd8cc4-local.
 - ~13:00 (Paris 14:40 reset): both background agents died on a credit limit; resumed. Anger: r1 = "just stand" (0 stomps; the foot-lift term collapsed when the action-rate tax stepped up at it 1000; one stomp at ckpt 750); r2 StompStrong (stomp terms x3, flat -0.1 action-rate, head-yaw L1 + std 0.4) completed ~13:45 UTC, evaluation pending. Sad v7 build bab9102 ready; duck offline since ~11:00 (Host is down), install pending.
+- 12:16 the duck came back (it had been power-cycled: fresh boot, "up 1 min"; Bluetooth `duckctl --name remi_duck ip`
+  still said 192.168.1.29 while Wi-Fi was silent, so it was off, not re-addressed). Installed bab9102-local with the
+  torque guard (no torque event since boot), verified read-only: policy loaded from the hub, driving=true, healthy,
+  padd line "A sad, B devastated, Y curious", bank md5 unchanged (sad 31d9ef09.., devastated 2366d364.., curious 478ae48a..).
+- Sad v7 installed on the robot: rev bab9102-local (A = sad half-depth with the lift first, neck and bow follow the beak only below level as in the v7 simulation; alternative 262a739 follows the written brief with the neck starting at 0.625 s). Verified read-only; bank md5 unchanged. Not yet tested by Rémi.
