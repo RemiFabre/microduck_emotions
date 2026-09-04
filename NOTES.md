@@ -150,3 +150,19 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - 2026-09-04 12:43: r2 resubmitted: job `6a9aa0ef259f8e97255ddfe9`, repo `pollen-robotics/stomp-r2-strong-20260904-1243` (private), `Mjlab-StompStrong-Flat-MicroDuck`, 2000 it, ≈ $3.
 - Lake scene v2 READY (commit 80ebc04 on scene/lake): 69 s from wake-up, 10 beats (hey / talk / duck_curious / bad_news / but_why 6.5 s / excuse "meteorological conditions" with shy1 / window / are_you_scared / not_scared "optimizing our long-term survivability" with no1 + proud2 + fear1 / the_end sad2). Synced to the Reachy Mini (up at 192.168.1.14; `reachy-mini.local` does not resolve on the Mac right now), all 13 moves present in its cache, not started. Run: `ROBOT=pollen@192.168.1.14 robot/run_on_robot.sh scenes/lake --start-delay 5`.
 - **Decided by Rémi**: curious = `curious_two_tilts_r35_leftboost` + `Q3_up2`. Robot wav `sounds/robot/curious_a.wav`. Shipping to Y. (`ssh pollen@reachy-mini.local` resolves again.)
+
+### Same day: sad validated on the robot; CURIOUS (with quacks) shipped on Y
+
+- Commit `4bd8cc4` on `pad-expressions`: `Kind::CuriousQuacks` (LB's silent `Curious` stays): forward over
+  0-0.4 s (neck -0.8, head_pitch -0.35 so the beak stays level), roll 0 -> +0.35 over 0.4-0.75 s, +0.35 ->
+  -0.44 over 1.0-1.35 s, hold, everything back over 2.1-2.6 s (one shared return ramp), 3.0 s, sticks locked,
+  body pitch 0, no sit. `SoundTag::Curious` -> `/var/lib/robot/sounds/curious/curious_a.wav` (two chirps at
+  0.6 / 1.2 s, the file carries its own 0.6 s lead). Mouth table from the JSON: a 0.1 s snap open on each
+  chirp (0.8 s and 1.4 s samples). Keyframe test against the JSON (15 frames, tolerance 0.003).
+- Lesson: two test failures were float hairs (-0.44*1.0 = -0.44000000000000006 outside a closed range;
+  0.8/0.1 = 7.999.. interpolating the mouth to 0.99999); and a `;` in the shell chain let a failing test
+  through to a commit twice — amended, never installed. Gate on the test result with `&&`.
+- Installed rev 4bd8cc4-local with a torque guard (abort unless the last torque line is "on=false").
+- Bank md5: curious_a.wav 478ae48a910b4a6d83359af6589ea43a, sad_a.wav 31d9ef09d4dbd5a02c509eba7ba3b1cf,
+  devastated_a.wav 2366d3644145d5ee94fd75e0d8637702.
+- Curious installed on the robot: commit 4bd8cc4 on `pad-expressions` (rev 4bd8cc4-local), Y = curious (A sad, B devastated), verified read-only; bank md5 curious_a 478ae48a910b4a6d83359af6589ea43a. Not yet tested by Rémi.

@@ -1,7 +1,7 @@
 From 013c0c7f93206e819d5c1791c3f8d6112b38a259 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:43:22 +0200
-Subject: [PATCH 1/9] robot.rebootMotors: reboot servos in place, `robotctl
+Subject: [PATCH 01/10] robot.rebootMotors: reboot servos in place, `robotctl
  robot reboot-motors`, D-pad-up on the pad
 
 A servo that trips its shutdown mask (overload, overheating, electrical shock) latches with
@@ -580,7 +580,7 @@ index 1f04de3..3dc5c9f 100644
 From 9660d73c0f66750d87da02861c03ce88a14fbd8b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:16:16 +0200
-Subject: [PATCH 2/9] padd: reboot the servos on any D-pad-up press
+Subject: [PATCH 02/10] padd: reboot the servos on any D-pad-up press
 
 ---
  docs/robot/cheatsheet.md |  2 +-
@@ -645,7 +645,7 @@ index 10aea72..307d817 100644
 From a56532541ac05a2e1edeb5903581090feca32030 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:18:42 +0200
-Subject: [PATCH 3/9] padd: the servo reboot is D-pad right, D-pad up already
+Subject: [PATCH 03/10] padd: the servo reboot is D-pad right, D-pad up already
  has the mode-switch hold
 
 ---
@@ -707,7 +707,7 @@ index 307d817..56798b1 100644
 From e0f4b5489142d7911fcf54f59e21e22a2541c515 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 14:42:40 +0200
-Subject: [PATCH 4/9] padd: LB curious / RB peck head expressions, Select =
+Subject: [PATCH 04/10] padd: LB curious / RB peck head expressions, Select =
  robot.soften (gentle release), kicks on the D-pad
 
 - padd/src/expressions.rs: timed head-intent sequences played through the policy's command
@@ -1543,8 +1543,8 @@ index 3dc5c9f..c906860 100644
 From db2c70efe43c0562aec1fd2f614b0df706169aad Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:16:34 +0200
-Subject: [PATCH 5/9] padd: Start once stands the robot up (robot.init), Start
- again drives
+Subject: [PATCH 05/10] padd: Start once stands the robot up (robot.init),
+ Start again drives
 
 The first Start on a booted duck used to run the gait straight out of the home ramp. The pad
 now keeps a belief of whether the robot is up: false at start and after the soften / recover /
@@ -1656,7 +1656,7 @@ index 07489b5..2301850 100644
 From 5492ea602e3aef59b2a19d702977aab2da2cd88e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 20:25:46 +0200
-Subject: [PATCH 6/9] padd: R3 = startled (head up, a step back); expressions
+Subject: [PATCH 06/10] padd: R3 = startled (head up, a step back); expressions
  can drive the twist
 
 ---
@@ -1829,8 +1829,8 @@ index 2301850..c523949 100644
 From fdc09eef5c62abe6ead89edca323a4985a7d5d51 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 11:43:36 +0200
-Subject: [PATCH 7/9] padd: emotion mode on a DPad-Up tap, B = devastated (sit,
- droop, three sobs); robotd: a devastated sound tag
+Subject: [PATCH 07/10] padd: emotion mode on a DPad-Up tap, B = devastated
+ (sit, droop, three sobs); robotd: a devastated sound tag
 
 ---
  duck-ipc-proto/src/lib.rs |   4 +
@@ -2276,7 +2276,7 @@ index c84d08d..fb4e027 100644
 From 67a6e37f03b70b83f122a79f2c67bc2eac217874 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:05:28 +0200
-Subject: [PATCH 8/9] robotd: load the policies from
+Subject: [PATCH 08/10] robotd: load the policies from
  /opt/robot/policies/current when that hub exists (newer releases ship none in
  the release dir)
 
@@ -2324,7 +2324,7 @@ index 5aa8ba0..109543a 100644
 From c9d0fedfbdd2c4bde3fec13c0d78d833044fe0d4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:17:09 +0200
-Subject: [PATCH 9/9] padd: emotion mode A = sad (standing droop with a small
+Subject: [PATCH 09/10] padd: emotion mode A = sad (standing droop with a small
  bow, two shakes, coo); robotd: a sad sound tag
 
 ---
@@ -2704,6 +2704,257 @@ index fb4e027..bf429f1 100644
              SoundTag::Coo,
              SoundTag::Devastated,
 +            SoundTag::Sad,
+         ]
+         .into_iter()
+         .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
+-- 
+2.53.0
+
+
+From 4bd8cc4df2db60641dc13ae1bae5834b5aa59c83 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Fri, 4 Sep 2026 12:51:30 +0200
+Subject: [PATCH 10/10] padd: emotion mode Y = curious with quacks (head
+ forward, tilt right then left on two chirps); robotd: a curious sound tag
+
+---
+ duck-ipc-proto/src/lib.rs |   4 ++
+ padd/src/expressions.rs   | 116 ++++++++++++++++++++++++++++++++++++++
+ padd/src/main.rs          |   5 +-
+ robotd/src/intents.rs     |   1 +
+ 4 files changed, 124 insertions(+), 2 deletions(-)
+
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index c023c0b..d94c37b 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -1606,6 +1606,9 @@ pub enum SoundTag {
+     /// The "sad" emotion: a low coo gliding down while the head droops. Also hand-copied
+     /// into `<bank>/sad/`.
+     Sad,
++    /// The "curious" emotion: two chirps, the second a little higher (a question). Also
++    /// hand-copied into `<bank>/curious/`.
++    Curious,
+ }
+ 
+ impl SoundTag {
+@@ -1621,6 +1624,7 @@ impl SoundTag {
+             SoundTag::Wheee => "wheee",
+             SoundTag::Devastated => "devastated",
+             SoundTag::Sad => "sad",
++            SoundTag::Curious => "curious",
+         }
+     }
+ }
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index 6298ff6..71c8b01 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -30,6 +30,10 @@ pub enum Kind {
+     /// low coo glides down, two slow silent "no" shakes at the bottom, then back level. The
+     /// walking policy stays in charge underneath, sticks locked.
+     Sad,
++    /// Curious with a voice (emotion mode, Y): the head comes forward, beak level, then tilts
++    /// right on a chirp and left on a second, higher chirp ("hm?"), holds, and comes back.
++    /// LB's `Curious` is the silent cousin; this one is the emotion, quacks included.
++    CuriousQuacks,
+ }
+ 
+ #[derive(Debug, Clone, Copy)]
+@@ -102,6 +106,27 @@ const SAD_MOUTH: [f64; 33] = [
+     1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000,
+     0.934, 0.751, 0.567, 0.372, 0.188, 0.016, 0.000,
+ ];
++/// Curious with quacks, seconds from the press (simulation `curious_two_tilts_r35_leftboost`):
++/// the head comes forward over `CQ_FORWARD_LEN` (neck down, head pitched up to keep the beak
++/// level), tilts right to `CQ_TILT_RIGHT` from `CQ_TILT1`, then over to `CQ_TILT_LEFT` from
++/// `CQ_TILT2` (the left side tracks weaker, so it asks the full range), holds, and everything
++/// ramps back from `CQ_BACK` over `CQ_BACK_LEN`. The chirps land at 0.6 and 1.2 s.
++const CQ_LEN: f64 = 3.0;
++const CQ_FORWARD_LEN: f64 = 0.4;
++const CQ_NECK: f64 = 0.8;
++const CQ_HEAD: f64 = 0.35;
++const CQ_TILT1: f64 = 0.4;
++const CQ_TILT2: f64 = 1.0;
++const CQ_TILT_LEN: f64 = 0.35;
++const CQ_TILT_RIGHT: f64 = 0.35;
++const CQ_TILT_LEFT: f64 = -0.44;
++const CQ_BACK: f64 = 2.1;
++const CQ_BACK_LEN: f64 = 0.5;
++/// The beak, 0..1 every 0.1 s: a snap open on each chirp, shut otherwise.
++const CQ_MOUTH: [f64; 17] = [
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 1.000, 0.030, 0.000, 0.000, 0.000,
++    0.000, 1.000, 0.059, 0.000,
++];
+ 
+ impl Expression {
+     pub fn start(kind: Kind, now: Instant) -> Self {
+@@ -115,6 +140,7 @@ impl Expression {
+             Kind::Startled => STARTLED_LEN,
+             Kind::Devastated => DEV_LEN,
+             Kind::Sad => SAD_LEN,
++            Kind::CuriousQuacks => CQ_LEN,
+         })
+     }
+ 
+@@ -146,6 +172,7 @@ impl Expression {
+         match kind {
+             Kind::Devastated => Some(proto::SoundTag::Devastated),
+             Kind::Sad => Some(proto::SoundTag::Sad),
++            Kind::CuriousQuacks => Some(proto::SoundTag::Curious),
+             _ => None,
+         }
+     }
+@@ -186,6 +213,7 @@ pub fn twist_at(kind: Kind, t: f64) -> Option<proto::MoveParams> {
+         // Drooping: the sticks must not walk it. Zero twist for the whole thing.
+         Kind::Devastated if t < DEV_LEN => Some(proto::MoveParams::default()),
+         Kind::Sad if t < SAD_LEN => Some(proto::MoveParams::default()),
++        Kind::CuriousQuacks if t < CQ_LEN => Some(proto::MoveParams::default()),
+         _ => None,
+     }
+ }
+@@ -220,6 +248,7 @@ pub fn mouth_at(kind: Kind, t: f64) -> f64 {
+     match kind {
+         Kind::Devastated => table_at(&DEV_MOUTH, t),
+         Kind::Sad => table_at(&SAD_MOUTH, t),
++        Kind::CuriousQuacks => table_at(&CQ_MOUTH, t),
+         _ => 0.0,
+     }
+ }
+@@ -272,6 +301,23 @@ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+                 head_roll: 0.0,
+             }
+         }
++        Kind::CuriousQuacks => {
++            // Everything is scaled by the same return ramp, so the whole pose comes back
++            // together. Head pitch negative = beak up, which cancels the neck's dip.
++            let back = 1.0 - ramp(t - CQ_BACK, CQ_BACK_LEN);
++            let forward = ramp(t, CQ_FORWARD_LEN);
++            let roll = if t < CQ_TILT2 {
++                CQ_TILT_RIGHT * ramp(t - CQ_TILT1, CQ_TILT_LEN)
++            } else {
++                CQ_TILT_RIGHT + (CQ_TILT_LEFT - CQ_TILT_RIGHT) * ramp(t - CQ_TILT2, CQ_TILT_LEN)
++            };
++            proto::HeadParams {
++                neck_pitch: -CQ_NECK * forward * back,
++                head_pitch: -CQ_HEAD * forward * back,
++                head_yaw: 0.0,
++                head_roll: roll * back,
++            }
++        }
+         Kind::Startled => {
+             // Head pitch negative is beak up (measured on the shipped policies). Up fast, back
+             // to level over the last half second.
+@@ -540,4 +586,74 @@ mod tests {
+                 .is_none()
+         );
+     }
++
++    #[test]
++    fn curious_quacks_comes_forward_tilts_right_then_left_on_the_chirps_and_comes_back() {
++        assert_eq!(Expression::skill_at_start(Kind::CuriousQuacks), None);
++        assert_eq!(
++            Expression::sound_at_start(Kind::CuriousQuacks),
++            Some(proto::SoundTag::Curious)
++        );
++        assert!(!Expression::has_pose(Kind::CuriousQuacks));
++        assert_eq!(pose_at(Kind::CuriousQuacks, 1.0), None);
++        // Keyframes from the simulation (t, neck, head_pitch, head_roll).
++        for (t, neck, pitch, roll) in [
++            (0.0, 0.0, 0.0, 0.0),
++            (0.1, -0.117, -0.051, 0.0),
++            (0.3, -0.683, -0.299, 0.0),
++            (0.4, -0.8, -0.35, 0.0),
++            (0.5, -0.8, -0.35, 0.066),
++            (0.7, -0.8, -0.35, 0.333),
++            (0.8, -0.8, -0.35, 0.35),
++            (1.1, -0.8, -0.35, 0.201),
++            (1.2, -0.8, -0.35, -0.133),
++            (1.4, -0.8, -0.35, -0.44),
++            (2.1, -0.8, -0.35, -0.44),
++            (2.3, -0.524, -0.229, -0.288),
++            (2.5, -0.076, -0.033, -0.042),
++            (2.6, 0.0, 0.0, 0.0),
++            (2.9, 0.0, 0.0, 0.0),
++        ] {
++            let h = head_at(Kind::CuriousQuacks, t);
++            assert!(
++                (h.neck_pitch - neck).abs() < 0.003,
++                "neck at {t}: {}",
++                h.neck_pitch
++            );
++            assert!(
++                (h.head_pitch - pitch).abs() < 0.003,
++                "pitch at {t}: {}",
++                h.head_pitch
++            );
++            assert!(
++                (h.head_roll - roll).abs() < 0.003,
++                "roll at {t}: {}",
++                h.head_roll
++            );
++            assert_eq!(h.head_yaw, 0.0);
++        }
++        for i in 0..(CQ_LEN * 100.0) as usize {
++            let t = i as f64 / 100.0;
++            let h = head_at(Kind::CuriousQuacks, t);
++            assert!(h.neck_pitch <= 0.0 && h.head_pitch <= 0.0);
++            assert!((-0.44 - 1e-9..=0.35 + 1e-9).contains(&h.head_roll));
++            assert!((0.0..=1.0).contains(&mouth_at(Kind::CuriousQuacks, t)));
++        }
++        // The beak: a snap on each chirp, shut in between and after.
++        assert!(mouth_at(Kind::CuriousQuacks, 0.8) > 0.99);
++        assert!(mouth_at(Kind::CuriousQuacks, 1.4) > 0.99);
++        assert_eq!(mouth_at(Kind::CuriousQuacks, 0.5), 0.0);
++        assert_eq!(mouth_at(Kind::CuriousQuacks, 1.1), 0.0);
++        assert_eq!(mouth_at(Kind::CuriousQuacks, 2.0), 0.0);
++        assert_eq!(
++            twist_at(Kind::CuriousQuacks, 1.0),
++            Some(proto::MoveParams::default())
++        );
++        assert_eq!(twist_at(Kind::CuriousQuacks, CQ_LEN), None);
++        let e = Expression::start(Kind::CuriousQuacks, Instant::now());
++        assert!(
++            e.head_at(e.started + Expression::duration(Kind::CuriousQuacks))
++                .is_none()
++        );
++    }
+ }
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index f30a766..83959a8 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -269,7 +269,7 @@ fn main() -> std::process::ExitCode {
+         "driving — Start once = stand up (init), Start again = policy on/off, Y head mode, \
+          B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+-         DPad-Up tap = emotion mode (A sad, B devastated), Select = soft release, \
++         DPad-Up tap = emotion mode (A sad, B devastated, Y curious), Select = soft release, \
+          Select (3s) shutdown"
+     );
+ 
+@@ -441,10 +441,11 @@ fn main() -> std::process::ExitCode {
+                 tracing::info!(?mode, "mode");
+             }
+         }
+-        // Emotion mode's face buttons. A and B are bound; the others log and do nothing yet.
++        // Emotion mode's face buttons. A, B and Y are bound; X logs and does nothing yet.
+         match face {
+             Some(Face::A) => start_expression = Some(Kind::Sad),
+             Some(Face::B) => start_expression = Some(Kind::Devastated),
++            Some(Face::Y) => start_expression = Some(Kind::CuriousQuacks),
+             Some(other) => tracing::warn!(button = ?other, "emotion mode: nothing bound here yet"),
+             None => {}
+         }
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index bf429f1..0be480e 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -330,6 +330,7 @@ impl Intents {
+             SoundTag::Coo,
+             SoundTag::Devastated,
+             SoundTag::Sad,
++            SoundTag::Curious,
          ]
          .into_iter()
          .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
