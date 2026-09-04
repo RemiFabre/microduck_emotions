@@ -166,3 +166,4 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Bank md5: curious_a.wav 478ae48a910b4a6d83359af6589ea43a, sad_a.wav 31d9ef09d4dbd5a02c509eba7ba3b1cf,
   devastated_a.wav 2366d3644145d5ee94fd75e0d8637702.
 - Curious installed on the robot: commit 4bd8cc4 on `pad-expressions` (rev 4bd8cc4-local), Y = curious (A sad, B devastated), verified read-only; bank md5 curious_a 478ae48a910b4a6d83359af6589ea43a. Not yet tested by Rémi.
+- Rémi (voice): curious good on the robot. SAD on the robot: the head is too heavy at full droop, the duck walks forward to not fall. Fix: same duration and speed, half the net depth: first lift 0.25 (head_pitch -0.25) over 0.625 s, then descend 0.75 over 1.875 s (net head_pitch +0.5, neck -0.75); sound unchanged. v7 spec `motion/sadness/v7_spec.json` (body pitch 0.05 and 0). Also: run the lake scene on the Reachy Mini now (explicit go, Reachy Mini only).
