@@ -2,7 +2,7 @@
  "n_stomps": 2,
  "stomps": [
   {
-   "t_lift": 0.3,
+   "t_lift": 0.28,
    "t_touch": 1.2,
    "lift_mm": 191.0,
    "down_speed": 0.84,
@@ -11,7 +11,7 @@
    "touched": true
   },
   {
-   "t_lift": 1.32,
+   "t_lift": 1.28,
    "t_touch": 1.78,
    "lift_mm": 142.2,
    "down_speed": 0.72,
@@ -25,6 +25,10 @@
  "support_lifted_frac": 0.128,
  "support_lift_mm": 34.0,
  "max_tilt": 0.802,
+ "max_tilt_deg": 53.3,
+ "gesture_tilt_deg": 53.3,
+ "trunk_dz_mm": 39.1,
+ "foot_peak_mm": 191.0,
  "fell": false,
  "end_upright": true,
  "end_two_feet": true,
@@ -39,5 +43,6 @@
   0.0,
   2.96
  ],
- "verdict": "2 stomp(s), hop"
+ "small_ok": false,
+ "verdict": "2 tap(s), peak 191 mm, tilt 53 deg, hop"
 }

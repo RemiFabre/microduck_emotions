@@ -230,4 +230,25 @@ falls and the end state, and builds the contact sheets + `index.html`.
   on the stomp terms so the stomping itself is not discouraged; the gates and taxes shape HOW.
 - Risk: the upright gate + tilt tax may push the policy back toward "just stand" (r1). Watch `stomp_foot_lift`
   staying near its 2.16 ceiling and `trunk_tilt` shrinking together.
+- **Cancelled at 14:39** (10 min in, still bootstrapping, ≈ $0.5): Rémi reviewed the r2 videos meanwhile and
+  rejected the whole direction ("the amplitude of the movement is huge, tremendous amplitudes again ... we want a
+  very short, very low amplitude movement of the foot. This is unusable."). StompClean still rewarded a 3 cm lift
+  and a fast descent; it was superseded by the v2 design below before it trained.
+
+### Rémi's r2 review and the v2 design (spec section "v2: small stomp")
+
+What r2 measured (9 rollouts, both engines): right-foot peak 152–194 mm (hip height), trunk tilt 43–53°, trunk
+travelling 45–53 mm vertically and up to 0.46 m/s sideways, the support foot 32–43 mm off the floor, joint
+speeds 15–17 rad/s, right hip/knee/ankle swings ≈ 2 rad, commanded targets 8 rad beyond HOME. v2 = a TAP:
+foot in a 1–2 cm band (reward 0 at 3 cm, taxed above), 0.12 s up + 0.12 s back on the floor, three taps 0.45 s
+apart, nothing pays for speed or impact any more, and from step 0 the rest of the body is taxed for moving
+(tilt, trunk velocity, height, support-foot lift, joint velocity and action magnitude on every joint that is not
+the stomping leg's hip pitch / knee / ankle or the head yaw), targets hard-clamped to the joint ranges. Head yaw
+kept at ±0.4 (left / right / left). Success = 3 taps of 1–3 cm, never above 3 cm, tilt never above 5°, head
+≥ 0.3 rad each way, upright at the end.
+
+### r3 — `stomp-r3-small-20260904-1442` (job `6a9abcc8e686246ca69a15cb`), launched 14:42, task `Mjlab-StompSmall-Flat-MicroDuck` (env commit `aaaafc6`)
+
+- What: the v2 small-stomp design, 4096 envs × 2000 it, rtx-pro-6000, 90 min cap.
+- Why: Rémi's review; every excess of r2 has a dedicated tax, and the only positive gesture reward is the 1–2 cm band.
 - Result: (pending)

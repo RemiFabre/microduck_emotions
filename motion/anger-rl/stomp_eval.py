@@ -18,12 +18,13 @@ import numpy as np
 
 TOOLS = Path("/Users/remi/microduck/notes/tools"); sys.path.insert(0, str(TOOLS))
 HOME = np.array([0.0, -0.0873, -0.4579, -0.0049, 0.4530, 0.3491, 0.3491, 0.0, 0.0, 0.0, 0.0873, 0.4579, 0.0049, -0.4530])
-LIFT_MIN = 0.02      # m: success threshold of the design
+LIFT_MIN = 0.01      # m: a tap counts from 1 cm (v2 small stomp; v1 asked for 2 cm)
 TASK = "Mjlab-Stomp-Flat-MicroDuck"
 BASE = Path("/Users/remi/microduck/microduck/policies/alpha_stand.onnx")
 
 
-def analyze_log(log, foot="right", trick_only=True):
+def analyze_log(log, foot="right", trick_only=True, lift_min=None):
+    lift_min = LIFT_MIN if lift_min is None else lift_min
     # Warp logs carry the episode reset tick (done=1) -> cut there, or joint "speeds" read the qpos jump
     dones = [i for i, l in enumerate(log) if l.get("done")]
     if dones: log = log[:dones[0]]          # the done tick already holds the NEXT spawn (mjlab resets inside step)
@@ -38,7 +39,7 @@ def analyze_log(log, foot="right", trick_only=True):
     zr = z - z0
     stomps, i, n = [], 0, len(win)
     while i < n:
-        if zr[i] >= LIFT_MIN:
+        if zr[i] >= lift_min:
             j = i
             while j < n and zr[j] > 0.005: j += 1           # back near the floor
             k = j
@@ -59,21 +60,48 @@ def analyze_log(log, foot="right", trick_only=True):
     qd = np.abs(np.diff(np.array([l["q"] for l in log]), axis=0) / dt)
     gz = np.array([l["gz"] for l in log]); tilt = np.array([l["tilt"] for l in log])
     fell = bool((gz > -0.5).any() or (tilt > 0.85).any())
+    tilt_deg = float(np.degrees(np.arcsin(np.clip(tilt.max(), 0, 1))))
+    tr_tilt = np.array([l["tilt"] for l in win]); tilt_deg_gesture = float(np.degrees(np.arcsin(np.clip(tr_tilt.max(), 0, 1))))
+    zt = np.array([l["z"] for l in win])
     end = log[-1]
     out = dict(n_stomps=len(stomps), stomps=stomps,
                max_joint_speed=round(float(qd.max()), 2), max_joint_speed_joint=int(np.unravel_index(qd.argmax(), qd.shape)[1]),
                support_lifted_frac=round(float(np.mean([1 - l[of] for l in win])), 3),
                support_lift_mm=round(float((max(l[ok] for l in win) - np.median([l[ok] for l in log[:5]])) * 1000), 1),
-               max_tilt=round(float(tilt.max()), 3), fell=fell,
+               max_tilt=round(float(tilt.max()), 3), max_tilt_deg=round(tilt_deg, 1), gesture_tilt_deg=round(tilt_deg_gesture, 1),
+               trunk_dz_mm=round(float(zt.max() - zt.min()) * 1000, 1),
+               foot_peak_mm=round(float(zr.max()) * 1000, 1), fell=fell,
                end_upright=bool(end["gz"] < -0.9), end_two_feet=bool(end["lf"] and end["rf"]),
                end_head_yaw=round(float(end["q"][7]), 2), end_pose_dev=round(float(np.abs(np.array(end["q"]) - HOME).max()), 2),
                end_z=round(float(end["z"]), 3),
                yaw_range=[round(float(yaw.min()), 2), round(float(yaw.max()), 2)],
                window=[round(float(t[0]), 2), round(float(t[-1]), 2)])
-    out["verdict"] = ("FELL" if fell else f"{len(stomps)} stomp(s)" +
+    out["small_ok"] = bool(len(stomps) >= 3 and all(10 <= x["lift_mm"] <= 30 and x["touched"] for x in stomps)
+                           and tilt_deg_gesture < 5.0 and not fell and out["end_upright"] and out["end_two_feet"])
+    out["verdict"] = ("FELL" if fell else f"{len(stomps)} tap(s), peak {zr.max()*1000:.0f} mm, tilt {tilt_deg_gesture:.0f} deg" +
                       (", hop" if out["support_lifted_frac"] > 0.1 else "") +
                       ("" if out["end_upright"] and out["end_two_feet"] else ", bad end"))
     return out
+
+
+def foot_plot(log, out_png, foot="right", band=(0.01, 0.03)):
+    """Foot height (mm) vs time with the 1-3 cm tap band, head yaw (rad) and trunk tilt (deg): the scale the eye
+    cannot read off a video."""
+    import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
+    zk = "rz" if foot == "right" else "lz"
+    t = np.array([l["t"] for l in log]); z0 = float(np.median([l[zk] for l in log[:5]]))
+    z = (np.array([l[zk] for l in log]) - z0) * 1000; oz = (np.array([l["lz" if foot == "right" else "rz"] for l in log]) - z0) * 1000
+    yaw = np.array([l["q"][7] for l in log]); tilt = np.degrees(np.arcsin(np.clip([l["tilt"] for l in log], 0, 1)))
+    fig, ax = plt.subplots(3, 1, figsize=(9, 5.2), sharex=True)
+    ax[0].axhspan(band[0] * 1000, band[1] * 1000, color="#cfc", alpha=0.6, label="tap band 10-30 mm")
+    ax[0].plot(t, z, "k", lw=1.5, label=f"{foot} foot"); ax[0].plot(t, oz, "b", lw=0.8, alpha=0.6, label="support foot")
+    ax[0].set_ylabel("foot height (mm)"); ax[0].set_ylim(-5, max(40, float(z.max()) + 5)); ax[0].legend(loc="upper right", fontsize=8)
+    ax[1].plot(t, yaw, "m"); ax[1].axhline(0.4, ls=":", c="gray"); ax[1].axhline(-0.4, ls=":", c="gray"); ax[1].set_ylabel("head yaw (rad)")
+    ax[2].plot(t, tilt, "r"); ax[2].axhline(5, ls=":", c="gray"); ax[2].set_ylabel("trunk tilt (deg)"); ax[2].set_xlabel("t (s)")
+    tr = [l["t"] for l in log if l.get("trick")]
+    if tr:
+        for a in ax: a.axvspan(tr[0], tr[-1], color="#eee", zorder=0)
+    fig.tight_layout(); fig.savefig(out_png, dpi=90); plt.close(fig); return out_png
 
 
 def contact_sheet(mp4, times, duration, out_png, cols=None):
@@ -133,12 +161,14 @@ def cmd_analyze(a):
         base_t = [l["t"] for l in log if l.get("trick")][0] if any(l.get("trick") for l in log) else 0.0
         sheet_times = sorted(set([round(base_t, 2)] + [round(s["t_lift"] + (s["t_touch"] - s["t_lift"]) / 2, 2) for s in an["stomps"]] + times + [round(log[-1]["t"], 2)]))[:8]
         png = contact_sheet(d / (js.stem + ".mp4"), sheet_times, dur, d / f"{js.stem}_sheet.png", cols=4)
+        try: plot = foot_plot(log if not any(l.get("done") for l in log) else log[:[i for i, l in enumerate(log) if l.get("done")][0]], d / f"{js.stem}_foot.png")
+        except Exception as e: plot = None; print("foot_plot failed:", e)
         meta = {k: doc[k] for k in doc if k not in ("stats", "log")}
-        cls = "ok" if (an["n_stomps"] >= 3 and not an["fell"] and an["end_upright"]) else "v"
+        cls = "ok" if an.get("small_ok") else "v"
         cards.append(f"<div class=card><b>{js.stem}</b> <span class={cls}>{an['verdict']}</span><br><small>{json.dumps(meta)}</small>"
-                     f"<video src='{js.stem}.mp4' controls autoplay loop muted></video>" + (f"<img src='{png.name}'>" if png else "") +
+                     f"<video src='{js.stem}.mp4' controls autoplay loop muted></video>" + (f"<img src='{png.name}'>" if png else "") + (f"<img src='{plot.name}'>" if plot else "") +
                      f"<pre>{json.dumps({k: v for k, v in an.items()}, indent=1)}</pre></div>")
-        summary.append((js.stem, an["verdict"], [(s['lift_mm'], s['down_speed'], s['yaw_at_touch']) for s in an['stomps']], an["max_joint_speed"], an["fell"]))
+        summary.append((js.stem, an["verdict"], [(s['lift_mm'], s['down_speed'], s['yaw_at_touch']) for s in an['stomps']], "qd %.1f" % an["max_joint_speed"], "small_ok" if an["small_ok"] else "-"))
     page = d / "index.html"
     page.write_text(HTML.format(title=a.title or f"angry stomp · {d.name}", intro=a.intro, cards="".join(cards)))
     for s in summary: print(*s)

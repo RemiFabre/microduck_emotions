@@ -2,7 +2,7 @@
  "n_stomps": 4,
  "stomps": [
   {
-   "t_lift": 0.3,
+   "t_lift": 0.28,
    "t_touch": 0.72,
    "lift_mm": 119.9,
    "down_speed": 0.65,
@@ -11,7 +11,7 @@
    "touched": true
   },
   {
-   "t_lift": 0.8,
+   "t_lift": 0.76,
    "t_touch": 1.74,
    "lift_mm": 126.6,
    "down_speed": 0.94,
@@ -20,7 +20,7 @@
    "touched": true
   },
   {
-   "t_lift": 1.82,
+   "t_lift": 1.78,
    "t_touch": 2.26,
    "lift_mm": 152.3,
    "down_speed": 0.95,
@@ -29,7 +29,7 @@
    "touched": true
   },
   {
-   "t_lift": 2.44,
+   "t_lift": 2.42,
    "t_touch": 2.64,
    "lift_mm": 41.7,
    "down_speed": 0.46,
@@ -43,6 +43,10 @@
  "support_lifted_frac": 0.228,
  "support_lift_mm": 39.5,
  "max_tilt": 0.683,
+ "max_tilt_deg": 43.0,
+ "gesture_tilt_deg": 43.0,
+ "trunk_dz_mm": 45.8,
+ "foot_peak_mm": 152.3,
  "fell": false,
  "end_upright": true,
  "end_two_feet": false,
@@ -57,5 +61,6 @@
   0.0,
   2.96
  ],
- "verdict": "4 stomp(s), hop, bad end"
+ "small_ok": false,
+ "verdict": "4 tap(s), peak 152 mm, tilt 43 deg, hop, bad end"
 }
