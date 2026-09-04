@@ -172,7 +172,7 @@ falls and the end state, and builds the contact sheets + `index.html`.
     stomp terms are worth ~13 % of the return (short windows) and the action-rate step at it 1000 out-priced them.
 - Cost: ≈ $3.1 (68 min on rtx-pro-6000, 18 min of it bootstrap).
 
-### r2 — `stomp-r2-strong-20260904-1233` (job `6a9a9e8e259f8e97255ddf3b`), launched 12:33, task `Mjlab-StompStrong-Flat-MicroDuck`
+### r2 — `stomp-r2-strong-20260904-1243` (job `6a9aa0ef259f8e97255ddfe9`), launched 12:43, task `Mjlab-StompStrong-Flat-MicroDuck`
 
 - What changed vs r1 (nothing else): `stomp_foot_lift` and `stomp_foot_impact` weights 3 → 9 (the stomps become
   ~35 % of the return instead of ~13 %); `pose_stand_legs` 1.5 → 1.0; action-rate weight flat at −0.1 (no ramp: the
@@ -183,4 +183,6 @@ falls and the end state, and builds the contact sheets + `index.html`.
   is far from).
 - A first r2 without the head fix (job `6a9a9baa259f8e97255ddea0`, 12:21) was cancelled by me 8 min later, in
   bootstrap, once the r1 rollouts showed the dead head term (≈ $0.3 lost, 70 min saved).
+- The 12:33 submission of this exact job (`6a9a9e8e259f8e97255ddf3b`) died in bootstrap on HF infrastructure
+  (`apt` could not reach security.ubuntu.com, exit 100, ≈ $0.4); resubmitted unchanged at 12:43.
 - Result: (pending)
