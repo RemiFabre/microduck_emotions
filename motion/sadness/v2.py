@@ -28,6 +28,7 @@ for _i, _a in enumerate(sys.argv):
     if _a == "--version" and _i + 1 < len(sys.argv):
         VERSION = sys.argv[_i + 1]
 LATER = VERSION != "v2"          # v3 onward: clip cut at the spec total, page opened on the first video, sad only
+MOUTH_DELAY = 0.15 if VERSION >= "v5" else 0.0   # v5: the beak follows the sound 0.15 s late (Remi saw it open before the head moved)
 SPEC = json.load(open(HERE / f"{VERSION}_spec.json"))
 # Extra option, not in the spec: the standing `sad` with body pitch +0.05 instead of +0.10. At +0.10 the stand net turns
 # the head only one way (yaw joint ~0 at the + extremes), so "three swings" shows as one; at +0.05 it swings both ways.
@@ -107,7 +108,8 @@ def render_pair(motion, sound, wav, desc, with_open=False):
     for k in range(n):
         t = k * F.CDT
         h = fn(t)
-        mouth = float(env[k]) if k < len(env) else 0.0
+        kd = k - int(round(MOUTH_DELAY / F.CDT))
+        mouth = float(env[kd]) if 0 <= kd < len(env) else 0.0
         du.head[:] = (h["neck"], h["head_pitch"], h["head_yaw"], h["head_roll"])
         du.body[:] = 0
         du.body[2] = h["body_pitch"]
@@ -230,7 +232,12 @@ def index():
   <p><a href="../../motion/sadness/v2/{stem}_beats.png">beats sheet</a> &middot; <a href="../../motion/sadness/v2/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/sadness/v2/{stem}.mp4">silent mp4</a></p>
   <img class="sheet" src="../../motion/sadness/v2/{stem}_beats.png">
 </div>""")
-    if VERSION == "v4":
+    if VERSION == "v5":
+        intro = {"sad": "Standing, body pitch +0.05. Same motions as v4 (droop 2.0 s: swings 2.6 / 3.8 s, 7.8 s; droop 2.5 s: swings 3.1 / 4.3 s, 8.3 s), "
+                        "the coo sound pitched into this duck's register (starts 210-260 Hz, falls to ~150-165 Hz with the head), swings silent. "
+                        "The beak follows the sound's loudness with a 0.15 s delay, so it opens once the head has started to move and is shut for the swings.",
+                 "devastated": ""}
+    elif VERSION == "v4":
         intro = {"sad": "Standing, body pitch +0.05. One continuous sound from the start to the end of the head going DOWN, descending with the head "
                         "(as if the pain were felt as the head lowers); the two side-to-side swings are SILENT. Two droop speeds: 2.0 s (swings 2.6 / 3.8 s, 7.8 s) "
                         "and 2.5 s (swings 3.1 / 4.3 s, 8.3 s). The beak follows the sound's loudness, so it opens during the droop and is shut for the swings.",
@@ -255,9 +262,10 @@ video{{background:#000;border-radius:6px}} .decided{{background:#fff8e6;border:2
 </style>
 <h1>Microduck sadness {VERSION}: sound + motion, re-synced</h1>
 {'<p class="decided"><b>Devastated is decided</b> (devastated_3x1.0 + D3v2_sobs_gentler, see <a href="../v2/index.html">v2</a>). This page is SAD only, v3: shorter (about half of v2) and softer.</p>' if VERSION == "v3" else ''}
+{'<p class="decided"><b>sad v5: the coo sound in the duck\'s own register, descending with the head.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v4/index.html">v4</a>.</p>' if VERSION == "v5" else ''}
 {'<p class="decided"><b>sad v4: the sound descends with the head, the shakes are silent.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v3/index.html">v3</a>.</p>' if VERSION == "v4" else ''}
 <p class="sub">Remi's notes: three swings not four; sad slower and its sound only once the tilt is nearly done; the beak moves with the sound.
-The mouth is driven by the wav's loudness (RMS at 50 Hz, 60 ms smoothing, fully open at 60% of the peak) through the same mouth intent the robot accepts.
+The mouth is driven by the wav's loudness (RMS at 50 Hz, 60 ms smoothing, fully open at 60% of the peak{', 0.15 s delay' if MOUTH_DELAY else ''}) through the same mouth intent the robot accepts.
 Simulation (640x480, 30 fps). Motions and json: <code>/Users/remi/microduck/notes/emotions/motion/sadness/v2/</code>. Spec: <code>v2_spec.json</code>.</p>
 """
     for emo in ("devastated", "sad"):

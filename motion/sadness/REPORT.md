@@ -226,3 +226,13 @@ body pitch +0.05, two swings: `sad_droop2.0` (droop 0-2.0 s, swings 2.6 / 3.8 s,
 each, all audible only during the droop. Verified: the jaw opens from 0.06-0.18 s and stays open through the droop, is
 shut (0.00) at both swings and after (max 0.06-0.13 in the silences, the EMA tail); yaw joint +0.28 / -0.38 on every
 pair; no fall in the 12 renders.
+
+---
+
+# v5 (2026-09-04): sad, the coo in the duck's own register, descending with the head
+
+Spec `v5_spec.json`, rendered by `v2.py --version v5`. Same two motions as v4 (`sad_droop2.0`, `sad_droop2.5`, body
+pitch +0.05, two silent swings), four coo sounds each (210-260 Hz falling to 150-165 Hz). Outputs: `motion/sadness/v5/`
+and `/Users/remi/microduck/notes/emotions/combined/v5/` (8 muxed mp4s, `index.html`). New: the mouth channel is delayed
+0.15 s, so the jaw opens at 0.28-0.32 s (v4: 0.06-0.18 s), once the head has started to move. Verified: jaw open through
+the droop, 0.00 at both swings and after (max 0.05-0.08 in the silences), yaw joint +0.28 / -0.38, no fall in the 8 renders.
