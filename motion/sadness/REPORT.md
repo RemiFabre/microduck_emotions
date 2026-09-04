@@ -236,3 +236,13 @@ pitch +0.05, two silent swings), four coo sounds each (210-260 Hz falling to 150
 and `/Users/remi/microduck/notes/emotions/combined/v5/` (8 muxed mp4s, `index.html`). New: the mouth channel is delayed
 0.15 s, so the jaw opens at 0.28-0.32 s (v4: 0.06-0.18 s), once the head has started to move. Verified: jaw open through
 the droop, 0.00 at both swings and after (max 0.05-0.08 in the silences), yaw joint +0.28 / -0.38, no fall in the 8 renders.
+
+---
+
+# v6 (2026-09-04): sad, the coo voice synthesized on the droop glide, no stretching
+
+Spec `v6_spec.json`, rendered by `v2.py --version v6` (same as v5: body pitch +0.05, two silent swings, mouth delayed
+0.15 s). Four synthesized coo-voice glides (200-260 Hz falling to 130-160 Hz) plus one tape-only wheee-loop variant, on
+`sad_droop2.0` and `sad_droop2.5`: 10 pairs in `motion/sadness/v6/` and `/Users/remi/microduck/notes/emotions/combined/v6/`
+(`index.html`). Verified: jaw opens at 0.28-0.36 s, open through the droop, back to 0.00-0.06 by the first swing and 0.00
+after; yaw joint +0.28 / -0.38 on every pair; no fall in the 10 renders. (v5 was rejected: the granular stretch sounded robotic.)

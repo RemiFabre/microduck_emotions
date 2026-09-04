@@ -232,7 +232,12 @@ def index():
   <p><a href="../../motion/sadness/v2/{stem}_beats.png">beats sheet</a> &middot; <a href="../../motion/sadness/v2/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/sadness/v2/{stem}.mp4">silent mp4</a></p>
   <img class="sheet" src="../../motion/sadness/v2/{stem}_beats.png">
 </div>""")
-    if VERSION == "v5":
+    if VERSION == "v6":
+        intro = {"sad": "Standing, body pitch +0.05. Same motions as v4 (droop 2.0 s: swings 2.6 / 3.8 s, 7.8 s; droop 2.5 s: swings 3.1 / 4.3 s, 8.3 s). "
+                        "The sound is the robot's coo voice synthesized directly on the droop glide (no granular stretching), plus one tape-only wheee-loop variant; "
+                        "swings silent. The beak follows the sound's loudness with a 0.15 s delay.",
+                 "devastated": ""}
+    elif VERSION == "v5":
         intro = {"sad": "Standing, body pitch +0.05. Same motions as v4 (droop 2.0 s: swings 2.6 / 3.8 s, 7.8 s; droop 2.5 s: swings 3.1 / 4.3 s, 8.3 s), "
                         "the coo sound pitched into this duck's register (starts 210-260 Hz, falls to ~150-165 Hz with the head), swings silent. "
                         "The beak follows the sound's loudness with a 0.15 s delay, so it opens once the head has started to move and is shut for the swings.",
@@ -262,6 +267,7 @@ video{{background:#000;border-radius:6px}} .decided{{background:#fff8e6;border:2
 </style>
 <h1>Microduck sadness {VERSION}: sound + motion, re-synced</h1>
 {'<p class="decided"><b>Devastated is decided</b> (devastated_3x1.0 + D3v2_sobs_gentler, see <a href="../v2/index.html">v2</a>). This page is SAD only, v3: shorter (about half of v2) and softer.</p>' if VERSION == "v3" else ''}
+{'<p class="decided"><b>sad v6: the coo voice synthesized, descending with the head, no stretching.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous rounds: <a href="../v4/index.html">v4</a>, <a href="../v5/index.html">v5</a>.</p>' if VERSION == "v6" else ''}
 {'<p class="decided"><b>sad v5: the coo sound in the duck\'s own register, descending with the head.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v4/index.html">v4</a>.</p>' if VERSION == "v5" else ''}
 {'<p class="decided"><b>sad v4: the sound descends with the head, the shakes are silent.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v3/index.html">v3</a>.</p>' if VERSION == "v4" else ''}
 <p class="sub">Remi's notes: three swings not four; sad slower and its sound only once the tilt is nearly done; the beak moves with the sound.
