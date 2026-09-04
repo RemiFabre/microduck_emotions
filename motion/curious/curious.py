@@ -25,8 +25,15 @@ import duckfilm as F
 import sadness as S
 from v2 import mouth_envelope, COMBINE, PY
 
-SPEC = json.load(open(HERE / "spec.json"))
-OUT_COMBINED = Path("/Users/remi/microduck/notes/emotions/combined/curious")
+def _arg(flag, default):
+    return sys.argv[sys.argv.index(flag) + 1] if flag in sys.argv and sys.argv.index(flag) + 1 < len(sys.argv) else default
+
+
+SPEC_FILE = HERE / _arg("--spec", "spec.json")
+SPEC = json.load(open(SPEC_FILE))
+OUT_COMBINED = Path("/Users/remi/microduck/notes/emotions/combined") / _arg("--page", "curious")
+HEADER = _arg("--header", "curious (Y): head forward, tilt, double rising quack")
+COMPARE = [c for c in _arg("--compare", "").split(",") if c]     # stems of earlier renders to show first, for comparison
 FWD_NECK, FWD_PITCH = -0.8, -0.35
 MOUTH_DELAY = 0.15
 PREROLL = 0.6          # seconds of quiet standing before t = 0 (not in the clip): the duck settles from the spawn
@@ -159,20 +166,18 @@ def beats_sheet(stem, frames, b, log):
     out.save(HERE / f"{stem}_beats.png")
 
 
-def index():
-    cards = {n: [] for n in SPEC["motions"]}
-    for r in SPEC["renders"]:
-        stem = f"{r['motion']}__{r['sound']}"
+def card(stem, motion, sound, sound_desc, label=""):
         p = HERE / f"{stem}.json"
         if not p.exists():
-            continue
+            return ""
         m = json.load(open(p))["measured"]
         b = m["beats"]
+        r = dict(motion=motion, sound=sound, desc=sound_desc)
         beats = (f"forward {b['forward'][0]}-{b['forward'][1]} s &middot; tilt " + ", ".join(f"{ts}-{te} s to {rr:+.2f}" for ts, te, rr in b["tilt"]) +
                  (f" &middot; yaw {b['yaw']}" if b["yaw"] else "") + f" &middot; quacks at {', '.join(str(q) for q in b['quacks'])} s &middot; hold to {b['hold_end']} &middot; back {b['back'][0]}-{b['back'][1]} s &middot; {b['total']} s")
-        cards[r["motion"]].append(f"""
+        return f"""
 <div class="card">
-  <h3>{r['motion']} + {r['sound']}</h3>
+  <h3>{r['motion']} + {r['sound']}{label}</h3>
   <p class="snd"><b>motion:</b> {m['motion_desc']}</p>
   <video src="{stem}.mp4" controls playsinline width="640" height="480"></video>
   <p class="beats"><b>beats:</b> {beats}</p>
@@ -182,20 +187,32 @@ def index():
      jaw at the quacks {m['jaw_max_at_quacks']}, between them {m['jaw_max_between_quacks']}</p>
   <p><a href="../../motion/curious/{stem}_beats.png">beats sheet</a> &middot; <a href="../../motion/curious/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/curious/{stem}.mp4">silent mp4</a></p>
   <img class="sheet" src="../../motion/curious/{stem}_beats.png">
-</div>""")
-    html = f"""<!doctype html><meta charset="utf-8"><title>Microduck curious (Y)</title>
+</div>"""
+
+
+def index():
+    cards = {n: [] for n in SPEC["motions"]}
+    for r in SPEC["renders"]:
+        cards[r["motion"]].append(card(f"{r['motion']}__{r['sound']}", r["motion"], r["sound"], r["desc"]))
+    compare = ""
+    for stem in COMPARE:
+        mo, so = stem.split("__", 1)
+        j = json.load(open(HERE / f"{stem}.json"))["measured"]
+        compare += card(stem, mo, so, j["desc"], label=' &nbsp;<span class="note">for comparison: the pick from the first round</span>')
+    html = f"""<!doctype html><meta charset="utf-8"><title>Microduck {HEADER}</title>
 <style>
 body{{font-family:-apple-system,Helvetica,Arial,sans-serif;margin:24px;background:#f6f4ef;color:#222;max-width:1400px}}
 h1{{margin-bottom:4px}} .sub{{color:#666;margin-top:0}} h2{{margin-top:36px}}
 .card{{background:#fff;border-radius:10px;padding:16px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}}
-.card h3{{margin:0 0 8px}} .beats,.snd,.meas{{font-size:14px;margin:6px 0}} .meas{{color:#555}}
+.card h3{{margin:0 0 8px}} .note{{font-size:13px;color:#b06000;font-weight:normal}} .beats,.snd,.meas{{font-size:14px;margin:6px 0}} .meas{{color:#555}}
 .sheet{{width:100%;max-width:1360px;margin-top:10px;border-radius:6px}}
 video{{background:#000;border-radius:6px}}
 </style>
-<h1>curious (Y): head forward, tilt, double rising quack</h1>
+<h1>{HEADER}</h1>
 <p class="sub">Standing (stand net at rest, no sit, body pose 0). Head deltas: neck -0.8 and head_pitch -0.35 bring the head forward with the beak level;
 head_roll +-0.27 is the tilt (the joint's full range); the mouth follows the wav's loudness with a 0.15 s delay. Three-quarter front camera. Simulation, 640x480, 30 fps.
-Motions and json: <code>/Users/remi/microduck/notes/emotions/motion/curious/</code> (spec: <code>spec.json</code>, renderer: <code>curious.py</code>).</p>
+Motions and json: <code>/Users/remi/microduck/notes/emotions/motion/curious/</code> (spec: <code>{SPEC_FILE.name}</code>, renderer: <code>curious.py</code>).</p>
+{compare}
 """
     for n in SPEC["motions"]:
         if cards[n]:
@@ -208,6 +225,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default=None)
     ap.add_argument("--no-open", action="store_true")
+    ap.add_argument("--spec", default="spec.json"); ap.add_argument("--page", default="curious"); ap.add_argument("--header", default=None); ap.add_argument("--compare", default="")
     a = ap.parse_args()
     opened = a.no_open
     for r in SPEC["renders"]:

@@ -24,6 +24,9 @@ BASE = Path("/Users/remi/microduck/microduck/policies/alpha_stand.onnx")
 
 
 def analyze_log(log, foot="right", trick_only=True):
+    # Warp logs carry the episode reset tick (done=1) -> cut there, or joint "speeds" read the qpos jump
+    dones = [i for i, l in enumerate(log) if l.get("done")]
+    if dones: log = log[:dones[0]]          # the done tick already holds the NEXT spawn (mjlab resets inside step)
     dt = log[1]["t"] - log[0]["t"]
     zk, fk = ("rz", "rf") if foot == "right" else ("lz", "lf")
     ok, of = ("lz", "lf") if foot == "right" else ("rz", "rf")

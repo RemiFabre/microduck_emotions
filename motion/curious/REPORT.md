@@ -21,3 +21,18 @@ Measured (joint angles, simulation), the same for every sound of a motion:
 - Jaw: 0.91-1.00 at every quack, 0.00-0.03 outside the sound for Q1/Q3/Q5. Q2 (bank inquire) and Q4 keep the jaw open
   between the two quacks because the sound itself is continuous there (Q2 is audible 0.66-1.30 s as one segment): correct
   behaviour, the beak follows the sound.
+
+## v2 (more roll), pick = curious_two_tilts + Q3_bank_chirp_x2
+
+Spec `spec_v2.json`, page `/Users/remi/microduck/notes/emotions/combined/curious_v2/index.html` (the original pick shown first
+for comparison). Roll joint reached (right = +, left = -), measured 0.25 s after each tilt ramp ends:
+
+| variant | asked right / left | joint right | joint left |
+|---|---|---|---|
+| `curious_two_tilts` (original) | +0.27 / -0.27 | +0.37 rad (21 deg) | -0.17 rad (-10 deg) |
+| `curious_two_tilts_r35` | +0.35 / -0.35 | +0.43 rad (24 deg) | -0.26 rad (-15 deg) |
+| `curious_two_tilts_r35_leftboost` | +0.35 / -0.44 | +0.43 rad (24 deg) | -0.35 rad (-20 deg) |
+| `curious_two_tilts_r44` | +0.44 / -0.44 | +0.44 rad (25 deg) | -0.35 rad (-20 deg) |
+
+The right side saturates near the joint range (+0.44); the left side tops out at -0.35 whatever is asked. `r35_leftboost`
+is the most symmetric (+0.43 / -0.35) and 30% more than the original on the right. No fall; jaw on the quacks only.

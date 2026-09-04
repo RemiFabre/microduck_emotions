@@ -158,4 +158,29 @@ falls and the end state, and builds the contact sheets + `index.html`.
   it 1000 wiped it out for good (a metric stepping DOWN exactly at a curriculum boundary is the
   AGENTS.md signature of a tax introduced before the skill exists). Cost: 18 min bootstrap +
   50 min training ≈ 68 min ≈ $3.1 (slow package downloads that day).
-- Rollouts (both engines, `motion/anger-rl/r1/index.html`): (pending)
+- Rollouts (both engines, `/Users/remi/microduck/notes/emotions/motion/anger-rl/r1/index.html`, 9 clips + contact sheets):
+  - Final policy (exported ONNX in the CPU proxy, 5 seeds; checkpoint 1999 in Warp, 2 seeds): **0 stomps in 7/7
+    rollouts**, head yaw range ±0.04 rad (never turns), stands still, upright, both feet down, max joint speed
+    2–8 rad/s. It is a stand policy. Honest verdict: r1 learnt nothing of the gesture.
+  - Checkpoint 750 in Warp (where the lift term peaked): ONE stomp per rollout — right foot up 30–31 mm at
+    t ≈ 0.45 s, down at 0.39 m/s, head turned to +0.53 / +0.69 rad (left) around it; seed 1 then kept the foot
+    hovering until the end (a "lift without the slam" hover). So the skill existed in embryo at it 750, on the
+    first stomp only, and was wiped out at it 1000.
+  - Two diagnoses, both reward-side (measured, not guessed): (a) the head term had no gradient — with std 0.25 a
+    ±0.6 rad plateau pays exp(−5.8) ≈ 0 when the head stays at 0, and staying at 0 still collects 60 % of the
+    term from the ramps and the zero segments, so the head never learnt to move (yaw range ±0.04); (b) the
+    stomp terms are worth ~13 % of the return (short windows) and the action-rate step at it 1000 out-priced them.
+- Cost: ≈ $3.1 (68 min on rtx-pro-6000, 18 min of it bootstrap).
+
+### r2 — `stomp-r2-strong-20260904-1233` (job `6a9a9e8e259f8e97255ddf3b`), launched 12:33, task `Mjlab-StompStrong-Flat-MicroDuck`
+
+- What changed vs r1 (nothing else): `stomp_foot_lift` and `stomp_foot_impact` weights 3 → 9 (the stomps become
+  ~35 % of the return instead of ~13 %); `pose_stand_legs` 1.5 → 1.0; action-rate weight flat at −0.1 (no ramp: the
+  it-1000 step killed the skill in r1; anti-thrash pressure stays on the physics terms `foot_overspeed`, `trunk_az`,
+  `body_ang_vel`); head yaw Gaussian std 0.25 → 0.4 plus a new L1 companion `head_yaw_l1` (weight 2, self-negating:
+  −1.2/step at the full 0.6 rad error), a constant pull toward the head schedule.
+- Why: the two r1 diagnoses above (AGENTS.md: taxes after skill discovery; Gaussian + L1 for a target the policy
+  is far from).
+- A first r2 without the head fix (job `6a9a9baa259f8e97255ddea0`, 12:21) was cancelled by me 8 min later, in
+  bootstrap, once the r1 rollouts showed the dead head term (≈ $0.3 lost, 70 min saved).
+- Result: (pending)
