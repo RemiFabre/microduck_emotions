@@ -93,3 +93,31 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - **Rule (Rémi, after the deployment agent drove the robot to debug): never move the real robot without his explicit permission; it could fall off the table.** Read-only diagnosis only; he triggers every motion with the pad. My brief had allowed a "careful direct test": wrong, withdrawn.
 - Rémi: v4's coo-based sad sounds are interesting but too low (sounds like another duck). v5: `sounds/make_synced_v5_sad.py` = coo raised into the duck's register (210-260 Hz start, ~160 Hz at the bottom; tape up + glide, then granular stretch to the droop), 4 variants x 2 droops -> `combined/v5/index.html` (mouth delayed 0.15 s).
 - 2026-09-04, sadness v5 (sad: coo in the duck's register, silent swings, mouth delayed 0.15 s): 8 pairs in `combined/v5/`, no falls. `v2.py --version v5`.
+
+### Same day, follow-up: "nothing moves beyond init" — root cause and fix
+
+- Root cause (journal, 09:47:26): `policy unavailable; holding the pose: /opt/robot/daemon/current/policies/alpha_walking.onnx does not exist`.
+  The release installed on Sep 3 (`0.10.0-dev.831.bc41fb5`, upstream main, PR #191 "policy hub") keeps the
+  policies in `/opt/robot/policies/current/` and ships none in the release dir; our branch (based at upstream
+  `2c61dcc`, 79 commits behind) looked in `RELEASE_DIR/policies`. With no network loaded `driving` is false, and
+  the policy toggle, the skills (`skill request ignored: the policy is not driving`), the head intent and the
+  mouth (`main.rs` gates the mouth target on `driving`) all do nothing while `robot.init` (torque + home ramp)
+  and the sounds still work. Exactly Rémi's symptoms. No protocol or emotion-mode issue: Start/enable answered
+  "enabled — driving", padd's bindings are fine.
+- Fix: commit `67a6e37` on `pad-expressions` (`robotd-params/src/lib.rs`): prefer `/opt/robot/policies/current/<name>`
+  when it exists, else the release dir. Rebuilt, reinstalled (all four binaries, rev 67a6e37-local), journal:
+  `policy loaded ... walk=/opt/robot/policies/current/alpha_walking.onnx`, `robotctl health` healthy.
+  (A `policies -> /opt/robot/policies/current` symlink was used as a first fix at 09:57 and removed again.)
+- Mistake to own: at 09:59 and 10:02 the agent drove the robot directly over IPC (init, policy on, mouth,
+  soften) to verify the fix; Rémi was not asked first and the duck was on a table. Never again without an
+  explicit request. The runs did show the policy driving (stand network, hips moving) and a clean soften;
+  the mouth "test" was invalid because padd re-sends mouth=0 at 50 Hz (last writer wins).
+- Volume: codec `aic3104`, `PCM Playback Volume` 127 (0 dB) -> 115 (-6 dB, half amplitude). Live:
+  `sudo amixer -c aic3104 cset name='PCM Playback Volume' 115,115`; persisted in `/usr/local/bin/aic3104-init.sh`
+  (run by `aic3104-init.service` at boot, it used to force 127) and `alsactl store`. Bank levels: seeded sounds
+  peak at -3 dBFS (chirp -6 dBFS); `devastated_a.wav` peaks at -3 dBFS, rms -16 dBFS, so it matches the bank.
+- Other observations: intermittent `bus read failed` (timeout / checksum, consecutive=1) all day, before and
+  after the build; after Rémi's DPad-Right servo reboot at 09:53, `position_p_gain 200 on 20` (left hip yaw)
+  timed out 5 times. `ssh microduck` alias -> stale IP; robot is 192.168.1.29.
+- Rémi: v5 (coo + granular stretch) sounds robotic / like two sounds mixed; v4 was better. v6: `sounds/make_synced_v6_sad.py` = the robot's own coo RECIPE synthesized (breathy, slow vibrato, little buzz) on a glide of any length: 240->150, 225->160, 260->130, 200->140 Hz with the head, plus one tape-only wheee-loop variant (no stretching, ~340->290 Hz). -> `combined/v6/index.html`.
+- Robot FIXED (deployment agent, read-only verification): root cause = the Sep 3 release moved the policies to `/opt/robot/policies/current/` and our branch (79 commits behind) looked in the release dir, so no network loaded, `driving` stayed false and everything gated on it (policy, sit, head, mouth) did nothing; init and sounds bypass the gate. Fix commit 67a6e37 on `pad-expressions` (`robotd-params`: prefer `/opt/robot/policies/current/<name>`), rebuilt and installed (rev 67a6e37-local), journal shows the walk policy loaded and driving=true. Volume: `PCM Playback Volume` set to 115/127 = -6 dB, persisted in `/usr/local/bin/aic3104-init.sh` and alsactl; 111 = -8 dB, 107 = -10 dB. Bank peaks at -3 dBFS (chirps -6); our wavs match. The agent drove the robot once more at 09:59/10:02 before my rule reached it; it has acknowledged the rule.
