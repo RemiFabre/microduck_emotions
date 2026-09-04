@@ -53,3 +53,37 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - **Rémi**: devastated = `devastated_3x1.0` + **`D3v2_sobs_gentler`** (even better than D3v2_sobs). Sad v2: right start time, still too intense and ~2x too long. v3 sad: `sounds/make_synced_v3_sad.py` -> 2.2-2.7 s phrases (peak -12 to -14 dBFS, 185-210 Hz, slides of 2-2.5 semitones), on three shorter motions with body pitch 0.05: two swings 1.2 s apart, two swings 1.0 s apart, one single slow swing; spec `motion/sadness/v3_spec.json`; renders -> `combined/v3/index.html`.
 - 2026-09-04, sadness v3 (sad only; devastated decided = devastated_3x1.0 + D3v2_sobs_gentler): six shorter pairs in `combined/v3/` (7.4-7.8 s, body pitch 0.05, two swings or one slow swing, beak follows the 2.2-2.7 s sound then shuts). `v2.py --v3`.
 - Rémi (voice): the physical duck is on; ship `devastated` to it on top of `pad-expressions`. Pad design: an unused control toggles **emotion mode** (in it: A = sad, B = devastated, X = angry, Y = excited; only B bound for now; Start/Select unchanged in both modes). A dedicated long-lived deployment agent does this (new SoundTag `devastated`, expression = sit + head envelope + 3 yaw swings + mouth from the wav envelope, wav trimmed by 0.3 s so the shock lands on the press). It reports the exact button sequence when ready.
+
+## 2026-09-04, robot deployment agent: devastated on the pad (build staged, install needs Rémi's sudo password)
+
+- Commit `fdc09ee` on `pad-expressions` of `/Users/remi/microduck/microduck` (on top of the film build):
+  - `padd`: **DPad-Up tap** (press and release under 0.6 s; the 3 s hold is still walk/roller) toggles
+    *emotion mode*: chirp going in, low "tock" going out, logged at warn. In emotion mode the face
+    buttons are A sad / B devastated / X angry / Y excited; only **B** is bound (the others log
+    "nothing bound here yet"). Outside it every button keeps its meaning. Start and Select are
+    handled before and independently of the mode (verified in code, `cargo test -p padd` 5/5 green).
+  - `Kind::Devastated` in `padd/src/expressions.rs`: `sit_toggle` + the `devastated` sound at t=0,
+    head envelope from REPORT.md §0 with three swings (extremes +0.4/-0.4/+0.4 at 3/4/5 s), rise
+    6.5-8.5 s, total 8.5 s, stays seated; the beak follows a 0.1 s table traced from the sound
+    (the JSON `mouth` channel shifted by -0.3 s) through the same `robot.mouth` intent as RT (max of
+    triggers and expression, no conflict). Twist is forced to zero for the 8.5 s so the sticks
+    cannot walk a seated duck.
+  - `SoundTag::Devastated` (`"devastated"`) in duck-ipc-proto, added to `take_sounds()` (bit 7 of
+    the u32 mask; Wheee stays the stamped-level exception).
+- Sound: `/Users/remi/microduck/notes/emotions/sounds/robot/devastated_a.wav` = synced_v2
+  `devastated_3x1.0__D3v2_sobs_gentler.wav` minus the 0.3 s lead-in and the trailing silence
+  (6.6 s, 48 kHz mono 16-bit). Played on the robot's speaker with
+  `aplay -q -D plughw:aic3104` over ssh: OK, 6.7 s.
+- Robot state before touching it: up at 192.168.1.29 (the `ssh microduck` alias in ~/.ssh/config
+  still points at 192.168.10.139, use the IP), release 0.10.0-dev.831.bc41fb5 with a sideload from
+  Sep 3 15:45 whose padd logs the OLD mapping ("Start toggles the policy, LB/RB kicks", rev
+  f732cad-pr203) — i.e. the expressions build was NOT what was running. `robotctl health`: healthy,
+  battery 8.08 V (93 %), torque off (`driving=false fallen=true`), intermittent "bus read failed"
+  warnings (timeouts / checksum, consecutive=1 each).
+- `sudo` on the robot needs a password that is not on this Mac, so the swap could not be done by
+  the agent. Everything is staged in `~/duck-sideload/` on the robot (4 binaries + wav);
+  `/Users/remi/microduck/notes/emotions/install-on-duck.sh` does the swap + the sound folder
+  (`/var/lib/robot/sounds/devastated/devastated_a.wav`) with one password prompt.
+  `sounds ensure-bank --force` deletes the whole bank folder, so re-run the install after it.
+- Not verified on hardware: the sit + head droop + sound together (Rémi tests). Press B only while
+  STANDING (sit_toggle on a seated duck stands it up).
