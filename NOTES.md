@@ -170,3 +170,16 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - 2026-09-04, sadness v7 (robot feedback: full droop too heavy, duck walked forward): half-depth droop with a 0.25 lift first, two variants (body pitch 0.05 / 0) in `combined/v7/` with the decided v6 card first. Sim trunk drift is within +-1 cm for v6 and both v7 clips: the sim does not reproduce the robot's forward walk, so it validates the geometry/beak only. Joint numbers on the page and in the REPORT v7 section.
 - sad v7 rendered (`combined/v7/index.html`): half depth with the lift first; head_pitch joint -6 deg .. +40 deg (v6: +57), neck -14 deg (v6: -24). The simulation does NOT reproduce the forward walk seen on the robot (trunk drift within +-1 cm for v6 and v7), so only the robot test tells. Next levers if it still walks: body pitch 0 (`bp0` variant, head +27 deg) or a smaller neck command (the neck moves the head's mass forward).
 - Lake scene v2 played on the Reachy Mini (Rémi's go): every beat ran to completion, no errors, 70 s from the first line to the end of the last beat, first line ~7.6 s after ENTER with --start-delay 5, asleep ~88 s after ENTER. Taste is Rémi's.
+
+### Same day: curious validated; SAD v7 (half depth, lift first) built, robot went off the network mid-install
+
+- Rémi on the robot: the full sad droop was too heavy, the duck walked forward to stay up. v7: head lifts to
+  head_pitch -0.25 over 0.625 s, then descends to +0.5 over 1.875 s; the v7 simulation JSON
+  (`/Users/remi/microduck/notes/emotions/motion/sadness/v7/sad_v7_halfdown__S6_coo_voice_200_140.json`) slaves
+  the neck and the bow to the beak below level (neck = -1.5*max(head_pitch,0), body = 0.1*max(head_pitch,0)),
+  so both stay at 0 through the lift and reach -0.75 / 0.05 at 2.5 s. This differs from the written brief
+  (neck ramping from 0.625 s, body 0.0125 during the lift); the JSON was followed. Everything else unchanged.
+- Commits `262a739` (brief's form) then `bab9102` (JSON's form) on `pad-expressions`; test checks 21 JSON
+  keyframes to 0.003. Build bab9102-local ready in target/docker; the first scp dropped ("Connection closed")
+  and the robot then answered "Host is down": the install did NOT happen, robot still on 4bd8cc4-local.
+- ~13:00 (Paris 14:40 reset): both background agents died on a credit limit; resumed. Anger: r1 = "just stand" (0 stomps; the foot-lift term collapsed when the action-rate tax stepped up at it 1000; one stomp at ckpt 750); r2 StompStrong (stomp terms x3, flat -0.1 action-rate, head-yaw L1 + std 0.4) completed ~13:45 UTC, evaluation pending. Sad v7 build bab9102 ready; duck offline since ~11:00 (Host is down), install pending.
