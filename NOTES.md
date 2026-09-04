@@ -196,3 +196,11 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Rémi: the Reachy Mini player must wake up BEFORE the ENTER prompt (ENTER then only starts the first line after the delay). Scene agent is changing skit.py / run_on_robot.sh on scene/lake.
 - Reachy Mini player changed (commit 8acb678 on scene/lake): motors on + wake-up happen before the ENTER prompt; ENTER = start delay then beat 0; ESC sleeps it in both phases. Command unchanged. First real check is Rémi's run (reachy_mini not importable on the Mac).
 - **Rémi**: curious (Y) now makes the robot walk forward (head too far forward, the stand policy steps to compensate; it worked at first). Quick fix: roll only, no head-forward. Deployment agent installing; sim spec `motion/curious/spec_v4.json` (curious_rollonly). Lesson: on the real robot, anything that moves the head's mass forward (neck down/forward, deep head_pitch) makes the walking policy step forward; keep sad and curious shallow.
+
+### Same day: curious fix — head stays back (Rémi: the forward head made the duck step forward)
+
+- Commit `8922e49` on `pad-expressions`: `Kind::CuriousQuacks` neck and head_pitch are 0 throughout; roll, timing,
+  sound, mouth, stick lock unchanged (CQ_FORWARD_LEN / CQ_NECK / CQ_HEAD removed). Test: 14 roll keyframes + head at 0.
+- Installed 8922e49-local (guard: no torque event since the 12:15 boot; none since the restart). Verified read-only:
+  policy loaded from the hub, driving=true, healthy, mapping line "A sad, B devastated, Y curious".
+- Curious roll-only installed: rev 8922e49-local (Y), neck and head_pitch 0 throughout, roll and chirps unchanged; verified read-only. Not yet tested by Rémi.
