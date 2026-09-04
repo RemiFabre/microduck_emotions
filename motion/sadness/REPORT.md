@@ -214,3 +214,15 @@ body pitch +0.05 so both swing directions show. Clips are cut at the spec's tota
 - `sad_1x_slow`: one slow swing to +0.33 at 2.8 s (0.8 s out, 1.0 s back), rise 4.6-6.6.
 - Beak: opens at 1.96-1.98 s (the sound starts at the end of the tilt), fully open during the 2.2-2.7 s phrase, shut
   (<= 0.08) afterwards. No fall in the six renders. Head 98-99% down at the first swing.
+
+---
+
+# v4 (2026-09-04): sad, the sound descends with the head, the swings are silent
+
+Spec `v4_spec.json`, rendered by `v2.py --version v4`. Outputs: `motion/sadness/v4/` (silent mp4, keyframes json with
+`mouth`, `_beats.png`) and `/Users/remi/microduck/notes/emotions/combined/v4/` (12 muxed mp4s, `index.html`). Two motions,
+body pitch +0.05, two swings: `sad_droop2.0` (droop 0-2.0 s, swings 2.6 / 3.8 s, rise 5.0-7.0, 7.8 s) and
+`sad_droop2.5` (droop 0-2.5 s with the same half-cosine stretched, swings 3.1 / 4.3 s, rise 5.5-7.5, 8.3 s). Six sounds
+each, all audible only during the droop. Verified: the jaw opens from 0.06-0.18 s and stays open through the droop, is
+shut (0.00) at both swings and after (max 0.06-0.13 in the silences, the EMA tail); yaw joint +0.28 / -0.38 on every
+pair; no fall in the 12 renders.

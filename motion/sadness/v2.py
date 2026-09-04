@@ -21,7 +21,13 @@ sys.path.insert(0, "/Users/remi/microduck/notes/reachy-encounter")
 import duckfilm as F
 import sadness as S
 
-VERSION = "v3" if "--v3" in sys.argv else "v2"
+VERSION = "v2"
+for _i, _a in enumerate(sys.argv):
+    if _a == "--v3":
+        VERSION = "v3"
+    if _a == "--version" and _i + 1 < len(sys.argv):
+        VERSION = sys.argv[_i + 1]
+LATER = VERSION != "v2"          # v3 onward: clip cut at the spec total, page opened on the first video, sad only
 SPEC = json.load(open(HERE / f"{VERSION}_spec.json"))
 # Extra option, not in the spec: the standing `sad` with body pitch +0.05 instead of +0.10. At +0.10 the stand net turns
 # the head only one way (yaw joint ~0 at the + extremes), so "three swings" shows as one; at +0.05 it swings both ways.
@@ -87,7 +93,7 @@ def mouth_envelope(wav_path):
 def render_pair(motion, sound, wav, desc, with_open=False):
     fn, b = make_motion(motion)
     env = mouth_envelope(wav)
-    total = b["total"] if VERSION == "v3" else max(b["total"], len(env) * F.CDT)   # v3: the clip ends at the spec's total (the wav's tail is silence)
+    total = b["total"] if LATER else max(b["total"], len(env) * F.CDT)   # v3: the clip ends at the spec's total (the wav's tail is silence)
     m, d, du = S.fresh()
     r = mujoco.Renderer(m, S.SIZE[1], S.SIZE[0])
     cam = mujoco.MjvCamera()
@@ -224,7 +230,12 @@ def index():
   <p><a href="../../motion/sadness/v2/{stem}_beats.png">beats sheet</a> &middot; <a href="../../motion/sadness/v2/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/sadness/v2/{stem}.mp4">silent mp4</a></p>
   <img class="sheet" src="../../motion/sadness/v2/{stem}_beats.png">
 </div>""")
-    if VERSION == "v3":
+    if VERSION == "v4":
+        intro = {"sad": "Standing, body pitch +0.05. One continuous sound from the start to the end of the head going DOWN, descending with the head "
+                        "(as if the pain were felt as the head lowers); the two side-to-side swings are SILENT. Two droop speeds: 2.0 s (swings 2.6 / 3.8 s, 7.8 s) "
+                        "and 2.5 s (swings 3.1 / 4.3 s, 8.3 s). The beak follows the sound's loudness, so it opens during the droop and is shut for the swings.",
+                 "devastated": ""}
+    elif VERSION == "v3":
         intro = {"sad": "Standing, body pitch +0.05 (both swing directions visible). Shorter and softer than v2: two swings 1.2 s or 1.0 s apart, or ONE slow swing; "
                         "everything ends by 6.6-7.0 s. The sound (2.2-2.7 s) starts at the end of the tilt; the beak follows its loudness and shuts after it.",
                  "devastated": ""}
@@ -244,6 +255,7 @@ video{{background:#000;border-radius:6px}} .decided{{background:#fff8e6;border:2
 </style>
 <h1>Microduck sadness {VERSION}: sound + motion, re-synced</h1>
 {'<p class="decided"><b>Devastated is decided</b> (devastated_3x1.0 + D3v2_sobs_gentler, see <a href="../v2/index.html">v2</a>). This page is SAD only, v3: shorter (about half of v2) and softer.</p>' if VERSION == "v3" else ''}
+{'<p class="decided"><b>sad v4: the sound descends with the head, the shakes are silent.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v3/index.html">v3</a>.</p>' if VERSION == "v4" else ''}
 <p class="sub">Remi's notes: three swings not four; sad slower and its sound only once the tilt is nearly done; the beak moves with the sound.
 The mouth is driven by the wav's loudness (RMS at 50 Hz, 60 ms smoothing, fully open at 60% of the peak) through the same mouth intent the robot accepts.
 Simulation (640x480, 30 fps). Motions and json: <code>/Users/remi/microduck/notes/emotions/motion/sadness/v2/</code>. Spec: <code>v2_spec.json</code>.</p>
@@ -259,7 +271,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default=None, help="substring filter on motion__sound")
     ap.add_argument("--no-open", action="store_true")
-    ap.add_argument("--v3", action="store_true", help="use v3_spec.json and the v3 output folders (default: v2)")
+    ap.add_argument("--v3", action="store_true", help="shorthand for --version v3")
+    ap.add_argument("--version", default="v2", help="vN: use vN_spec.json and the vN output folders (default: v2)")
     a = ap.parse_args()
     opened = a.no_open
     for r in SPEC["renders"]:
@@ -268,7 +281,7 @@ if __name__ == "__main__":
             continue
         render_pair(r["motion"], r["sound"], Path(r["wav"]), r["desc"])
         index()
-        if not opened and (r["motion"].startswith("devastated") or VERSION == "v3"):
+        if not opened and (r["motion"].startswith("devastated") or LATER):
             subprocess.run(["open", str(OUT_COMBINED / "index.html")])
             opened = True
     index()
