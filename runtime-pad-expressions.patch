@@ -1,0 +1,2712 @@
+From 013c0c7f93206e819d5c1791c3f8d6112b38a259 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
+Date: Wed, 2 Sep 2026 16:43:22 +0200
+Subject: [PATCH 1/9] robot.rebootMotors: reboot servos in place, `robotctl
+ robot reboot-motors`, D-pad-up on the pad
+
+A servo that trips its shutdown mask (overload, overheating, electrical shock) latches with
+torque off until it is rebooted or the battery is pulled. This adds the REBOOT instruction as
+an IO primitive and one intent on top of it:
+
+- `duck_control::io::RobotIo::reboot(id)` (rustypot's reboot; FakeIo records it) and
+  `Safety::reboot_motors(ids)`, which also forgets the gain cache: a rebooted XL330 comes
+  back at its EEPROM gains, and a cache that still says "200 is written" would leave it there.
+- `robot.rebootMotors { ids }`: torque off on every joint, REBOOT the ids named (all of them
+  when the list is empty), back to limp. `init` / Start brings the robot up again. Refused
+  over Bluetooth like `relax`; allowed on the console like `relax`.
+- `robotctl robot reboot-motors [ID ...]`: no ids = every servo, ids space separated (#201
+  asked for commas; spaces are what a shell hands over naturally).
+- padd: a short D-pad-up press and release reboots every servo. The 3 s hold still switches
+  walk/roller and does not reboot.
+
+Closes #201.
+---
+ btd/src/route.rs           |  2 +-
+ docs/robot/cheatsheet.md   |  2 +
+ duck-control/src/bus.rs    |  9 ++++
+ duck-control/src/io.rs     | 16 +++++++
+ duck-control/src/safety.rs | 32 ++++++++++++++
+ duck-ipc-proto/src/lib.rs  | 22 +++++++++-
+ mediad/src/route.rs        |  2 +-
+ padd/src/main.rs           | 22 +++++++++-
+ robotctl/src/main.rs       | 23 ++++++++++
+ robotd/src/intents.rs      | 24 ++++++++++-
+ robotd/src/main.rs         | 88 ++++++++++++++++++++++++++++++++++++++
+ updater/src/ipc.rs         |  1 +
+ 12 files changed, 237 insertions(+), 6 deletions(-)
+
+diff --git a/btd/src/route.rs b/btd/src/route.rs
+index ba02ec4..7beeb96 100644
+--- a/btd/src/route.rs
++++ b/btd/src/route.rs
+@@ -238,7 +238,7 @@ fn permits(call: &proto::Call) -> bool {
+         // offer, and `robot.init` is its counterpart: standing a robot up moves every joint at once,
+         // which wants the person doing it to be looking at the robot rather than at a screen. Both
+         // are `robotctl` on the robot, deliberately.
+-        RobotInit | RobotRelax => false,
++        RobotInit | RobotRelax | RobotRebootMotors(_) => false,
+ 
+         // `robot.stop` deserves its own line, because refusing it looks wrong. An emergency stop
+         // in the app is exactly what someone reaches for, and §6 does say local should preempt
+diff --git a/docs/robot/cheatsheet.md b/docs/robot/cheatsheet.md
+index b49adb2..8171ef4 100644
+--- a/docs/robot/cheatsheet.md
++++ b/docs/robot/cheatsheet.md
+@@ -184,6 +184,7 @@ sudo robotctl robot init
+ 
+ ```
+ sudo robotctl robot relax --yes
++sudo robotctl robot reboot-motors           # every servo; or `reboot-motors 3 11` for just those. Torque off, then init / Start
+ ```
+ 
+ `init` powers the joints and ramps to the home pose over about two seconds — **it moves every joint**,
+@@ -245,6 +246,7 @@ mapping is the prototype's, so muscle memory carries over:
+ | **LB / RB** | left / right kick |
+ | **DPad-Down** | sit ↔ stand |
+ | **RT / LT** | mouth (either trigger) — RT also quacks; LT rides the "wheee" while held |
++| **DPad-Up**, short press | reboot every servo: the way back from a tripped overload without pulling the battery. Torque off, then Start |
+ | **DPad-Up**, held 3 s | switch drive mode, walk ⇄ roller |
+ | **Select**, held 2 s | sit down, then power off |
+ 
+diff --git a/duck-control/src/bus.rs b/duck-control/src/bus.rs
+index 5604188..8d50ac9 100644
+--- a/duck-control/src/bus.rs
++++ b/duck-control/src/bus.rs
+@@ -301,6 +301,15 @@ impl RobotIo for DynamixelIo {
+         DynamixelIo::set_torque(self, on)
+     }
+ 
++    fn reboot(&mut self, id: u8) -> Result<()> {
++        // The status packet is a courtesy the servo may not manage before it resets, so only a
++        // failure to send is an error here.
++        self.controller
++            .reboot(id)
++            .map(|_| ())
++            .map_err(|e| IoError::Bus(format!("reboot {id}: {e}")))
++    }
++
+     fn set_gain(&mut self, kp: u16) -> Result<()> {
+         // I and D are written too, at zero — the prototype's `--ki`/`--kd` defaults, which
+         // its startup writes to every motor. These are RAM registers, so every power-up
+diff --git a/duck-control/src/io.rs b/duck-control/src/io.rs
+index 379724f..8230406 100644
+--- a/duck-control/src/io.rs
++++ b/duck-control/src/io.rs
+@@ -134,6 +134,14 @@ pub trait RobotIo {
+     /// never because a process began.
+     fn set_torque(&mut self, on: bool) -> Result<()>;
+ 
++    /// Reboot one servo: the Protocol 2 REBOOT instruction.
++    ///
++    /// The way out of a latched hardware error — overload, overheating, electrical shock, the
++    /// `shutdown` mask — which otherwise holds torque off until the battery is pulled. The servo is
++    /// off the bus for a few hundred milliseconds and comes back with torque off and its RAM
++    /// registers, the gains among them, at their EEPROM defaults; the caller owns putting them back.
++    fn reboot(&mut self, id: u8) -> Result<()>;
++
+     /// Supply voltage and case temperatures, in one extra transaction.
+     ///
+     /// Not part of [`Sensors`], and not on the tick's critical path: these registers sit at
+@@ -191,6 +199,8 @@ pub struct FakeIo {
+     /// How many times torque was written, so a test can tell "brought up once" from "written every
+     /// tick" — the latter being a bus transaction per joint per tick.
+     pub torque_writes: usize,
++    /// Every servo id rebooted, in order.
++    pub reboots: Vec<u8>,
+ }
+ 
+ impl Default for FakeIo {
+@@ -217,6 +227,7 @@ impl FakeIo {
+             track_targets: true,
+             torque: None,
+             torque_writes: 0,
++            reboots: Vec::new(),
+         }
+     }
+ 
+@@ -284,6 +295,11 @@ impl RobotIo for FakeIo {
+         Ok(())
+     }
+ 
++    fn reboot(&mut self, id: u8) -> Result<()> {
++        self.reboots.push(id);
++        Ok(())
++    }
++
+     fn imu_ready(&self) -> bool {
+         self.imu_ready
+     }
+diff --git a/duck-control/src/safety.rs b/duck-control/src/safety.rs
+index 8424781..77db56d 100644
+--- a/duck-control/src/safety.rs
++++ b/duck-control/src/safety.rs
+@@ -167,6 +167,18 @@ impl<T: RobotIo> Safety<T> {
+         self.io.set_torque(on)
+     }
+ 
++    /// Reboot these servos, and forget the gain cache: a rebooted servo comes back at its EEPROM
++    /// gains, and a cache that still says the running gain is written would leave it there. The
++    /// next [`Self::apply`] rewrites the gains on every servo.
++    pub fn reboot_motors(&mut self, ids: &[u8]) -> Result<(), IoError> {
++        for &id in ids {
++            tracing::warn!(id, "rebooting servo");
++            self.io.reboot(id)?;
++        }
++        self.gain = None;
++        Ok(())
++    }
++
+     /// The gain last written to the servos, or `None` before the first write. This is what
+     /// the robot is running at, which is not always what the caller asked for.
+     pub fn gain(&self) -> Option<u16> {
+@@ -288,6 +300,26 @@ impl<T: RobotIo> Safety<T> {
+ 
+ #[cfg(test)]
+ mod tests {
++    /// A reboot forgets the gain cache, so the rebooted servos get their gains back on the next
++    /// apply instead of running at whatever their EEPROM says.
++    #[test]
++    fn rebooting_motors_rewrites_the_gain_on_the_next_apply() {
++        use crate::io::FakeIo;
++        use crate::model::DEFAULT_POSITION;
++        let mut s = Safety::new(FakeIo::at(DEFAULT_POSITION), SafetyConfig::default());
++        s.apply(DEFAULT_POSITION, DEFAULT_POSITION, 200).unwrap();
++        assert_eq!(s.gain(), Some(200));
++        s.reboot_motors(&[3, 11]).unwrap();
++        assert_eq!(s.io().reboots, vec![3, 11]);
++        assert_eq!(
++            s.gain(),
++            None,
++            "the gain cache must be forgotten after a reboot"
++        );
++        s.apply(DEFAULT_POSITION, DEFAULT_POSITION, 200).unwrap();
++        assert_eq!(s.gain(), Some(200));
++    }
++
+     use super::*;
+     use crate::imu::ImuData;
+     use crate::io::FakeIo;
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index 658e842..25fb23c 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -348,6 +348,12 @@ pub mod method {
+     /// yield a fallen robot is commanded at, which keeps torque on. This is the register.
+     pub const ROBOT_RELAX: &str = "robot.relax";
+ 
++    /// Reboot servos: the REBOOT instruction, which clears a latched hardware error (overload,
++    /// overheating, electrical shock) that otherwise holds torque off until the battery is pulled.
++    /// Torque is cut on every joint first and the robot is back at limp afterwards, so `robot.init`
++    /// or `robot.enable` brings it up from a known state. Discrete; send as a request.
++    pub const ROBOT_REBOOT_MOTORS: &str = "robot.rebootMotors";
++
+     // ── skills ───────────────────────────────────────────────────────────────
+     //
+     // One-shot scripted moves, ported from `microduck_runtime`. Each swaps a dedicated
+@@ -626,6 +632,8 @@ pub enum Call {
+     RobotInit,
+     /// Cut power to the joints. The robot collapses if nothing holds it.
+     RobotRelax,
++    /// Reboot servos (all of them, or the ids named), then limp. See [`method::ROBOT_REBOOT_MOTORS`].
++    RobotRebootMotors(RebootMotorsParams),
+     /// Run a one-shot skill, or toggle sit↔stand.
+     RobotDo(DoParams),
+     /// Standing body pose. Continuous. Send as a notification.
+@@ -766,6 +774,7 @@ impl Call {
+             Call::RobotEnable(_) => method::ROBOT_ENABLE,
+             Call::RobotInit => method::ROBOT_INIT,
+             Call::RobotRelax => method::ROBOT_RELAX,
++            Call::RobotRebootMotors(_) => method::ROBOT_REBOOT_MOTORS,
+             Call::RobotDo(_) => method::ROBOT_DO,
+             Call::RobotPose(_) => method::ROBOT_POSE,
+             Call::RobotMouth(_) => method::ROBOT_MOUTH,
+@@ -887,6 +896,7 @@ impl Call {
+             | Call::RobotEnable(_)
+             | Call::RobotInit
+             | Call::RobotRelax
++            | Call::RobotRebootMotors(_)
+             | Call::RobotDo(_)
+             | Call::RobotPose(_)
+             | Call::RobotMouth(_)
+@@ -976,6 +986,7 @@ impl Call {
+             Call::RobotLook(p) => encode(p),
+             Call::RobotEnable(p) => encode(p),
+             Call::RobotDo(p) => encode(p),
++            Call::RobotRebootMotors(p) => encode(p),
+             Call::RobotPose(p) => encode(p),
+             Call::RobotMouth(p) => encode(p),
+             Call::RobotSetMode(p) => encode(p),
+@@ -1051,6 +1062,7 @@ impl Call {
+             method::ROBOT_ENABLE => Call::RobotEnable(decode(params)?),
+             method::ROBOT_INIT => Call::RobotInit,
+             method::ROBOT_RELAX => Call::RobotRelax,
++            method::ROBOT_REBOOT_MOTORS => Call::RobotRebootMotors(decode(params)?),
+             method::ROBOT_DO => Call::RobotDo(decode(params)?),
+             method::ROBOT_POSE => Call::RobotPose(decode(params)?),
+             method::ROBOT_MOUTH => Call::RobotMouth(decode(params)?),
+@@ -1183,6 +1195,7 @@ pub mod test_support {
+             }),
+             Call::RobotInit,
+             Call::RobotRelax,
++            Call::RobotRebootMotors(RebootMotorsParams { ids: vec![3, 11] }),
+             Call::RobotDo(DoParams {
+                 skill: Skill::GroundPick,
+             }),
+@@ -1695,6 +1708,13 @@ pub enum Skill {
+     Roulade,
+ }
+ 
++/// Which servos [`method::ROBOT_REBOOT_MOTORS`] reboots. Empty means every servo.
++#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
++#[serde(default, deny_unknown_fields)]
++pub struct RebootMotorsParams {
++    pub ids: Vec<u8>,
++}
++
+ #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+ #[serde(deny_unknown_fields)]
+ pub struct DoParams {
+@@ -3873,7 +3893,7 @@ mod tests {
+     fn every_call_covers_every_variant() {
+         assert_eq!(
+             every_call().len(),
+-            46,
++            47,
+             "a Call variant was added or removed — update every_call() and this count"
+         );
+     }
+diff --git a/mediad/src/route.rs b/mediad/src/route.rs
+index b52f1db..7ffa54b 100644
+--- a/mediad/src/route.rs
++++ b/mediad/src/route.rs
+@@ -82,7 +82,7 @@ fn permits(call: &proto::Call) -> bool {
+         // camera: it is looking at the robot, which is precisely what a phone in the room over
+         // Bluetooth was not. Permitted for that reason, and it would be worth revisiting if a
+         // control-only session without video ever becomes a normal thing.
+-        RobotEnable(_) | RobotInit | RobotRelax => true,
++        RobotEnable(_) | RobotInit | RobotRelax | RobotRebootMotors(_) => true,
+ 
+         // `robot.stop` is permitted here and refused over BLE, and the difference is honesty
+         // rather than authority. BLE's objection was that a stop button over "an unbonded,
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 8b7a8ee..10aea72 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -247,8 +247,8 @@ fn main() -> std::process::ExitCode {
+         hz = args.hz,
+         roller,
+         "driving — Start toggles the policy, Y head mode, B body pose, A ground pick, \
+-         LB/RB kicks, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+-         Select (2s) shutdown"
++         LB/RB kicks, DPad-Down sit, triggers mouth, DPad-Up reboot servos, DPad-Up (3s) \
++         walk/roller, Select (2s) shutdown"
+     );
+ 
+     let period = Duration::from_secs_f64(1.0 / args.hz as f64);
+@@ -277,7 +277,14 @@ fn main() -> std::process::ExitCode {
+         let mut kick_right = false;
+         let mut sit_toggle = false;
+         let mut roulade = false;
++        let mut reboot_motors = false;
+         while let Some(event) = gilrs.next_event() {
++            // D-pad up pressed and released short of the mode-switch hold: reboot the servos
++            // (`robot.rebootMotors`), the way back from a tripped overload without pulling the
++            // battery. On the release, so a hold that reached the switch does not also reboot.
++            if let gilrs::EventType::ButtonReleased(Button::DPadUp, _) = event.event {
++                reboot_motors = !mode_switch_sent;
++            }
+             if let gilrs::EventType::ButtonPressed(button, _) = event.event {
+                 match button {
+                     Button::Start => toggle_enable = true,
+@@ -418,6 +425,17 @@ fn main() -> std::process::ExitCode {
+             return std::process::ExitCode::FAILURE;
+         }
+ 
++        if reboot_motors {
++            tracing::warn!(
++                "DPad-Up released — asking the robot to reboot its servos (robot.rebootMotors)"
++            );
++            let call = proto::Call::RobotRebootMotors(proto::RebootMotorsParams::default());
++            if let Err(e) = request(&mut stream, &mut next_id, &call) {
++                tracing::error!(error = %e, "reboot request failed");
++                return std::process::ExitCode::FAILURE;
++            }
++        }
++
+         // Select held two seconds: sit down, then power off. Sent once per hold — the
+         // robot owns the sequence from there, and a second request would be a no-op anyway.
+         if pad.is_pressed(Button::Select) {
+diff --git a/robotctl/src/main.rs b/robotctl/src/main.rs
+index 7e2b3b5..f32aba9 100644
+--- a/robotctl/src/main.rs
++++ b/robotctl/src/main.rs
+@@ -378,6 +378,19 @@ enum RobotCommand {
+         json: bool,
+     },
+ 
++    /// Reboot servos: every one of them, or only the ids given.
++    ///
++    /// The way back from a servo in hardware error (overload, overheating) without pulling the
++    /// battery. Torque goes off on every joint first, so hold the robot or have it down; the
++    /// rebooted servos come back with torque off and their gains restored on the next write.
++    /// Then `robot init` or Start.
++    RebootMotors {
++        /// Servo ids, space separated. None means all.
++        ids: Vec<u8>,
++        #[arg(long)]
++        json: bool,
++    },
++
+     /// Run a one-shot skill: `ground-pick`, `kick-left`, `kick-right`, `roulade`, or
+     /// `sit` (toggle).
+     ///
+@@ -2215,6 +2228,10 @@ fn run_robot(socket: &Path, command: RobotCommand) -> Result<(), Failure> {
+     let (call, json) = match &command {
+         RobotCommand::Init { json } => (proto::Call::RobotInit, *json),
+         RobotCommand::Relax { json, .. } => (proto::Call::RobotRelax, *json),
++        RobotCommand::RebootMotors { ids, json } => (
++            proto::Call::RobotRebootMotors(proto::RebootMotorsParams { ids: ids.clone() }),
++            *json,
++        ),
+         RobotCommand::Do { skill, json } => (
+             proto::Call::RobotDo(proto::DoParams {
+                 skill: skill.as_skill(),
+@@ -2282,6 +2299,12 @@ fn run_robot(socket: &Path, command: RobotCommand) -> Result<(), Failure> {
+     match command {
+         RobotCommand::Init { .. } => println!("standing up — about two seconds to the home pose"),
+         RobotCommand::Relax { .. } => println!("torque off"),
++        RobotCommand::RebootMotors { ids, .. } if ids.is_empty() => {
++            println!("rebooting every servo, torque off — then `robot init` or Start")
++        }
++        RobotCommand::RebootMotors { ids, .. } => {
++            println!("rebooting servos {ids:?}, torque off — then `robot init` or Start")
++        }
+         RobotCommand::Do { skill, .. } => println!("{skill:?} queued"),
+         RobotCommand::Mode { .. } | RobotCommand::Look { .. } => unreachable!("answered above"),
+     }
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index a0c2893..ee26c8d 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -12,8 +12,8 @@
+ //! Every slot is stamped, because the loop's real question is never "what is the value" but
+ //! "how old is it". That is what the deadman reads.
+ 
+-use std::sync::Arc;
+ use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
++use std::sync::{Arc, Mutex};
+ 
+ /// "No mode switch pending" in [`Intents::mode_switch`].
+ ///
+@@ -168,6 +168,9 @@ pub struct Intents {
+     /// The wheee hold, as a stamped level: `padd` re-notifies while the trigger is down,
+     /// and the loop reads value + age so a dead client's ride decays instead of looping.
+     wheee: ArcSwap<Stamped<bool>>,
++    /// `robot.rebootMotors`, pending: the ids to reboot (empty = all). A mutex rather than an
++    /// atomic because it carries a list; the loop takes it with `try_lock`, so it can never wait.
++    reboot_motors: Mutex<Option<Vec<u8>>>,
+ }
+ 
+ /// What a client asked for, once.
+@@ -228,6 +231,7 @@ impl Intents {
+             shutdown: AtomicBool::new(false),
+             mode_switch: AtomicU8::new(MODE_NONE),
+             sounds: std::sync::atomic::AtomicU32::new(0),
++            reboot_motors: Mutex::new(None),
+             wheee: ArcSwap::from_pointee(Stamped {
+                 value: false,
+                 at_us: 0,
+@@ -385,6 +389,24 @@ impl Intents {
+     /// Ask the loop to cut power to the joints.
+     ///
+     /// Also clears `enabled`: a robot that has been asked to go limp is not one the policy should
++    /// Ask the loop to reboot these servos (empty = all). Clears `enabled` for the same reason
++    /// [`Self::request_relax`] does: the robot comes back up when someone asks, not mid-reboot.
++    pub fn request_reboot_motors(&self, ids: Vec<u8>) {
++        self.enabled.store(false, Ordering::Relaxed);
++        if let Ok(mut slot) = self.reboot_motors.lock() {
++            *slot = Some(ids);
++        }
++    }
++
++    /// Take the pending reboot request, if any. Never blocks: a contended lock reads as "nothing
++    /// yet" and the request is picked up on the next tick.
++    pub fn take_reboot_motors(&self) -> Option<Vec<u8>> {
++        self.reboot_motors
++            .try_lock()
++            .ok()
++            .and_then(|mut slot| slot.take())
++    }
++
+     /// keep driving, and leaving that flag set would have the next tick bring it straight back up.
+     pub fn request_relax(&self) {
+         self.enabled.store(false, Ordering::Relaxed);
+diff --git a/robotd/src/main.rs b/robotd/src/main.rs
+index aa7c46b..40c8207 100644
+--- a/robotd/src/main.rs
++++ b/robotd/src/main.rs
+@@ -1442,6 +1442,33 @@ async fn control_loop<T: RobotIo>(
+             None => {}
+         }
+ 
++        // `robot.rebootMotors`: torque off everywhere, then REBOOT the named servos (every servo
++        // when none are named). The rebooted servos are off the bus for a few hundred milliseconds
++        // — the reads fail and the loop coasts through it — and come back with torque off and
++        // EEPROM gains; the forgotten gain cache makes the next write restore the gains, and the
++        // robot is back at limp, so the next `init` or Start brings it up like a fresh boot. Torque
++        // off first on purpose: a tripped servo is usually a leg, and a robot standing on the other
++        // leg while one reboots is not a robot to leave standing.
++        if let Some(ids) = intents.take_reboot_motors() {
++            let ids: Vec<u8> = if ids.is_empty() {
++                duck_control::model::JOINT_IDS.to_vec()
++            } else {
++                ids
++            };
++            if let Err(e) = safety.set_torque(false) {
++                tracing::warn!(error = %e, "robot.rebootMotors: torque off failed on a servo; rebooting anyway");
++            }
++            match safety.reboot_motors(&ids) {
++                Ok(()) => tracing::warn!(
++                    ?ids,
++                    "robot.rebootMotors: rebooted; init or Start brings the robot up"
++                ),
++                Err(e) => tracing::warn!(error = %e, ?ids, "robot.rebootMotors: failed part-way"),
++            }
++            bringup = Bringup::Limp;
++            was_driving = false;
++        }
++
+         // One-shot skill requests, taken once per tick like the power request. They need a
+         // driving robot — the prototype's buttons likewise did nothing until the policy ran.
+         let requests = intents.take_skills();
+@@ -2975,6 +3002,12 @@ fn dispatch(
+             proto::Response::ok(Some(id), &proto::IntentResult::accepted())
+         }
+ 
++        // Never refused: a robot with a tripped servo is exactly the one that needs it.
++        proto::Call::RobotRebootMotors(p) => {
++            intents.request_reboot_motors(p.ids.clone());
++            proto::Response::ok(Some(id), &proto::IntentResult::accepted())
++        }
++
+         proto::Call::RobotHealth => proto::Response::ok(Some(id), &state.health()),
+         proto::Call::RobotSafeToRestart => proto::Response::ok(Some(id), &state.safe_to_restart()),
+         proto::Call::RobotModelApi => proto::Response::ok(
+@@ -4407,6 +4440,9 @@ mod tests {
+             fn set_torque(&mut self, on: bool) -> duck_control::io::Result<()> {
+                 self.0.set_torque(on)
+             }
++            fn reboot(&mut self, id: u8) -> duck_control::io::Result<()> {
++                self.0.reboot(id)
++            }
+             fn slow_sensors(&mut self) -> duck_control::io::Result<duck_control::SlowSensors> {
+                 self.0.slow_sensors()
+             }
+@@ -4580,6 +4616,58 @@ mod tests {
+         );
+     }
+ 
++    /// **`robot.rebootMotors` cuts torque, reboots the named servos and returns to limp.**
++    #[tokio::test]
++    async fn robot_reboot_motors_reboots_the_named_servos_and_returns_to_limp() {
++        let io = FakeIo::at(DEFAULT_POSITION).frozen();
++        let mut params = Params::default();
++        params.policy.enabled = false;
++        let s = Arc::new(RobotState::new(&params, false, false));
++        let intents = Arc::new(Intents::new());
++        intents.request_init();
++
++        let (tx, rx) = std::sync::mpsc::channel();
++        let loop_state = Arc::clone(&s);
++        let loop_intents = Arc::clone(&intents);
++        let handle = tokio::spawn(async move {
++            let mut io = io;
++            control_loop_probe_with(&mut io, loop_state, loop_intents, Duration::from_millis(2))
++                .await;
++            tx.send((io.torque, io.reboots.clone(), io.last_gain))
++                .unwrap();
++        });
++        while s.ticks.load(Ordering::Relaxed) < 3 {
++            tokio::time::sleep(Duration::from_millis(2)).await;
++        }
++        let at = s.ticks.load(Ordering::Relaxed);
++        intents.request_reboot_motors(vec![7]);
++        while s.ticks.load(Ordering::Relaxed) < at + 4 {
++            tokio::time::sleep(Duration::from_millis(2)).await;
++        }
++        s.shutdown.store(true, Ordering::Relaxed);
++        handle.await.unwrap();
++        let (torque, reboots, last_gain) = rx.recv().unwrap();
++        assert_eq!(
++            torque,
++            Some(false),
++            "the joints must be unpowered after a reboot"
++        );
++        assert_eq!(reboots, vec![7], "only the named servo is rebooted");
++        assert_eq!(
++            last_gain,
++            Some(params.policy.gain),
++            "the gain is written again after the reboot"
++        );
++        assert!(
++            !s.homed.load(Ordering::Relaxed),
++            "still reporting homed after a reboot"
++        );
++        assert!(
++            !intents.snapshot().enabled,
++            "a reboot must stop the policy asking to drive"
++        );
++    }
++
+     /// Relaxing clears `enabled` too. Otherwise the very next tick sees a robot that was asked to
+     /// drive, brings it back up, and the robot someone just let go of stands up again.
+     #[test]
+diff --git a/updater/src/ipc.rs b/updater/src/ipc.rs
+index 1f04de3..3dc5c9f 100644
+--- a/updater/src/ipc.rs
++++ b/updater/src/ipc.rs
+@@ -632,6 +632,7 @@ impl Server {
+             | Call::RobotEnable(_)
+             | Call::RobotInit
+             | Call::RobotRelax
++            | Call::RobotRebootMotors(_)
+             | Call::RobotDo(_)
+             | Call::RobotSound(_)
+             | Call::RobotPose(_)
+-- 
+2.53.0
+
+
+From 9660d73c0f66750d87da02861c03ce88a14fbd8b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
+Date: Wed, 2 Sep 2026 17:16:16 +0200
+Subject: [PATCH 2/9] padd: reboot the servos on any D-pad-up press
+
+---
+ docs/robot/cheatsheet.md |  2 +-
+ padd/src/main.rs         | 13 ++++---------
+ 2 files changed, 5 insertions(+), 10 deletions(-)
+
+diff --git a/docs/robot/cheatsheet.md b/docs/robot/cheatsheet.md
+index 8171ef4..b952bcd 100644
+--- a/docs/robot/cheatsheet.md
++++ b/docs/robot/cheatsheet.md
+@@ -246,7 +246,7 @@ mapping is the prototype's, so muscle memory carries over:
+ | **LB / RB** | left / right kick |
+ | **DPad-Down** | sit ↔ stand |
+ | **RT / LT** | mouth (either trigger) — RT also quacks; LT rides the "wheee" while held |
+-| **DPad-Up**, short press | reboot every servo: the way back from a tripped overload without pulling the battery. Torque off, then Start |
++| **DPad-Up** | reboot every servo: the way back from a tripped overload without pulling the battery. Torque off, then Start |
+ | **DPad-Up**, held 3 s | switch drive mode, walk ⇄ roller |
+ | **Select**, held 2 s | sit down, then power off |
+ 
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 10aea72..307d817 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -279,12 +279,6 @@ fn main() -> std::process::ExitCode {
+         let mut roulade = false;
+         let mut reboot_motors = false;
+         while let Some(event) = gilrs.next_event() {
+-            // D-pad up pressed and released short of the mode-switch hold: reboot the servos
+-            // (`robot.rebootMotors`), the way back from a tripped overload without pulling the
+-            // battery. On the release, so a hold that reached the switch does not also reboot.
+-            if let gilrs::EventType::ButtonReleased(Button::DPadUp, _) = event.event {
+-                reboot_motors = !mode_switch_sent;
+-            }
+             if let gilrs::EventType::ButtonPressed(button, _) = event.event {
+                 match button {
+                     Button::Start => toggle_enable = true,
+@@ -299,6 +293,9 @@ fn main() -> std::process::ExitCode {
+                     Button::LeftTrigger => kick_left = true,
+                     Button::RightTrigger => kick_right = true,
+                     Button::DPadDown => sit_toggle = true,
++                    // Reboot the servos: the way back from a tripped overload without pulling
++                    // the battery.
++                    Button::DPadUp => reboot_motors = true,
+                     _ => {}
+                 }
+             }
+@@ -426,9 +423,7 @@ fn main() -> std::process::ExitCode {
+         }
+ 
+         if reboot_motors {
+-            tracing::warn!(
+-                "DPad-Up released — asking the robot to reboot its servos (robot.rebootMotors)"
+-            );
++            tracing::warn!("DPad-Up — asking the robot to reboot its servos (robot.rebootMotors)");
+             let call = proto::Call::RobotRebootMotors(proto::RebootMotorsParams::default());
+             if let Err(e) = request(&mut stream, &mut next_id, &call) {
+                 tracing::error!(error = %e, "reboot request failed");
+-- 
+2.53.0
+
+
+From a56532541ac05a2e1edeb5903581090feca32030 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
+Date: Wed, 2 Sep 2026 17:18:42 +0200
+Subject: [PATCH 3/9] padd: the servo reboot is D-pad right, D-pad up already
+ has the mode-switch hold
+
+---
+ docs/robot/cheatsheet.md | 2 +-
+ padd/src/main.rs         | 8 +++++---
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/docs/robot/cheatsheet.md b/docs/robot/cheatsheet.md
+index b952bcd..01b4e09 100644
+--- a/docs/robot/cheatsheet.md
++++ b/docs/robot/cheatsheet.md
+@@ -246,8 +246,8 @@ mapping is the prototype's, so muscle memory carries over:
+ | **LB / RB** | left / right kick |
+ | **DPad-Down** | sit ↔ stand |
+ | **RT / LT** | mouth (either trigger) — RT also quacks; LT rides the "wheee" while held |
+-| **DPad-Up** | reboot every servo: the way back from a tripped overload without pulling the battery. Torque off, then Start |
+ | **DPad-Up**, held 3 s | switch drive mode, walk ⇄ roller |
++| **DPad-Right** | reboot every servo: the way back from a tripped overload without pulling the battery. Torque off, then Start |
+ | **Select**, held 2 s | sit down, then power off |
+ 
+ There is no stop button: release the sticks and the robot stands, and `robotd`'s deadman stops it
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 307d817..56798b1 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -247,7 +247,7 @@ fn main() -> std::process::ExitCode {
+         hz = args.hz,
+         roller,
+         "driving — Start toggles the policy, Y head mode, B body pose, A ground pick, \
+-         LB/RB kicks, DPad-Down sit, triggers mouth, DPad-Up reboot servos, DPad-Up (3s) \
++         LB/RB kicks, DPad-Down sit, triggers mouth, DPad-Right reboot servos, DPad-Up (3s) \
+          walk/roller, Select (2s) shutdown"
+     );
+ 
+@@ -295,7 +295,7 @@ fn main() -> std::process::ExitCode {
+                     Button::DPadDown => sit_toggle = true,
+                     // Reboot the servos: the way back from a tripped overload without pulling
+                     // the battery.
+-                    Button::DPadUp => reboot_motors = true,
++                    Button::DPadRight => reboot_motors = true,
+                     _ => {}
+                 }
+             }
+@@ -423,7 +423,9 @@ fn main() -> std::process::ExitCode {
+         }
+ 
+         if reboot_motors {
+-            tracing::warn!("DPad-Up — asking the robot to reboot its servos (robot.rebootMotors)");
++            tracing::warn!(
++                "DPad-Right — asking the robot to reboot its servos (robot.rebootMotors)"
++            );
+             let call = proto::Call::RobotRebootMotors(proto::RebootMotorsParams::default());
+             if let Err(e) = request(&mut stream, &mut next_id, &call) {
+                 tracing::error!(error = %e, "reboot request failed");
+-- 
+2.53.0
+
+
+From e0f4b5489142d7911fcf54f59e21e22a2541c515 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
+Date: Wed, 2 Sep 2026 14:42:40 +0200
+Subject: [PATCH 4/9] padd: LB curious / RB peck head expressions, Select =
+ robot.soften (gentle release), kicks on the D-pad
+
+- padd/src/expressions.rs: timed head-intent sequences played through the policy's command
+  block. LB tilts the head both ways with a neck dip; RB sends the head forward twice
+  (neck -1.5, head_pitch -0.6 keeps the beak level). Kicks move to DPad-Left/Right.
+- robot.soften (duck-ipc-proto, robotd, btd route, robotctl): gain to gain_limp at once, in
+  steps of five to zero over one second while the joints are commanded where they are, then
+  torque off. padd sends it on the Select press; Select held 3 s still powers off.
+- FakeIo gains a min_gain so the ramp is testable.
+---
+ btd/src/route.rs          |   2 +-
+ docs/robot/cheatsheet.md  |   8 +-
+ duck-control/src/io.rs    |   5 ++
+ duck-ipc-proto/src/lib.rs |  14 +++-
+ padd/src/expressions.rs   | 165 +++++++++++++++++++++++++++++++++++++
+ padd/src/main.rs          |  88 ++++++++++++++++----
+ robotctl/src/main.rs      |  12 +++
+ robotd/src/intents.rs     |  11 +++
+ robotd/src/main.rs        | 167 ++++++++++++++++++++++++++++++++++++++
+ updater/src/ipc.rs        |   1 +
+ 10 files changed, 455 insertions(+), 18 deletions(-)
+ create mode 100644 padd/src/expressions.rs
+
+diff --git a/btd/src/route.rs b/btd/src/route.rs
+index 7beeb96..9dce76f 100644
+--- a/btd/src/route.rs
++++ b/btd/src/route.rs
+@@ -238,7 +238,7 @@ fn permits(call: &proto::Call) -> bool {
+         // offer, and `robot.init` is its counterpart: standing a robot up moves every joint at once,
+         // which wants the person doing it to be looking at the robot rather than at a screen. Both
+         // are `robotctl` on the robot, deliberately.
+-        RobotInit | RobotRelax | RobotRebootMotors(_) => false,
++        RobotInit | RobotRelax | RobotRebootMotors(_) | RobotSoften => false,
+ 
+         // `robot.stop` deserves its own line, because refusing it looks wrong. An emergency stop
+         // in the app is exactly what someone reaches for, and §6 does say local should preempt
+diff --git a/docs/robot/cheatsheet.md b/docs/robot/cheatsheet.md
+index 01b4e09..12668fc 100644
+--- a/docs/robot/cheatsheet.md
++++ b/docs/robot/cheatsheet.md
+@@ -185,6 +185,7 @@ sudo robotctl robot init
+ ```
+ sudo robotctl robot relax --yes
+ sudo robotctl robot reboot-motors           # every servo; or `reboot-motors 3 11` for just those. Torque off, then init / Start
++sudo robotctl robot soften          # the gentle version: 1 s gain ramp to zero, then torque off
+ ```
+ 
+ `init` powers the joints and ramps to the home pose over about two seconds — **it moves every joint**,
+@@ -243,12 +244,15 @@ mapping is the prototype's, so muscle memory carries over:
+ | **B** / circle | body-pose mode: sticks lean and crouch the standing robot |
+ | **A** / cross | ground pick |
+ | **X** / square | roulade — one forward roll; hold to chain rolls |
+-| **LB / RB** | left / right kick |
++| **LB** | curious: a slow head tilt right, then left, with a small dip of the neck (about 2 s) |
++| **RB** | peck: the head goes forward twice (about 1.7 s) |
++| **DPad-Left** | left kick (the right kick has no button while the bumpers are expressions) |
+ | **DPad-Down** | sit ↔ stand |
+ | **RT / LT** | mouth (either trigger) — RT also quacks; LT rides the "wheee" while held |
+ | **DPad-Up**, held 3 s | switch drive mode, walk ⇄ roller |
+ | **DPad-Right** | reboot every servo: the way back from a tripped overload without pulling the battery. Torque off, then Start |
+-| **Select**, held 2 s | sit down, then power off |
++| **Select** | soft release: gain to the limp value at once, to zero over 1 s, then torque off (`robot.soften`). The robot folds to the floor. |
++| **Select**, held 3 s | power off (the robot is already down from the press above) |
+ 
+ There is no stop button: release the sticks and the robot stands, and `robotd`'s deadman stops it
+ if `padd` dies. On a roller robot (`mode = "roller"` in `robotd.toml`) the sticks take the roller
+diff --git a/duck-control/src/io.rs b/duck-control/src/io.rs
+index 8230406..a4eecfa 100644
+--- a/duck-control/src/io.rs
++++ b/duck-control/src/io.rs
+@@ -184,6 +184,9 @@ pub struct FakeIo {
+     pub writes: usize,
+     /// Last gain commanded, so a test can tell "went limp" from "stopped commanding".
+     pub last_gain: Option<u16>,
++    /// Lowest gain ever commanded, so a test can tell a ramp reached the bottom even after the
++    /// running gain was restored.
++    pub min_gain: Option<u16>,
+     /// Whether the orientation filter reports converged. False models the first seconds after
+     /// startup, when projected gravity is not yet a measurement.
+     pub imu_ready: bool,
+@@ -219,6 +222,7 @@ impl FakeIo {
+             reads: 0,
+             writes: 0,
+             last_gain: None,
++            min_gain: None,
+             imu_ready: true,
+             slow: Some(SlowSensors {
+                 volts: 7.4,
+@@ -286,6 +290,7 @@ impl RobotIo for FakeIo {
+ 
+     fn set_gain(&mut self, kp: u16) -> Result<()> {
+         self.last_gain = Some(kp);
++        self.min_gain = Some(self.min_gain.map_or(kp, |m| m.min(kp)));
+         Ok(())
+     }
+ 
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index 25fb23c..811779a 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -353,6 +353,11 @@ pub mod method {
+     /// Torque is cut on every joint first and the robot is back at limp afterwards, so `robot.init`
+     /// or `robot.enable` brings it up from a known state. Discrete; send as a request.
+     pub const ROBOT_REBOOT_MOTORS: &str = "robot.rebootMotors";
++    /// Let go softly, then cut power: the gain drops to `gain_limp` at once, ramps linearly to
++    /// zero over one second while the joints are commanded where they are, and torque is cut
++    /// at the end. The gamepad's Select press. **The robot still ends up on the floor** — it just
++    /// gets there without a snap, which is what a robot forcing against a limit needs.
++    pub const ROBOT_SOFTEN: &str = "robot.soften";
+ 
+     // ── skills ───────────────────────────────────────────────────────────────
+     //
+@@ -634,6 +639,8 @@ pub enum Call {
+     RobotRelax,
+     /// Reboot servos (all of them, or the ids named), then limp. See [`method::ROBOT_REBOOT_MOTORS`].
+     RobotRebootMotors(RebootMotorsParams),
++    /// Let go softly over a second, then cut power. See [`method::ROBOT_SOFTEN`].
++    RobotSoften,
+     /// Run a one-shot skill, or toggle sit↔stand.
+     RobotDo(DoParams),
+     /// Standing body pose. Continuous. Send as a notification.
+@@ -775,6 +782,7 @@ impl Call {
+             Call::RobotInit => method::ROBOT_INIT,
+             Call::RobotRelax => method::ROBOT_RELAX,
+             Call::RobotRebootMotors(_) => method::ROBOT_REBOOT_MOTORS,
++            Call::RobotSoften => method::ROBOT_SOFTEN,
+             Call::RobotDo(_) => method::ROBOT_DO,
+             Call::RobotPose(_) => method::ROBOT_POSE,
+             Call::RobotMouth(_) => method::ROBOT_MOUTH,
+@@ -897,6 +905,7 @@ impl Call {
+             | Call::RobotInit
+             | Call::RobotRelax
+             | Call::RobotRebootMotors(_)
++            | Call::RobotSoften
+             | Call::RobotDo(_)
+             | Call::RobotPose(_)
+             | Call::RobotMouth(_)
+@@ -1012,6 +1021,7 @@ impl Call {
+             | Call::RobotStop
+             | Call::RobotInit
+             | Call::RobotRelax
++            | Call::RobotSoften
+             | Call::RobotShutdown
+             | Call::RobotMode => Value::Object(serde_json::Map::new()),
+             Call::NetStatus
+@@ -1063,6 +1073,7 @@ impl Call {
+             method::ROBOT_INIT => Call::RobotInit,
+             method::ROBOT_RELAX => Call::RobotRelax,
+             method::ROBOT_REBOOT_MOTORS => Call::RobotRebootMotors(decode(params)?),
++            method::ROBOT_SOFTEN => Call::RobotSoften,
+             method::ROBOT_DO => Call::RobotDo(decode(params)?),
+             method::ROBOT_POSE => Call::RobotPose(decode(params)?),
+             method::ROBOT_MOUTH => Call::RobotMouth(decode(params)?),
+@@ -1196,6 +1207,7 @@ pub mod test_support {
+             Call::RobotInit,
+             Call::RobotRelax,
+             Call::RobotRebootMotors(RebootMotorsParams { ids: vec![3, 11] }),
++            Call::RobotSoften,
+             Call::RobotDo(DoParams {
+                 skill: Skill::GroundPick,
+             }),
+@@ -3893,7 +3905,7 @@ mod tests {
+     fn every_call_covers_every_variant() {
+         assert_eq!(
+             every_call().len(),
+-            47,
++            48,
+             "a Call variant was added or removed — update every_call() and this count"
+         );
+     }
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+new file mode 100644
+index 0000000..54d4d56
+--- /dev/null
++++ b/padd/src/expressions.rs
+@@ -0,0 +1,165 @@
++//! Scripted head expressions on the bumpers: little timed head-intent sequences the policy
++//! plays through the command block, so the sticks keep driving underneath.
++//!
++//! LB = *curious*: a slow head tilt one way, then the other, with a small dip of the neck. The
++//! "what is this thing?" look. RB = *peck*: the head goes forward twice — neck and head pitched
++//! down together, held long enough for the network to follow (the alpha policies track a head
++//! step in roughly half a second; shorter pulses barely move it), then back up.
++//!
++//! An expression is a pure function of the time since it started, so it needs no state beyond
++//! that instant, and it ends on its own. The amplitudes are the tracked ranges measured in
++//! simulation on the shipped policies: head_pitch and head_yaw follow ±1 rad one to one, the neck
++//! only follows downward (about half the command), head_roll follows ±0.27 rad.
++
++use std::time::{Duration, Instant};
++
++use duck_ipc_proto as proto;
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++pub enum Kind {
++    Curious,
++    Peck,
++}
++
++#[derive(Debug, Clone, Copy)]
++pub struct Expression {
++    kind: Kind,
++    started: Instant,
++}
++
++/// One peck: down for this long, then back up for the rest of `PECK_PERIOD`.
++const PECK_DOWN: f64 = 0.45;
++const PECK_PERIOD: f64 = 0.85;
++const PECK_COUNT: u32 = 2;
++/// The peck's amplitudes: neck command (tracks to about -0.85 rad) and the head-pitch counter-tilt.
++const PECK_NECK: f64 = 1.5;
++const PECK_HEAD: f64 = 0.6;
++/// Curious: tilt right, tilt left, centre. Each leg this long.
++const CURIOUS_LEG: f64 = 0.7;
++
++impl Expression {
++    pub fn start(kind: Kind, now: Instant) -> Self {
++        Self { kind, started: now }
++    }
++
++    pub fn duration(kind: Kind) -> Duration {
++        Duration::from_secs_f64(match kind {
++            Kind::Peck => PECK_PERIOD * PECK_COUNT as f64,
++            Kind::Curious => CURIOUS_LEG * 3.0,
++        })
++    }
++
++    /// The head intent at `now`, or `None` once the expression is over.
++    pub fn head_at(&self, now: Instant) -> Option<proto::HeadParams> {
++        let t = now.duration_since(self.started).as_secs_f64();
++        if t >= Self::duration(self.kind).as_secs_f64() {
++            return None;
++        }
++        Some(head_at(self.kind, t))
++    }
++}
++
++/// Smooth 0→1 ramp over `len` seconds (half a cosine): no snap for the servos to chase.
++fn ramp(t: f64, len: f64) -> f64 {
++    let x = (t / len).clamp(0.0, 1.0);
++    0.5 - 0.5 * (std::f64::consts::PI * x).cos()
++}
++
++pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
++    match kind {
++        Kind::Peck => {
++            let phase = t % PECK_PERIOD;
++            // Forward = the neck pitched down (it tracks only about half, so it is asked for
++            // more than its range) while the head pitches the other way to keep the beak level:
++            // a chicken's jab, about 3 cm of travel on this neck. Head pitch negative = beak up,
++            // measured in simulation; the two together read as "the head went forward", not
++            // "the beak dropped".
++            let down = if phase < PECK_DOWN {
++                ramp(phase, 0.12)
++            } else {
++                1.0 - ramp(phase - PECK_DOWN, 0.15)
++            };
++            proto::HeadParams {
++                neck_pitch: -PECK_NECK * down,
++                head_pitch: -PECK_HEAD * down,
++                head_yaw: 0.0,
++                head_roll: 0.0,
++            }
++        }
++        Kind::Curious => {
++            // Tilt one way, then the other, then back — with a small dip of the neck that reads
++            // as "looking at it". Rolls are within the joint's ±0.27 rad.
++            let roll = if t < CURIOUS_LEG {
++                0.27 * ramp(t, 0.3)
++            } else if t < 2.0 * CURIOUS_LEG {
++                0.27 - 0.54 * ramp(t - CURIOUS_LEG, 0.35)
++            } else {
++                -0.27 + 0.27 * ramp(t - 2.0 * CURIOUS_LEG, 0.3)
++            };
++            let dip = ramp(t, 0.4) * (1.0 - ramp(t - 2.0 * CURIOUS_LEG, 0.4));
++            proto::HeadParams {
++                neck_pitch: -0.5 * dip,
++                head_pitch: 0.0,
++                head_yaw: 0.0,
++                head_roll: roll,
++            }
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn a_peck_goes_forward_twice_and_comes_back() {
++        let downs: Vec<f64> = (0..(PECK_PERIOD * PECK_COUNT as f64 * 100.0) as usize)
++            .map(|i| -head_at(Kind::Peck, i as f64 / 100.0).neck_pitch / PECK_NECK)
++            .collect();
++        // two separate excursions past 0.9, and back near zero between them and at the end
++        let mut excursions = 0;
++        let mut inside = false;
++        for &d in &downs {
++            if d > 0.9 && !inside {
++                excursions += 1;
++                inside = true;
++            } else if d < 0.1 {
++                inside = false;
++            }
++        }
++        assert_eq!(excursions, 2, "two pecks");
++        assert!(
++            downs.last().unwrap().abs() < 0.05,
++            "ends with the head back up"
++        );
++        assert!(downs.iter().all(|d| (0.0..=1.0).contains(d)));
++    }
++
++    #[test]
++    fn curious_tilts_both_ways_within_the_roll_range_and_ends_centred() {
++        let rolls: Vec<f64> = (0..(CURIOUS_LEG * 3.0 * 100.0) as usize)
++            .map(|i| head_at(Kind::Curious, i as f64 / 100.0).head_roll)
++            .collect();
++        assert!(rolls.iter().cloned().fold(f64::MIN, f64::max) > 0.25);
++        assert!(rolls.iter().cloned().fold(f64::MAX, f64::min) < -0.25);
++        assert!(rolls.iter().all(|r| r.abs() <= 0.27 + 1e-9));
++        assert!(rolls.last().unwrap().abs() < 0.02);
++        let e = Expression::start(Kind::Curious, Instant::now());
++        assert!(
++            e.head_at(e.started + Expression::duration(Kind::Curious))
++                .is_none()
++        );
++        assert!(e.head_at(e.started).is_some());
++    }
++
++    #[test]
++    fn no_expression_touches_the_yaw_or_the_body() {
++        for kind in [Kind::Peck, Kind::Curious] {
++            for i in 0..300 {
++                let h = head_at(kind, i as f64 / 100.0);
++                assert_eq!(h.head_yaw, 0.0);
++                assert!(h.neck_pitch <= 0.0, "the neck only tracks downward");
++            }
++        }
++    }
++}
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 56798b1..07489b5 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -74,6 +74,9 @@ use std::time::{Duration, Instant};
+ 
+ use clap::Parser;
+ use duck_ipc_proto as proto;
++
++mod expressions;
++use expressions::{Expression, Kind};
+ use gilrs::{Axis, Button, Gilrs};
+ 
+ #[cfg(target_os = "linux")]
+@@ -154,7 +157,10 @@ struct Args {
+ const IDLE_POLL: Duration = Duration::from_millis(500);
+ 
+ /// Select held this long sits the robot down and powers it off.
+-const SHUTDOWN_HOLD: Duration = Duration::from_secs(2);
++///
++/// Three seconds, since the press itself now does something (`robot.soften`): the shutdown must
++/// be a hold nobody reaches by pressing the release button a moment too long.
++const SHUTDOWN_HOLD: Duration = Duration::from_secs(3);
+ 
+ /// D-pad up held this long switches drive mode, walk ⇄ roller.
+ ///
+@@ -247,8 +253,8 @@ fn main() -> std::process::ExitCode {
+         hz = args.hz,
+         roller,
+         "driving — Start toggles the policy, Y head mode, B body pose, A ground pick, \
+-         LB/RB kicks, DPad-Down sit, triggers mouth, DPad-Right reboot servos, DPad-Up (3s) \
+-         walk/roller, Select (2s) shutdown"
++         LB curious head, RB peck, DPad-Left kick left, DPad-Right reboot servos, DPad-Down sit, \
++         triggers mouth, DPad-Up (3s) walk/roller, Select = soft release, Select (3s) shutdown"
+     );
+ 
+     let period = Duration::from_secs_f64(1.0 / args.hz as f64);
+@@ -263,6 +269,10 @@ fn main() -> std::process::ExitCode {
+     // starts the wheee ride. The prototype's threshold.
+     let mut prev_rt = 0.0f64;
+     let mut prev_lt = 0.0f64;
++    // The bumpers play a scripted head expression (`expressions.rs`) that overrides the head
++    // intent for its duration; the sticks keep driving underneath. One at a time: a bumper
++    // pressed mid-expression restarts with the new one.
++    let mut expression: Option<Expression> = None;
+ 
+     loop {
+         let tick = Instant::now();
+@@ -274,10 +284,12 @@ fn main() -> std::process::ExitCode {
+         let mut toggle_body = false;
+         let mut ground_pick = false;
+         let mut kick_left = false;
+-        let mut kick_right = false;
++        let kick_right = false; // no button on this pad: D-pad right reboots the servos
+         let mut sit_toggle = false;
+         let mut roulade = false;
+         let mut reboot_motors = false;
++        let mut start_expression: Option<Kind> = None;
++        let mut soften = false;
+         while let Some(event) = gilrs.next_event() {
+             if let gilrs::EventType::ButtonPressed(button, _) = event.event {
+                 match button {
+@@ -289,13 +301,19 @@ fn main() -> std::process::ExitCode {
+                     // which the resend below carries.
+                     Button::West => roulade = true,
+                     // gilrs names the bumpers `LeftTrigger`/`RightTrigger`; the analog
+-                    // triggers are `LeftTrigger2`/`RightTrigger2`.
+-                    Button::LeftTrigger => kick_left = true,
+-                    Button::RightTrigger => kick_right = true,
++                    // triggers are `LeftTrigger2`/`RightTrigger2`. The bumpers are the
++                    // expression buttons; the left kick moved to D-pad left (the right one
++                    // has no button on this pad: D-pad right reboots the servos).
++                    Button::LeftTrigger => start_expression = Some(Kind::Curious),
++                    Button::RightTrigger => start_expression = Some(Kind::Peck),
++                    Button::DPadLeft => kick_left = true,
+                     Button::DPadDown => sit_toggle = true,
+                     // Reboot the servos: the way back from a tripped overload without pulling
+                     // the battery.
+                     Button::DPadRight => reboot_motors = true,
++                    // The release button: on the press itself, not the release, so it is
++                    // immediate. Held on, it becomes the shutdown below.
++                    Button::Select => soften = true,
+                     _ => {}
+                 }
+             }
+@@ -433,8 +451,21 @@ fn main() -> std::process::ExitCode {
+             }
+         }
+ 
+-        // Select held two seconds: sit down, then power off. Sent once per hold — the
++        // Select pressed: let go softly — gain to the limp value at once, to zero over a second,
++        // then torque off. The pad's emergency release for a robot forcing against something.
++        // Answered, because "refused" is worth a log line here of all places.
++        if soften {
++            tracing::warn!("Select pressed — asking the robot to let go softly (robot.soften)");
++            if let Err(e) = request(&mut stream, &mut next_id, &proto::Call::RobotSoften) {
++                tracing::error!(error = %e, "soften request failed");
++                return std::process::ExitCode::FAILURE;
++            }
++        }
++
++        // Select held three seconds: sit down, then power off. Sent once per hold — the
+         // robot owns the sequence from there, and a second request would be a no-op anyway.
++        // The press above already softened the robot, so the sit is skipped by the daemon
++        // (it needs a driving robot) and the machine simply powers off where it lies.
+         if pad.is_pressed(Button::Select) {
+             let held = select_held_since.get_or_insert(tick);
+             if tick.duration_since(*held) >= SHUTDOWN_HOLD && !shutdown_sent {
+@@ -549,6 +580,31 @@ fn main() -> std::process::ExitCode {
+             }
+         }
+ 
++        if let Some(kind) = start_expression {
++            tracing::info!(?kind, "expression");
++            expression = Some(Expression::start(kind, tick));
++        }
++        // The expression's head intent for this tick, if one is playing. `None` when it has
++        // just ended: one explicit zero head is sent below so the head does not stay parked
++        // where the last frame left it until the intent expires.
++        let expression_head = match expression {
++            Some(e) => match e.head_at(tick) {
++                Some(head) => Some(head),
++                None => {
++                    expression = None;
++                    Some(proto::HeadParams::default())
++                }
++            },
++            None => None,
++        };
++        if let Some(head) = expression_head
++            && mode != Mode::Head
++            && let Err(e) = notify(&mut stream, &proto::Call::RobotHead(head))
++        {
++            tracing::error!(error = %e, "send failed");
++            return std::process::ExitCode::FAILURE;
++        }
++
+         let call = match mode {
+             Mode::Drive if roller => proto::Call::RobotMove(proto::MoveParams {
+                 // The prototype's roller shaping: push harder than you can brake, no
+@@ -589,12 +645,16 @@ fn main() -> std::process::ExitCode {
+                 // The prototype's alpha mapping, signs included (its head_pitch/head_yaw
+                 // joint axes are inverted relative to stick direction — verified on
+                 // hardware there, kept verbatim here).
+-                proto::Call::RobotHead(proto::HeadParams {
+-                    neck_pitch: right_y * args.max_head,
+-                    head_pitch: -left_y * args.max_head,
+-                    head_yaw: -left_x * args.max_head,
+-                    head_roll: right_x * args.max_head,
+-                })
++                match expression_head {
++                    // A bumper expression takes the head over from the sticks while it plays.
++                    Some(head) => proto::Call::RobotHead(head),
++                    None => proto::Call::RobotHead(proto::HeadParams {
++                        neck_pitch: right_y * args.max_head,
++                        head_pitch: -left_y * args.max_head,
++                        head_yaw: -left_x * args.max_head,
++                        head_roll: right_x * args.max_head,
++                    }),
++                }
+             }
+             Mode::BodyPose => {
+                 if let Err(e) = notify(
+diff --git a/robotctl/src/main.rs b/robotctl/src/main.rs
+index f32aba9..f7a8cdd 100644
+--- a/robotctl/src/main.rs
++++ b/robotctl/src/main.rs
+@@ -391,6 +391,16 @@ enum RobotCommand {
+         json: bool,
+     },
+ 
++    /// Let go softly, then cut power: gain to the limp value at once, to zero over a second,
++    /// torque off at the end. The gamepad's Select press.
++    ///
++    /// **The robot still ends up on the floor**, just without the snap. Same as `relax` otherwise:
++    /// the next `init` or Start brings it back up from wherever it lies.
++    Soften {
++        #[arg(long)]
++        json: bool,
++    },
++
+     /// Run a one-shot skill: `ground-pick`, `kick-left`, `kick-right`, `roulade`, or
+     /// `sit` (toggle).
+     ///
+@@ -2232,6 +2242,7 @@ fn run_robot(socket: &Path, command: RobotCommand) -> Result<(), Failure> {
+             proto::Call::RobotRebootMotors(proto::RebootMotorsParams { ids: ids.clone() }),
+             *json,
+         ),
++        RobotCommand::Soften { json } => (proto::Call::RobotSoften, *json),
+         RobotCommand::Do { skill, json } => (
+             proto::Call::RobotDo(proto::DoParams {
+                 skill: skill.as_skill(),
+@@ -2305,6 +2316,7 @@ fn run_robot(socket: &Path, command: RobotCommand) -> Result<(), Failure> {
+         RobotCommand::RebootMotors { ids, .. } => {
+             println!("rebooting servos {ids:?}, torque off — then `robot init` or Start")
+         }
++        RobotCommand::Soften { .. } => println!("letting go softly — torque off in about a second"),
+         RobotCommand::Do { skill, .. } => println!("{skill:?} queued"),
+         RobotCommand::Mode { .. } | RobotCommand::Look { .. } => unreachable!("answered above"),
+     }
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index ee26c8d..c84d08d 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -34,6 +34,7 @@ const THEREMIN_UP: u8 = 1;
+ const THEREMIN_DOWN: u8 = 2;
+ const POWER_INIT: u8 = 1;
+ const POWER_RELAX: u8 = 2;
++const POWER_SOFTEN: u8 = 3;
+ use std::time::{Duration, Instant};
+ 
+ use arc_swap::ArcSwap;
+@@ -180,6 +181,8 @@ pub enum PowerRequest {
+     Init,
+     /// Torque off. The robot collapses if nothing holds it.
+     Relax,
++    /// Gain to `gain_limp` now, to zero over a second, then torque off. The soft `Relax`.
++    Soften,
+ }
+ 
+ /// What the loop reads at the top of a tick.
+@@ -413,6 +416,13 @@ impl Intents {
+         self.power.store(POWER_RELAX, Ordering::Relaxed);
+     }
+ 
++    /// Ask the loop to let go softly, then cut power. Clears `enabled` for the same reason
++    /// [`Self::request_relax`] does.
++    pub fn request_soften(&self) {
++        self.enabled.store(false, Ordering::Relaxed);
++        self.power.store(POWER_SOFTEN, Ordering::Relaxed);
++    }
++
+     /// Take the pending request, leaving none.
+     ///
+     /// Called once per tick by the loop. A later request replaces an unread earlier one, which is
+@@ -482,6 +492,7 @@ impl Intents {
+         match self.power.swap(POWER_NONE, Ordering::Relaxed) {
+             POWER_INIT => Some(PowerRequest::Init),
+             POWER_RELAX => Some(PowerRequest::Relax),
++            POWER_SOFTEN => Some(PowerRequest::Soften),
+             _ => None,
+         }
+     }
+diff --git a/robotd/src/main.rs b/robotd/src/main.rs
+index 40c8207..16bb756 100644
+--- a/robotd/src/main.rs
++++ b/robotd/src/main.rs
+@@ -91,6 +91,35 @@ const RATE_WINDOW: Duration = Duration::from_secs(1);
+ /// snap. Not a parameter yet — one number with no evidence that anyone wants a different one.
+ const HOME_RAMP: Duration = Duration::from_secs(2);
+ 
++/// How long `robot.soften` takes to bring the gain from `gain_limp` down to zero before it cuts
++/// torque. One second: long enough that a standing robot folds rather than drops, short enough
++/// that a joint forcing against something is released at once — the gain is already at the limp
++/// value on the first tick.
++const SOFTEN_RAMP: Duration = Duration::from_secs(1);
++
++/// `robot.soften` in flight: the joints are commanded where they were when it started, at a gain
++/// that runs linearly from `gain_limp` to zero over [`SOFTEN_RAMP`]; then torque is cut.
++#[derive(Debug, Clone, Copy, PartialEq)]
++struct Softening {
++    since: Instant,
++    from: [f64; NUM_JOINTS],
++}
++
++impl Softening {
++    /// The gain for this tick, or `None` once the ramp is over and torque should be cut.
++    fn gain_at(&self, now: Instant, gain_limp: u16) -> Option<u16> {
++        let t = now.duration_since(self.since).as_secs_f64() / SOFTEN_RAMP.as_secs_f64();
++        if t >= 1.0 {
++            return None;
++        }
++        // In steps of five: the gain is a register write to every servo, and a value that changes
++        // on every tick is fourteen extra transactions per tick for the whole second. Ten steps
++        // are indistinguishable from a straight line at this rate.
++        let raw = f64::from(gain_limp) * (1.0 - t);
++        Some(((raw / 5.0).round() * 5.0) as u16)
++    }
++}
++
+ /// Smoothing on the reported battery voltage. At one sample per [`RATE_WINDOW`] this is a
+ /// ~10 s time constant, which is what makes the number readable: the raw voltage sags
+ /// several tenths of a volt on every step and recovers between them, so an unsmoothed
+@@ -1251,6 +1280,7 @@ async fn control_loop<T: RobotIo>(
+     let limp_fall_max = Duration::from_millis(params.safety.limp_fall_max_ms);
+     let limp_fall_pose = Duration::from_millis(params.safety.limp_fall_pose_ms);
+     let mut limp_fall = LimpFall::Idle;
++    let mut softening: Option<Softening> = None;
+ 
+     // The voice, and the ear. Both optional equipment: a robot without a codec or a bank
+     // walks identically — the player degrades to a debug line, and the mic worker is only
+@@ -1434,11 +1464,37 @@ async fn control_loop<T: RobotIo>(
+                     // ends up rather than assuming it is still at the home pose.
+                     bringup = Bringup::Limp;
+                     was_driving = false;
++                    softening = None;
+                 }
+                 Err(e) => {
+                     tracing::warn!(error = %e, "cannot cut torque; the robot is still powered")
+                 }
+             },
++            // The soft version: nothing is written here beyond remembering where the joints are.
++            // From the next target selection on, the gain is `gain_limp` and falling, and the
++            // ramp's end (below, every tick) is what cuts torque. Only from a powered robot: a
++            // limp one has nothing to let go of.
++            Some(intents::PowerRequest::Soften) => {
++                if bringup == Bringup::Limp {
++                    tracing::info!("robot.soften: already limp");
++                } else if softening.is_none() {
++                    let from = coast.known_positions(hold);
++                    tracing::warn!(
++                        gain = params.safety.gain_limp,
++                        ramp_ms = SOFTEN_RAMP.as_millis(),
++                        "robot.soften: gain to limp now, to zero over the ramp, then torque off"
++                    );
++                    softening = Some(Softening {
++                        since: tick_start,
++                        from,
++                    });
++                    // Whatever else was in flight is over: a fall recovery would fight this, and
++                    // the hold target is now where the robot is, not where it was driving to.
++                    limp_fall = LimpFall::Idle;
++                    falling.reset();
++                    hold = from;
++                }
++            }
+             None => {}
+         }
+ 
+@@ -1469,6 +1525,24 @@ async fn control_loop<T: RobotIo>(
+             was_driving = false;
+         }
+ 
++        // The end of a soften: the gain has reached zero, cut torque and go back to the start —
++        // exactly what `robot.relax` does, a second later and a lot more gently.
++        if let Some(s) = softening
++            && s.gain_at(tick_start, params.safety.gain_limp).is_none()
++        {
++            match safety.set_torque(false) {
++                Ok(()) => {
++                    tracing::warn!("robot.soften: ramp done, torque off");
++                    bringup = Bringup::Limp;
++                    was_driving = false;
++                    softening = None;
++                }
++                Err(e) => {
++                    tracing::warn!(error = %e, "robot.soften: cannot cut torque; retrying next tick")
++                }
++            }
++        }
++
+         // One-shot skill requests, taken once per tick like the power request. They need a
+         // driving robot — the prototype's buttons likewise did nothing until the policy ran.
+         let requests = intents.take_skills();
+@@ -1911,6 +1985,8 @@ async fn control_loop<T: RobotIo>(
+             // The limp-fall sequence owns the robot for its duration: the whole point is
+             // that the policy is *not* driving while the robot falls, lands and is posed.
+             && !in_limp_fall
++            // So does a soften: the robot is being let go of.
++            && softening.is_none()
+             && sensors.is_some()
+             && imu_warm
+             && !powered_off;
+@@ -1961,6 +2037,17 @@ async fn control_loop<T: RobotIo>(
+         };
+ 
+         let (mut targets, gain, moving, policy_label) = match (driving, sensors.as_ref()) {
++            // A soften, before everything: the joints where they were when it started, at a gain
++            // running from limp to zero. `moving` is true — the robot is folding.
++            _ if softening.is_some() => {
++                let s = softening.expect("checked above");
++                (
++                    s.from,
++                    s.gain_at(tick_start, params.safety.gain_limp).unwrap_or(0),
++                    true,
++                    "soften",
++                )
++            }
+             // The limp-fall sequence, before anything else — `driving` is false throughout,
+             // so without this it would fall through to the hold branch and the robot would
+             // be commanded its pre-fall pose at walking gain, which is precisely the thing
+@@ -3008,6 +3095,12 @@ fn dispatch(
+             proto::Response::ok(Some(id), &proto::IntentResult::accepted())
+         }
+ 
++        // Never refused either: the soft way to the same place.
++        proto::Call::RobotSoften => {
++            intents.request_soften();
++            proto::Response::ok(Some(id), &proto::IntentResult::accepted())
++        }
++
+         proto::Call::RobotHealth => proto::Response::ok(Some(id), &state.health()),
+         proto::Call::RobotSafeToRestart => proto::Response::ok(Some(id), &state.safe_to_restart()),
+         proto::Call::RobotModelApi => proto::Response::ok(
+@@ -4616,6 +4709,80 @@ mod tests {
+         );
+     }
+ 
++    /// **`robot.soften` lets go over a second and only then cuts power.** Torque is still on
++    /// right after the request, the gain has dropped to the limp value, and after the ramp the
++    /// joints are off exactly once, as with `relax`.
++    #[tokio::test]
++    async fn robot_soften_ramps_the_gain_down_then_cuts_power() {
++        let io = FakeIo::at(DEFAULT_POSITION).frozen();
++        let mut params = Params::default();
++        params.policy.enabled = false;
++        let s = Arc::new(RobotState::new(&params, false, false));
++        let intents = Arc::new(Intents::new());
++        intents.request_init();
++
++        let (tx, rx) = std::sync::mpsc::channel();
++        let loop_state = Arc::clone(&s);
++        let loop_intents = Arc::clone(&intents);
++        let handle = tokio::spawn(async move {
++            let mut io = io;
++            control_loop_probe_with(&mut io, loop_state, loop_intents, Duration::from_millis(2))
++                .await;
++            tx.send((io.torque, io.torque_writes, io.min_gain)).unwrap();
++        });
++
++        while s.ticks.load(Ordering::Relaxed) < 3 {
++            tokio::time::sleep(Duration::from_millis(2)).await;
++        }
++        let ticks_at_soften = s.ticks.load(Ordering::Relaxed);
++        intents.request_soften();
++        while s.ticks.load(Ordering::Relaxed) < ticks_at_soften + 3 {
++            tokio::time::sleep(Duration::from_millis(2)).await;
++        }
++        // Mid-ramp: the robot is folding, which the loop reports as moving (so `safeToRestart`
++        // says no while it happens); torque itself is checked at the end.
++        assert!(
++            s.moving.load(Ordering::Relaxed),
++            "a softening robot must report moving"
++        );
++        tokio::time::sleep(SOFTEN_RAMP + Duration::from_millis(100)).await;
++        s.shutdown.store(true, Ordering::Relaxed);
++        handle.await.unwrap();
++
++        let (torque, writes, min_gain) = rx.recv().unwrap();
++        assert_eq!(
++            torque,
++            Some(false),
++            "soften left the joints powered after the ramp"
++        );
++        assert_eq!(writes, 2, "expected one on and one off, got {writes}");
++        // The lowest gain ever written: the ramp must have reached zero before torque was cut.
++        // (`last_gain` is the running gain again by then — the held branch restores it, as it
++        // does after a plain relax.)
++        assert_eq!(
++            min_gain,
++            Some(0),
++            "the gain never reached zero during the ramp"
++        );
++        assert!(
++            !s.homed.load(Ordering::Relaxed),
++            "still reporting homed after soften"
++        );
++    }
++
++    /// The ramp arithmetic on its own: limp gain on the first tick, zero at the end, `None` after.
++    #[test]
++    fn the_soften_ramp_starts_at_limp_gain_and_ends_at_zero() {
++        let since = Instant::now();
++        let s = Softening {
++            since,
++            from: DEFAULT_POSITION,
++        };
++        assert_eq!(s.gain_at(since, 50), Some(50));
++        assert_eq!(s.gain_at(since + SOFTEN_RAMP / 2, 50), Some(25));
++        assert_eq!(s.gain_at(since + SOFTEN_RAMP, 50), None);
++    }
++
+     /// **`robot.rebootMotors` cuts torque, reboots the named servos and returns to limp.**
+     #[tokio::test]
+     async fn robot_reboot_motors_reboots_the_named_servos_and_returns_to_limp() {
+diff --git a/updater/src/ipc.rs b/updater/src/ipc.rs
+index 3dc5c9f..c906860 100644
+--- a/updater/src/ipc.rs
++++ b/updater/src/ipc.rs
+@@ -633,6 +633,7 @@ impl Server {
+             | Call::RobotInit
+             | Call::RobotRelax
+             | Call::RobotRebootMotors(_)
++            | Call::RobotSoften
+             | Call::RobotDo(_)
+             | Call::RobotSound(_)
+             | Call::RobotPose(_)
+-- 
+2.53.0
+
+
+From db2c70efe43c0562aec1fd2f614b0df706169aad Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
+Date: Wed, 2 Sep 2026 16:16:34 +0200
+Subject: [PATCH 5/9] padd: Start once stands the robot up (robot.init), Start
+ again drives
+
+The first Start on a booted duck used to run the gait straight out of the home ramp. The pad
+now keeps a belief of whether the robot is up: false at start and after the soften / recover /
+shutdown it sent, true after its init. Not up: Start sends robot.init (torque on, 2 s ramp,
+hold). Up: Start toggles the policy as before.
+---
+ docs/robot/cheatsheet.md |  2 +-
+ padd/src/main.rs         | 35 +++++++++++++++++++++++++++++++----
+ 2 files changed, 32 insertions(+), 5 deletions(-)
+
+diff --git a/docs/robot/cheatsheet.md b/docs/robot/cheatsheet.md
+index 12668fc..4327ffe 100644
+--- a/docs/robot/cheatsheet.md
++++ b/docs/robot/cheatsheet.md
+@@ -239,7 +239,7 @@ mapping is the prototype's, so muscle memory carries over:
+ | --- | --- |
+ | left stick | drive: forward/back and strafe · head: head yaw and pitch · body pose: up and crouch |
+ | right stick | drive: turn · head: neck pitch and head roll · body pose: pitch and roll |
+-| **Start** | toggle the policy — nothing moves until it is on |
++| **Start** | first press: torque on and a 2 s ramp to the home pose, then hold (`robot.init`). Second press: the policy drives. Further presses toggle the policy. After Select / DPad-Up / a reboot, the next Start is an init again. |
+ | **Y** / triangle | head mode: sticks pose the head (body holds still) |
+ | **B** / circle | body-pose mode: sticks lean and crouch the standing robot |
+ | **A** / cross | ground pick |
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 07489b5..2301850 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -252,9 +252,10 @@ fn main() -> std::process::ExitCode {
+         socket = %args.socket.display(),
+         hz = args.hz,
+         roller,
+-        "driving — Start toggles the policy, Y head mode, B body pose, A ground pick, \
+-         LB curious head, RB peck, DPad-Left kick left, DPad-Right reboot servos, DPad-Down sit, \
+-         triggers mouth, DPad-Up (3s) walk/roller, Select = soft release, Select (3s) shutdown"
++        "driving — Start once = stand up (init), Start again = policy on/off, Y head mode, \
++         B body pose, A ground pick, LB curious head, RB peck, DPad-Left kick left, \
++         DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
++         Select = soft release, Select (3s) shutdown"
+     );
+ 
+     let period = Duration::from_secs_f64(1.0 / args.hz as f64);
+@@ -273,6 +274,18 @@ fn main() -> std::process::ExitCode {
+     // intent for its duration; the sticks keep driving underneath. One at a time: a bumper
+     // pressed mid-expression restarts with the new one.
+     let mut expression: Option<Expression> = None;
++    // Whether this pad believes the robot is up (torque on, at the home pose). Start on a robot
++    // that is not up sends `robot.init` — torque on and a two-second ramp to home, and the robot
++    // then just stands there — and only the next Start hands it to the policy. Without this, the
++    // first Start on a freshly booted duck held in the air started the gait straight out of the
++    // ramp, legs going everywhere.
++    //
++    // A belief rather than a query, because nothing on the wire says "homed" today. It starts
++    // false (padd starts with the robot, and a robotd restart takes padd down with it, so a fresh
++    // padd always meets a limp robot), goes true on the init this pad sent, and false on the
++    // soften / recover / shutdown it sent. If it is ever wrong the cost is the old behaviour
++    // (one Start does both) or one harmless extra re-home ramp — never a fall.
++    let mut up = false;
+ 
+     loop {
+         let tick = Instant::now();
+@@ -377,7 +390,18 @@ fn main() -> std::process::ExitCode {
+             }
+         }
+ 
+-        if toggle_enable {
++        if toggle_enable && !up {
++            tracing::warn!(
++                "Start — robot.init: torque on, ramping to the home pose over 2 s; press Start again to drive"
++            );
++            match request(&mut stream, &mut next_id, &proto::Call::RobotInit) {
++                Err(e) => {
++                    tracing::error!(error = %e, "init failed");
++                    return std::process::ExitCode::FAILURE;
++                }
++                Ok(_) => up = true,
++            }
++        } else if toggle_enable {
+             // The robot owns the toggle. A local on/off belief here drifts from the
+             // robot's the moment anything else moves it — robot.relax, the shutdown
+             // sequence, either side restarting — and a stale belief turns Start into a
+@@ -441,6 +465,7 @@ fn main() -> std::process::ExitCode {
+         }
+ 
+         if reboot_motors {
++            up = false;
+             tracing::warn!(
+                 "DPad-Right — asking the robot to reboot its servos (robot.rebootMotors)"
+             );
+@@ -455,6 +480,7 @@ fn main() -> std::process::ExitCode {
+         // then torque off. The pad's emergency release for a robot forcing against something.
+         // Answered, because "refused" is worth a log line here of all places.
+         if soften {
++            up = false;
+             tracing::warn!("Select pressed — asking the robot to let go softly (robot.soften)");
+             if let Err(e) = request(&mut stream, &mut next_id, &proto::Call::RobotSoften) {
+                 tracing::error!(error = %e, "soften request failed");
+@@ -470,6 +496,7 @@ fn main() -> std::process::ExitCode {
+             let held = select_held_since.get_or_insert(tick);
+             if tick.duration_since(*held) >= SHUTDOWN_HOLD && !shutdown_sent {
+                 shutdown_sent = true;
++                up = false;
+                 tracing::warn!("Select held — asking the robot to sit and power off");
+                 if let Err(e) = request(&mut stream, &mut next_id, &proto::Call::RobotShutdown) {
+                     tracing::error!(error = %e, "shutdown request failed");
+-- 
+2.53.0
+
+
+From 5492ea602e3aef59b2a19d702977aab2da2cd88e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
+Date: Wed, 2 Sep 2026 20:25:46 +0200
+Subject: [PATCH 6/9] padd: R3 = startled (head up, a step back); expressions
+ can drive the twist
+
+---
+ docs/robot/cheatsheet.md |  1 +
+ padd/src/expressions.rs  | 65 +++++++++++++++++++++++++++++++++++++++-
+ padd/src/main.rs         |  9 +++++-
+ 3 files changed, 73 insertions(+), 2 deletions(-)
+
+diff --git a/docs/robot/cheatsheet.md b/docs/robot/cheatsheet.md
+index 4327ffe..6dd4379 100644
+--- a/docs/robot/cheatsheet.md
++++ b/docs/robot/cheatsheet.md
+@@ -246,6 +246,7 @@ mapping is the prototype's, so muscle memory carries over:
+ | **X** / square | roulade — one forward roll; hold to chain rolls |
+ | **LB** | curious: a slow head tilt right, then left, with a small dip of the neck (about 2 s) |
+ | **RB** | peck: the head goes forward twice (about 1.7 s) |
++| **R3** (right stick click) | startled: head up at once, a step back, head settles (2 s). Add the scream with RT |
+ | **DPad-Left** | left kick (the right kick has no button while the bumpers are expressions) |
+ | **DPad-Down** | sit ↔ stand |
+ | **RT / LT** | mouth (either trigger) — RT also quacks; LT rides the "wheee" while held |
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index 54d4d56..c67dc49 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -19,6 +19,8 @@ use duck_ipc_proto as proto;
+ pub enum Kind {
+     Curious,
+     Peck,
++    /// Startled: the head snaps up and the duck backs away a step. The scream is on the trigger.
++    Startled,
+ }
+ 
+ #[derive(Debug, Clone, Copy)]
+@@ -36,6 +38,16 @@ const PECK_NECK: f64 = 1.5;
+ const PECK_HEAD: f64 = 0.6;
+ /// Curious: tilt right, tilt left, centre. Each leg this long.
+ const CURIOUS_LEG: f64 = 0.7;
++/// Startled: head up at once, then back away from `STARTLED_BACK_FROM` to `STARTLED_BACK_TO`
++/// (the calmest backward walk command the alpha gait has), head settling by the end.
++const STARTLED_LEN: f64 = 2.0;
++const STARTLED_BACK_FROM: f64 = 0.3;
++const STARTLED_BACK_TO: f64 = 1.5;
++const STARTLED_BACK: proto::MoveParams = proto::MoveParams {
++    vx: -0.35,
++    vy: 0.0,
++    vyaw: 0.22,
++};
+ 
+ impl Expression {
+     pub fn start(kind: Kind, now: Instant) -> Self {
+@@ -46,9 +58,16 @@ impl Expression {
+         Duration::from_secs_f64(match kind {
+             Kind::Peck => PECK_PERIOD * PECK_COUNT as f64,
+             Kind::Curious => CURIOUS_LEG * 3.0,
++            Kind::Startled => STARTLED_LEN,
+         })
+     }
+ 
++    /// The twist this expression wants at `now`: `None` when it leaves the sticks in charge.
++    pub fn twist_at(&self, now: Instant) -> Option<proto::MoveParams> {
++        let t = now.duration_since(self.started).as_secs_f64();
++        twist_at(self.kind, t)
++    }
++
+     /// The head intent at `now`, or `None` once the expression is over.
+     pub fn head_at(&self, now: Instant) -> Option<proto::HeadParams> {
+         let t = now.duration_since(self.started).as_secs_f64();
+@@ -65,8 +84,28 @@ fn ramp(t: f64, len: f64) -> f64 {
+     0.5 - 0.5 * (std::f64::consts::PI * x).cos()
+ }
+ 
++pub fn twist_at(kind: Kind, t: f64) -> Option<proto::MoveParams> {
++    match kind {
++        Kind::Startled if (STARTLED_BACK_FROM..STARTLED_BACK_TO).contains(&t) => {
++            Some(STARTLED_BACK)
++        }
++        _ => None,
++    }
++}
++
+ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+     match kind {
++        Kind::Startled => {
++            // Head pitch negative is beak up (measured on the shipped policies). Up fast, back
++            // to level over the last half second.
++            let up = ramp(t, 0.15) * (1.0 - ramp(t - (STARTLED_LEN - 0.5), 0.5));
++            proto::HeadParams {
++                neck_pitch: 0.0,
++                head_pitch: -up,
++                head_yaw: 0.0,
++                head_roll: 0.0,
++            }
++        }
+         Kind::Peck => {
+             let phase = t % PECK_PERIOD;
+             // Forward = the neck pitched down (it tracks only about half, so it is asked for
+@@ -152,9 +191,33 @@ mod tests {
+         assert!(e.head_at(e.started).is_some());
+     }
+ 
++    #[test]
++    fn startled_looks_up_then_backs_away_then_settles() {
++        assert!(
++            head_at(Kind::Startled, 0.2).head_pitch < -0.9,
++            "head up at once"
++        );
++        assert_eq!(
++            twist_at(Kind::Startled, 0.1),
++            None,
++            "no walking before the head is up"
++        );
++        assert_eq!(twist_at(Kind::Startled, 1.0), Some(STARTLED_BACK));
++        assert_eq!(twist_at(Kind::Startled, 1.8), None);
++        assert!(
++            head_at(Kind::Startled, STARTLED_LEN - 0.01)
++                .head_pitch
++                .abs()
++                < 0.05,
++            "level at the end"
++        );
++        assert_eq!(twist_at(Kind::Peck, 0.5), None);
++        assert_eq!(twist_at(Kind::Curious, 0.5), None);
++    }
++
+     #[test]
+     fn no_expression_touches_the_yaw_or_the_body() {
+-        for kind in [Kind::Peck, Kind::Curious] {
++        for kind in [Kind::Peck, Kind::Curious, Kind::Startled] {
+             for i in 0..300 {
+                 let h = head_at(kind, i as f64 / 100.0);
+                 assert_eq!(h.head_yaw, 0.0);
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 2301850..c523949 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -253,7 +253,7 @@ fn main() -> std::process::ExitCode {
+         hz = args.hz,
+         roller,
+         "driving — Start once = stand up (init), Start again = policy on/off, Y head mode, \
+-         B body pose, A ground pick, LB curious head, RB peck, DPad-Left kick left, \
++         B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+          Select = soft release, Select (3s) shutdown"
+     );
+@@ -319,6 +319,8 @@ fn main() -> std::process::ExitCode {
+                     // has no button on this pad: D-pad right reboots the servos).
+                     Button::LeftTrigger => start_expression = Some(Kind::Curious),
+                     Button::RightTrigger => start_expression = Some(Kind::Peck),
++                    // R3 (right stick click): startled — head up, a step back. Scream on RT.
++                    Button::RightThumb => start_expression = Some(Kind::Startled),
+                     Button::DPadLeft => kick_left = true,
+                     Button::DPadDown => sit_toggle = true,
+                     // Reboot the servos: the way back from a tripped overload without pulling
+@@ -645,6 +647,11 @@ fn main() -> std::process::ExitCode {
+                 vy: 0.0,
+                 vyaw: -right_x * ROLLER_YAW,
+             }),
++            // An expression that walks (startled backs away) takes the twist over from the
++            // sticks while it does.
++            Mode::Drive if expression.and_then(|e| e.twist_at(tick)).is_some() => {
++                proto::Call::RobotMove(expression.and_then(|e| e.twist_at(tick)).expect("checked"))
++            }
+             Mode::Drive => proto::Call::RobotMove(proto::MoveParams {
+                 vx: left_y
+                     * if left_y >= 0.0 {
+-- 
+2.53.0
+
+
+From fdc09eef5c62abe6ead89edca323a4985a7d5d51 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Fri, 4 Sep 2026 11:43:36 +0200
+Subject: [PATCH 7/9] padd: emotion mode on a DPad-Up tap, B = devastated (sit,
+ droop, three sobs); robotd: a devastated sound tag
+
+---
+ duck-ipc-proto/src/lib.rs |   4 +
+ padd/src/expressions.rs   | 159 ++++++++++++++++++++++++++++++++++++++
+ padd/src/main.rs          | 117 ++++++++++++++++++++++++++--
+ robotd/src/intents.rs     |   1 +
+ 4 files changed, 274 insertions(+), 7 deletions(-)
+
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index 811779a..0f46de6 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -1600,6 +1600,9 @@ pub enum SoundTag {
+     Coo,
+     /// The held joy ride: start → loop while held → end.
+     Wheee,
++    /// The "devastated" emotion: a shocked quack, then three soft sobs. Not part of the seeded
++    /// bank: the wav is copied into `<bank>/devastated/` by hand.
++    Devastated,
+ }
+ 
+ impl SoundTag {
+@@ -1613,6 +1616,7 @@ impl SoundTag {
+             SoundTag::Chirp => "chirp",
+             SoundTag::Coo => "coo",
+             SoundTag::Wheee => "wheee",
++            SoundTag::Devastated => "devastated",
+         }
+     }
+ }
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index c67dc49..3833eda 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -21,6 +21,11 @@ pub enum Kind {
+     Peck,
+     /// Startled: the head snaps up and the duck backs away a step. The scream is on the trigger.
+     Startled,
++    /// Devastated (emotion mode, B): the duck sits down at once (the shock), then the head
++    /// droops and shakes "no" three times while it sobs, then comes back level. It stays
++    /// seated. The sound and the sit are fired when the expression starts; the beak follows
++    /// the sound through `mouth_at`.
++    Devastated,
+ }
+ 
+ #[derive(Debug, Clone, Copy)]
+@@ -48,6 +53,33 @@ const STARTLED_BACK: proto::MoveParams = proto::MoveParams {
+     vy: 0.0,
+     vyaw: 0.22,
+ };
++/// Devastated, seconds from the button press (numbers decided in simulation, see
++/// notes/emotions/motion/sadness/REPORT.md): the sit lands by ~0.8 s; the head droops from
++/// `DEV_DROOP` over `DEV_DROOP_LEN`; three yaw swings of `DEV_YAW` rad with extremes at
++/// `DEV_SWING_AT` (+, -, +), half a second in and out; a hold; then the rise from `DEV_RISE`
++/// over `DEV_DROOP_LEN`. Neck asks for -1.5 (tracks to about -1.0 seated), head pitch +1.0
++/// (positive = beak down on these policies).
++const DEV_LEN: f64 = 8.5;
++const DEV_DROOP: f64 = 1.5;
++const DEV_DROOP_LEN: f64 = 2.0;
++const DEV_RISE: f64 = 6.5;
++const DEV_NECK: f64 = 1.5;
++const DEV_HEAD: f64 = 1.0;
++const DEV_YAW: f64 = 0.4;
++const DEV_SWING_AT: [f64; 3] = [3.0, 4.0, 5.0];
++const DEV_YAW_FADE: f64 = 0.5;
++/// The beak, 0..1 every 0.1 s from the press, traced from the sound's envelope (the `mouth`
++/// channel of the simulation's keyframes, video clock minus the 0.3 s lead-in): the shock at
++/// 0-0.5 s, the three sobs at 3.0 / 4.0 / 5.0 s dying out by 6.6 s. Zero after the table.
++const DEV_MOUTH_STEP: f64 = 0.1;
++const DEV_MOUTH: [f64; 67] = [
++    0.269, 1.000, 1.000, 1.000, 1.000, 0.380, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
++    0.000, 0.000, 0.000, 0.000, 0.074, 0.573, 1.000, 1.000, 1.000, 1.000, 1.000, 0.786, 0.369,
++    0.016, 0.060, 0.481, 0.912, 1.000, 1.000, 1.000, 1.000, 0.663, 0.312, 0.013, 0.052, 0.396,
++    0.756, 1.000, 1.000, 1.000, 1.000, 1.000, 0.885, 0.753, 0.632, 0.499, 0.373, 0.245, 0.117,
++    0.005, 0.000,
++];
+ 
+ impl Expression {
+     pub fn start(kind: Kind, now: Instant) -> Self {
+@@ -59,15 +91,38 @@ impl Expression {
+             Kind::Peck => PECK_PERIOD * PECK_COUNT as f64,
+             Kind::Curious => CURIOUS_LEG * 3.0,
+             Kind::Startled => STARTLED_LEN,
++            Kind::Devastated => DEV_LEN,
+         })
+     }
+ 
++    /// The one-shot skill to fire as this expression starts, if any.
++    pub fn skill_at_start(kind: Kind) -> Option<proto::Skill> {
++        match kind {
++            Kind::Devastated => Some(proto::Skill::SitToggle),
++            _ => None,
++        }
++    }
++
++    /// The sound to play as this expression starts, if any.
++    pub fn sound_at_start(kind: Kind) -> Option<proto::SoundTag> {
++        match kind {
++            Kind::Devastated => Some(proto::SoundTag::Devastated),
++            _ => None,
++        }
++    }
++
+     /// The twist this expression wants at `now`: `None` when it leaves the sticks in charge.
+     pub fn twist_at(&self, now: Instant) -> Option<proto::MoveParams> {
+         let t = now.duration_since(self.started).as_secs_f64();
+         twist_at(self.kind, t)
+     }
+ 
++    /// How open the beak is at `now`, 0..1. Zero for expressions with no voice, and after the end.
++    pub fn mouth_at(&self, now: Instant) -> f64 {
++        let t = now.duration_since(self.started).as_secs_f64();
++        mouth_at(self.kind, t)
++    }
++
+     /// The head intent at `now`, or `None` once the expression is over.
+     pub fn head_at(&self, now: Instant) -> Option<proto::HeadParams> {
+         let t = now.duration_since(self.started).as_secs_f64();
+@@ -89,12 +144,53 @@ pub fn twist_at(kind: Kind, t: f64) -> Option<proto::MoveParams> {
+         Kind::Startled if (STARTLED_BACK_FROM..STARTLED_BACK_TO).contains(&t) => {
+             Some(STARTLED_BACK)
+         }
++        // Seated and sobbing: the sticks must not walk it. Zero twist for the whole thing.
++        Kind::Devastated if t < DEV_LEN => Some(proto::MoveParams::default()),
+         _ => None,
+     }
+ }
+ 
++pub fn mouth_at(kind: Kind, t: f64) -> f64 {
++    match kind {
++        Kind::Devastated if t >= 0.0 => {
++            // Linear between table entries; the last entry is zero and so is everything after.
++            let x = t / DEV_MOUTH_STEP;
++            let i = x.floor() as usize;
++            match (DEV_MOUTH.get(i), DEV_MOUTH.get(i + 1)) {
++                (Some(a), Some(b)) => a + (b - a) * (x - i as f64),
++                _ => 0.0,
++            }
++        }
++        _ => 0.0,
++    }
++}
++
+ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+     match kind {
++        Kind::Devastated => {
++            let down =
++                ramp(t - DEV_DROOP, DEV_DROOP_LEN) * (1.0 - ramp(t - DEV_RISE, DEV_DROOP_LEN));
++            // Three half-cosine swings: fade in to +A by the first extreme, A to -A to A over
++            // the next two seconds, fade out to centre half a second after the last.
++            let [s1, s2, s3] = DEV_SWING_AT;
++            let yaw = if t < s1 - DEV_YAW_FADE {
++                0.0
++            } else if t < s1 {
++                DEV_YAW * ramp(t - (s1 - DEV_YAW_FADE), DEV_YAW_FADE)
++            } else if t < s2 {
++                DEV_YAW - 2.0 * DEV_YAW * ramp(t - s1, s2 - s1)
++            } else if t < s3 {
++                -DEV_YAW + 2.0 * DEV_YAW * ramp(t - s2, s3 - s2)
++            } else {
++                DEV_YAW * (1.0 - ramp(t - s3, DEV_YAW_FADE))
++            };
++            proto::HeadParams {
++                neck_pitch: -DEV_NECK * down,
++                head_pitch: DEV_HEAD * down,
++                head_yaw: yaw,
++                head_roll: 0.0,
++            }
++        }
+         Kind::Startled => {
+             // Head pitch negative is beak up (measured on the shipped policies). Up fast, back
+             // to level over the last half second.
+@@ -225,4 +321,67 @@ mod tests {
+             }
+         }
+     }
++
++    #[test]
++    fn devastated_sits_droops_shakes_three_times_sobs_and_comes_back_level() {
++        assert_eq!(
++            Expression::skill_at_start(Kind::Devastated),
++            Some(proto::Skill::SitToggle)
++        );
++        assert_eq!(
++            Expression::sound_at_start(Kind::Devastated),
++            Some(proto::SoundTag::Devastated)
++        );
++        for kind in [Kind::Peck, Kind::Curious, Kind::Startled] {
++            assert_eq!(Expression::skill_at_start(kind), None);
++            assert_eq!(Expression::sound_at_start(kind), None);
++            assert_eq!(mouth_at(kind, 0.2), 0.0);
++        }
++        // Head level while the duck sits, fully drooped by 3.5 s, level again at the end.
++        let h = head_at(Kind::Devastated, 1.0);
++        assert_eq!((h.neck_pitch, h.head_pitch, h.head_yaw), (0.0, 0.0, 0.0));
++        let h = head_at(Kind::Devastated, 4.5);
++        assert!((h.neck_pitch + 1.5).abs() < 1e-9 && (h.head_pitch - 1.0).abs() < 1e-9);
++        let h = head_at(Kind::Devastated, DEV_LEN - 0.01);
++        assert!(h.neck_pitch.abs() < 0.01 && h.head_pitch.abs() < 0.01 && h.head_yaw.abs() < 1e-9);
++        // The swings: +0.4, -0.4, +0.4 at 3, 4, 5 s, centred at 3.5 / 4.5 and outside 2.5-5.5.
++        for (t, want) in [(3.0, 0.4), (4.0, -0.4), (5.0, 0.4), (3.5, 0.0), (4.5, 0.0)] {
++            assert!(
++                (head_at(Kind::Devastated, t).head_yaw - want).abs() < 1e-9,
++                "yaw at {t}"
++            );
++        }
++        assert_eq!(head_at(Kind::Devastated, 2.4).head_yaw, 0.0);
++        assert_eq!(head_at(Kind::Devastated, 5.6).head_yaw, 0.0);
++        for i in 0..(DEV_LEN * 100.0) as usize {
++            let h = head_at(Kind::Devastated, i as f64 / 100.0);
++            assert!(h.neck_pitch <= 0.0 && h.head_pitch >= 0.0 && h.head_yaw.abs() <= 0.4 + 1e-9);
++            assert_eq!(h.head_roll, 0.0);
++            let m = mouth_at(Kind::Devastated, i as f64 / 100.0);
++            assert!((0.0..=1.0).contains(&m));
++        }
++        // The beak: open on the shock, shut in the silence, open on each sob, shut at the end.
++        assert!(mouth_at(Kind::Devastated, 0.2) > 0.9);
++        assert_eq!(mouth_at(Kind::Devastated, 2.0), 0.0);
++        for t in [3.3, 4.3, 5.3] {
++            assert!(mouth_at(Kind::Devastated, t) > 0.9, "sob at {t}");
++        }
++        assert_eq!(mouth_at(Kind::Devastated, 7.0), 0.0);
++        assert_eq!(mouth_at(Kind::Devastated, DEV_LEN + 1.0), 0.0);
++        // Seated: the sticks are locked out for the whole expression, then handed back.
++        assert_eq!(
++            twist_at(Kind::Devastated, 4.0),
++            Some(proto::MoveParams::default())
++        );
++        assert_eq!(twist_at(Kind::Devastated, DEV_LEN), None);
++        let e = Expression::start(Kind::Devastated, Instant::now());
++        assert!(
++            e.head_at(e.started + Expression::duration(Kind::Devastated))
++                .is_none()
++        );
++        assert_eq!(
++            e.mouth_at(e.started + Expression::duration(Kind::Devastated)),
++            0.0
++        );
++    }
+ }
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index c523949..4811e4f 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -169,6 +169,20 @@ const SHUTDOWN_HOLD: Duration = Duration::from_secs(3);
+ /// home and reloads its policies, so it has to be a hold nobody performs by accident.
+ const MODE_HOLD: Duration = Duration::from_secs(3);
+ 
++/// D-pad up pressed and released within this long is a *tap*: it toggles emotion mode, where
++/// the face buttons play emotions (A sad, B devastated, X angry, Y excited) instead of their
++/// usual jobs. Well under `MODE_HOLD`, so a tap and the mode-switch hold cannot be confused.
++const EMOTION_TAP: Duration = Duration::from_millis(600);
++
++/// A face button, as pressed in emotion mode.
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++enum Face {
++    A,
++    B,
++    X,
++    Y,
++}
++
+ /// Body-pose stick ranges, from the training env via the prototype: z is asymmetric
+ /// (little headroom up at the standing height, more crouch down), angles capped at ~15°.
+ const BODY_MAX_Z_UP: f64 = 0.010;
+@@ -255,7 +269,7 @@ fn main() -> std::process::ExitCode {
+         "driving — Start once = stand up (init), Start again = policy on/off, Y head mode, \
+          B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+-         Select = soft release, Select (3s) shutdown"
++         DPad-Up tap = emotion mode (B devastated), Select = soft release, Select (3s) shutdown"
+     );
+ 
+     let period = Duration::from_secs_f64(1.0 / args.hz as f64);
+@@ -286,6 +300,9 @@ fn main() -> std::process::ExitCode {
+     // soften / recover / shutdown it sent. If it is ever wrong the cost is the old behaviour
+     // (one Start does both) or one harmless extra re-home ramp — never a fall.
+     let mut up = false;
++    // Emotion mode: a D-pad-up tap toggles it. While on, the face buttons play emotions and
++    // nothing else; every other control keeps its meaning (Start and Select especially).
++    let mut emotion = false;
+ 
+     loop {
+         let tick = Instant::now();
+@@ -303,10 +320,25 @@ fn main() -> std::process::ExitCode {
+         let mut reboot_motors = false;
+         let mut start_expression: Option<Kind> = None;
+         let mut soften = false;
++        let mut toggle_emotion = false;
++        let mut face: Option<Face> = None;
+         while let Some(event) = gilrs.next_event() {
++            // A D-pad-up tap (released before `EMOTION_TAP`; the 3 s hold is the mode switch).
++            // `dpad_up_held_since` is still the press time here: it is only cleared further
++            // down this tick. `None` is a press and release inside one tick — a tap too.
++            if let gilrs::EventType::ButtonReleased(Button::DPadUp, _) = event.event
++                && dpad_up_held_since.is_none_or(|t| tick.duration_since(t) < EMOTION_TAP)
++            {
++                toggle_emotion = true;
++            }
+             if let gilrs::EventType::ButtonPressed(button, _) = event.event {
+                 match button {
+                     Button::Start => toggle_enable = true,
++                    // The face buttons: emotions in emotion mode, the prototype's jobs otherwise.
++                    Button::North if emotion => face = Some(Face::Y),
++                    Button::East if emotion => face = Some(Face::B),
++                    Button::South if emotion => face = Some(Face::A),
++                    Button::West if emotion => face = Some(Face::X),
+                     Button::North => toggle_head = true,
+                     Button::East => toggle_body = true,
+                     Button::South => ground_pick = true,
+@@ -365,6 +397,56 @@ fn main() -> std::process::ExitCode {
+             tap.watch(&pad);
+         }
+ 
++        if toggle_emotion {
++            emotion = !emotion;
++            tracing::warn!(
++                emotion,
++                "DPad-Up tap — emotion mode {} (A sad, B devastated, X angry, Y excited; \
++                 tap again to leave)",
++                if emotion { "ON" } else { "off" }
++            );
++            // A cue on the speaker: a chirp going in, the low "tock" coming out.
++            let cue = if emotion {
++                proto::SoundTag::Chirp
++            } else {
++                proto::SoundTag::Peck
++            };
++            if let Err(e) = notify(
++                &mut stream,
++                &proto::Call::RobotSound(proto::SoundParams {
++                    tag: cue,
++                    hold: None,
++                }),
++            ) {
++                tracing::error!(error = %e, "send failed");
++                return std::process::ExitCode::FAILURE;
++            }
++            // Emotions drive the head themselves, so the sticks go back to driving — and a
++            // body pose left active would fight the sit.
++            if emotion && mode != Mode::Drive {
++                if mode == Mode::BodyPose
++                    && let Err(e) = notify(
++                        &mut stream,
++                        &proto::Call::RobotPose(proto::PoseParams {
++                            active: false,
++                            ..Default::default()
++                        }),
++                    )
++                {
++                    tracing::error!(error = %e, "send failed");
++                    return std::process::ExitCode::FAILURE;
++                }
++                mode = Mode::Drive;
++                tracing::info!(?mode, "mode");
++            }
++        }
++        // Emotion mode's face buttons. Only B is bound so far; the others log and do nothing.
++        match face {
++            Some(Face::B) => start_expression = Some(Kind::Devastated),
++            Some(other) => tracing::warn!(button = ?other, "emotion mode: nothing bound here yet"),
++            None => {}
++        }
++
+         if toggle_head {
+             mode = if mode == Mode::Head {
+                 Mode::Drive
+@@ -455,6 +537,7 @@ fn main() -> std::process::ExitCode {
+         // their time waiting on replies, and the press above already got the real answer.
+         if pad.is_pressed(Button::West)
+             && !roulade
++            && !emotion
+             && let Err(e) = notify(
+                 &mut stream,
+                 &proto::Call::RobotDo(proto::DoParams {
+@@ -562,12 +645,36 @@ fn main() -> std::process::ExitCode {
+         let right_x = deadzone(pad.value(Axis::RightStickX));
+         let right_y = deadzone(pad.value(Axis::RightStickY));
+ 
++        if let Some(kind) = start_expression {
++            tracing::info!(?kind, "expression");
++            expression = Some(Expression::start(kind, tick));
++            // An expression with a move or a voice of its own fires them now, once. The skill
++            // is answered like the button skills above; the sound is fire-and-forget.
++            if let Some(skill) = Expression::skill_at_start(kind) {
++                let call = proto::Call::RobotDo(proto::DoParams { skill });
++                if let Err(e) = request(&mut stream, &mut next_id, &call) {
++                    tracing::error!(error = %e, "skill request failed");
++                    return std::process::ExitCode::FAILURE;
++                }
++            }
++            if let Some(tag) = Expression::sound_at_start(kind)
++                && let Err(e) = notify(
++                    &mut stream,
++                    &proto::Call::RobotSound(proto::SoundParams { tag, hold: None }),
++                )
++            {
++                tracing::error!(error = %e, "send failed");
++                return std::process::ExitCode::FAILURE;
++            }
++        }
++
+         // Either trigger opens the mouth; the max wins, as in the prototype — where RT
+-        // also chirps and LT rides the wheee, which they now do here too.
++        // also chirps and LT rides the wheee, which they now do here too. An expression
++        // with a voice opens the beak the same way, through the same intent.
+         let trigger = |b: Button| pad.button_data(b).map(|d| d.value()).unwrap_or(0.0) as f64;
+         let rt = trigger(Button::RightTrigger2);
+         let lt = trigger(Button::LeftTrigger2);
+-        let mouth = rt.max(lt);
++        let mouth = rt.max(lt).max(expression.map_or(0.0, |e| e.mouth_at(tick)));
+         if let Err(e) = notify(
+             &mut stream,
+             &proto::Call::RobotMouth(proto::MouthParams { open: mouth }),
+@@ -609,10 +716,6 @@ fn main() -> std::process::ExitCode {
+             }
+         }
+ 
+-        if let Some(kind) = start_expression {
+-            tracing::info!(?kind, "expression");
+-            expression = Some(Expression::start(kind, tick));
+-        }
+         // The expression's head intent for this tick, if one is playing. `None` when it has
+         // just ended: one explicit zero head is sent below so the head does not stay parked
+         // where the last frame left it until the intent expires.
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index c84d08d..fb4e027 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -328,6 +328,7 @@ impl Intents {
+             SoundTag::Peck,
+             SoundTag::Chirp,
+             SoundTag::Coo,
++            SoundTag::Devastated,
+         ]
+         .into_iter()
+         .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
+-- 
+2.53.0
+
+
+From 67a6e37f03b70b83f122a79f2c67bc2eac217874 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Fri, 4 Sep 2026 12:05:28 +0200
+Subject: [PATCH 8/9] robotd: load the policies from
+ /opt/robot/policies/current when that hub exists (newer releases ship none in
+ the release dir)
+
+---
+ robotd-params/src/lib.rs | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/robotd-params/src/lib.rs b/robotd-params/src/lib.rs
+index 5aa8ba0..109543a 100644
+--- a/robotd-params/src/lib.rs
++++ b/robotd-params/src/lib.rs
+@@ -25,6 +25,8 @@ use serde::{Deserialize, Serialize};
+ /// Where a release is mounted. Policy paths default under here, so an ordinary update
+ /// carries the policy with the binaries that were trained against it.
+ pub const RELEASE_DIR: &str = "/opt/robot/daemon/current";
++/// Where newer releases keep the policy set (upstream's `POLICY_DIR`); preferred when present.
++pub const POLICY_HUB_DIR: &str = "/opt/robot/policies/current";
+ 
+ /// Where a provisioned robot keeps it, alongside the updater's own config.
+ pub const DEFAULT_PATH: &str = "/etc/robot/robotd.toml";
+@@ -603,7 +605,18 @@ pub struct ResolvedPolicy {
+ 
+ impl PolicyParams {
+     pub fn resolved(&self) -> ResolvedPolicy {
+-        let release = |name: &str| PathBuf::from(RELEASE_DIR).join("policies").join(name);
++        // The release's own copy, unless this robot has the policy hub of newer releases
++        // (`/opt/robot/policies/current`, a symlink the updater swaps): from 0.10.0-dev.831 the
++        // release no longer carries a `policies/` folder at all, and a build of this branch on
++        // such a robot found no network and held the pose forever.
++        let release = |name: &str| {
++            let hub = PathBuf::from(POLICY_HUB_DIR).join(name);
++            if hub.exists() {
++                hub
++            } else {
++                PathBuf::from(RELEASE_DIR).join("policies").join(name)
++            }
++        };
+         let path = |field: &Option<PathBuf>, default: Option<&str>| -> Option<PathBuf> {
+             match field {
+                 Some(p) if is_none_sentinel(p) => None,
+-- 
+2.53.0
+
+
+From c9d0fedfbdd2c4bde3fec13c0d78d833044fe0d4 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Fri, 4 Sep 2026 12:17:09 +0200
+Subject: [PATCH 9/9] padd: emotion mode A = sad (standing droop with a small
+ bow, two shakes, coo); robotd: a sad sound tag
+
+---
+ duck-ipc-proto/src/lib.rs |   4 +
+ padd/src/expressions.rs   | 206 +++++++++++++++++++++++++++++++++-----
+ padd/src/main.rs          |  29 +++++-
+ robotd/src/intents.rs     |   1 +
+ 4 files changed, 212 insertions(+), 28 deletions(-)
+
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index 0f46de6..c023c0b 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -1603,6 +1603,9 @@ pub enum SoundTag {
+     /// The "devastated" emotion: a shocked quack, then three soft sobs. Not part of the seeded
+     /// bank: the wav is copied into `<bank>/devastated/` by hand.
+     Devastated,
++    /// The "sad" emotion: a low coo gliding down while the head droops. Also hand-copied
++    /// into `<bank>/sad/`.
++    Sad,
+ }
+ 
+ impl SoundTag {
+@@ -1617,6 +1620,7 @@ impl SoundTag {
+             SoundTag::Coo => "coo",
+             SoundTag::Wheee => "wheee",
+             SoundTag::Devastated => "devastated",
++            SoundTag::Sad => "sad",
+         }
+     }
+ }
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index 3833eda..6298ff6 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -26,6 +26,10 @@ pub enum Kind {
+     /// seated. The sound and the sit are fired when the expression starts; the beak follows
+     /// the sound through `mouth_at`.
+     Devastated,
++    /// Sad (emotion mode, A): standing, the head droops with a small bow of the body while a
++    /// low coo glides down, two slow silent "no" shakes at the bottom, then back level. The
++    /// walking policy stays in charge underneath, sticks locked.
++    Sad,
+ }
+ 
+ #[derive(Debug, Clone, Copy)]
+@@ -80,6 +84,24 @@ const DEV_MOUTH: [f64; 67] = [
+     0.756, 1.000, 1.000, 1.000, 1.000, 1.000, 0.885, 0.753, 0.632, 0.499, 0.373, 0.245, 0.117,
+     0.005, 0.000,
+ ];
++/// Sad, seconds from the press (simulation `sad_droop2.5`): droop over `SAD_DROOP_LEN`, two yaw
++/// swings with extremes at `SAD_SWING_AT` (+, -) and 0.6 s fades (window 2.5-4.9 s), hold, then
++/// the rise from `SAD_RISE` over `SAD_RISE_LEN`; head level at 7.5 s. Same head amplitudes as
++/// devastated, plus a body pitch of `SAD_BODY_PITCH` on the pose slot (0.10 made the stand net
++/// shake the head one way only).
++const SAD_LEN: f64 = 7.5;
++const SAD_DROOP_LEN: f64 = 2.5;
++const SAD_RISE: f64 = 5.5;
++const SAD_RISE_LEN: f64 = 2.0;
++const SAD_SWING_AT: [f64; 2] = [3.1, 4.3];
++const SAD_YAW_FADE: f64 = 0.6;
++const SAD_BODY_PITCH: f64 = 0.05;
++/// The beak for the sad coo, 0..1 every 0.1 s: open through the droop, shut by 3.2 s.
++const SAD_MOUTH: [f64; 33] = [
++    0.000, 0.000, 0.018, 0.218, 0.428, 0.643, 0.875, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000,
++    1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000,
++    0.934, 0.751, 0.567, 0.372, 0.188, 0.016, 0.000,
++];
+ 
+ impl Expression {
+     pub fn start(kind: Kind, now: Instant) -> Self {
+@@ -92,9 +114,25 @@ impl Expression {
+             Kind::Curious => CURIOUS_LEG * 3.0,
+             Kind::Startled => STARTLED_LEN,
+             Kind::Devastated => DEV_LEN,
++            Kind::Sad => SAD_LEN,
+         })
+     }
+ 
++    pub fn kind(&self) -> Kind {
++        self.kind
++    }
++
++    /// Whether this expression drives the body-pose slot (and so must release it at the end).
++    pub fn has_pose(kind: Kind) -> bool {
++        matches!(kind, Kind::Sad)
++    }
++
++    /// The body pose this expression wants at `now`, if it drives the pose slot at all.
++    pub fn pose_at(&self, now: Instant) -> Option<proto::PoseParams> {
++        let t = now.duration_since(self.started).as_secs_f64();
++        pose_at(self.kind, t)
++    }
++
+     /// The one-shot skill to fire as this expression starts, if any.
+     pub fn skill_at_start(kind: Kind) -> Option<proto::Skill> {
+         match kind {
+@@ -107,6 +145,7 @@ impl Expression {
+     pub fn sound_at_start(kind: Kind) -> Option<proto::SoundTag> {
+         match kind {
+             Kind::Devastated => Some(proto::SoundTag::Devastated),
++            Kind::Sad => Some(proto::SoundTag::Sad),
+             _ => None,
+         }
+     }
+@@ -144,50 +183,92 @@ pub fn twist_at(kind: Kind, t: f64) -> Option<proto::MoveParams> {
+         Kind::Startled if (STARTLED_BACK_FROM..STARTLED_BACK_TO).contains(&t) => {
+             Some(STARTLED_BACK)
+         }
+-        // Seated and sobbing: the sticks must not walk it. Zero twist for the whole thing.
++        // Drooping: the sticks must not walk it. Zero twist for the whole thing.
+         Kind::Devastated if t < DEV_LEN => Some(proto::MoveParams::default()),
++        Kind::Sad if t < SAD_LEN => Some(proto::MoveParams::default()),
+         _ => None,
+     }
+ }
+ 
++/// A body pose on the pose slot, `None` for expressions that leave it alone.
++pub fn pose_at(kind: Kind, t: f64) -> Option<proto::PoseParams> {
++    match kind {
++        Kind::Sad if (0.0..SAD_LEN).contains(&t) => Some(proto::PoseParams {
++            pitch: SAD_BODY_PITCH * sad_down(t),
++            active: true,
++            ..Default::default()
++        }),
++        _ => None,
++    }
++}
++
++/// A 0..1 table sampled every `DEV_MOUTH_STEP`, linear in between; zero past its end (every
++/// table ends on a zero).
++fn table_at(table: &[f64], t: f64) -> f64 {
++    if t < 0.0 {
++        return 0.0;
++    }
++    let x = t / DEV_MOUTH_STEP;
++    let i = x.floor() as usize;
++    match (table.get(i), table.get(i + 1)) {
++        (Some(a), Some(b)) => a + (b - a) * (x - i as f64),
++        _ => 0.0,
++    }
++}
++
+ pub fn mouth_at(kind: Kind, t: f64) -> f64 {
+     match kind {
+-        Kind::Devastated if t >= 0.0 => {
+-            // Linear between table entries; the last entry is zero and so is everything after.
+-            let x = t / DEV_MOUTH_STEP;
+-            let i = x.floor() as usize;
+-            match (DEV_MOUTH.get(i), DEV_MOUTH.get(i + 1)) {
+-                (Some(a), Some(b)) => a + (b - a) * (x - i as f64),
+-                _ => 0.0,
+-            }
+-        }
++        Kind::Devastated => table_at(&DEV_MOUTH, t),
++        Kind::Sad => table_at(&SAD_MOUTH, t),
+         _ => 0.0,
+     }
+ }
+ 
++/// Head-shake yaw: half-cosine swings through `extremes` (alternating +amp, -amp, ...), fading
++/// in from centre over `fade` before the first and back to centre over `fade` after the last.
++fn swings(t: f64, extremes: &[f64], amp: f64, fade: f64) -> f64 {
++    let Some((&first, _)) = extremes.split_first() else {
++        return 0.0;
++    };
++    let last = extremes[extremes.len() - 1];
++    if t < first - fade {
++        return 0.0;
++    }
++    if t < first {
++        return amp * ramp(t - (first - fade), fade);
++    }
++    for (i, pair) in extremes.windows(2).enumerate() {
++        let sign = if i % 2 == 0 { 1.0 } else { -1.0 };
++        if t < pair[1] {
++            return sign * amp * (1.0 - 2.0 * ramp(t - pair[0], pair[1] - pair[0]));
++        }
++    }
++    let sign = if extremes.len() % 2 == 1 { 1.0 } else { -1.0 };
++    sign * amp * (1.0 - ramp(t - last, fade))
++}
++
++fn sad_down(t: f64) -> f64 {
++    ramp(t, SAD_DROOP_LEN) * (1.0 - ramp(t - SAD_RISE, SAD_RISE_LEN))
++}
++
+ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+     match kind {
+         Kind::Devastated => {
+             let down =
+                 ramp(t - DEV_DROOP, DEV_DROOP_LEN) * (1.0 - ramp(t - DEV_RISE, DEV_DROOP_LEN));
+-            // Three half-cosine swings: fade in to +A by the first extreme, A to -A to A over
+-            // the next two seconds, fade out to centre half a second after the last.
+-            let [s1, s2, s3] = DEV_SWING_AT;
+-            let yaw = if t < s1 - DEV_YAW_FADE {
+-                0.0
+-            } else if t < s1 {
+-                DEV_YAW * ramp(t - (s1 - DEV_YAW_FADE), DEV_YAW_FADE)
+-            } else if t < s2 {
+-                DEV_YAW - 2.0 * DEV_YAW * ramp(t - s1, s2 - s1)
+-            } else if t < s3 {
+-                -DEV_YAW + 2.0 * DEV_YAW * ramp(t - s2, s3 - s2)
+-            } else {
+-                DEV_YAW * (1.0 - ramp(t - s3, DEV_YAW_FADE))
+-            };
+             proto::HeadParams {
+                 neck_pitch: -DEV_NECK * down,
+                 head_pitch: DEV_HEAD * down,
+-                head_yaw: yaw,
++                head_yaw: swings(t, &DEV_SWING_AT, DEV_YAW, DEV_YAW_FADE),
++                head_roll: 0.0,
++            }
++        }
++        Kind::Sad => {
++            let down = sad_down(t);
++            proto::HeadParams {
++                neck_pitch: -DEV_NECK * down,
++                head_pitch: DEV_HEAD * down,
++                head_yaw: swings(t, &SAD_SWING_AT, DEV_YAW, SAD_YAW_FADE),
+                 head_roll: 0.0,
+             }
+         }
+@@ -383,5 +464,80 @@ mod tests {
+             e.mouth_at(e.started + Expression::duration(Kind::Devastated)),
+             0.0
+         );
++        for kind in [Kind::Peck, Kind::Curious, Kind::Startled, Kind::Devastated] {
++            assert!(!Expression::has_pose(kind));
++            assert_eq!(pose_at(kind, 1.0), None);
++        }
++    }
++
++    #[test]
++    fn sad_droops_with_a_bow_shakes_twice_coos_and_comes_back_level_standing() {
++        assert_eq!(Expression::skill_at_start(Kind::Sad), None, "no sit");
++        assert_eq!(
++            Expression::sound_at_start(Kind::Sad),
++            Some(proto::SoundTag::Sad)
++        );
++        assert!(Expression::has_pose(Kind::Sad));
++        // Keyframes from the simulation (t, neck, head_pitch, head_yaw, body_pitch).
++        for (t, neck, pitch, yaw, body) in [
++            (0.0, 0.0, 0.0, 0.0, 0.0),
++            (1.0, -0.518, 0.345, 0.0, 0.017),
++            (2.5, -1.5, 1.0, 0.0, 0.05),
++            (2.6, -1.5, 1.0, 0.027, 0.05),
++            (3.1, -1.5, 1.0, 0.4, 0.05),
++            (3.7, -1.5, 1.0, 0.0, 0.05),
++            (4.3, -1.5, 1.0, -0.4, 0.05),
++            (4.6, -1.5, 1.0, -0.2, 0.05),
++            (4.9, -1.5, 1.0, 0.0, 0.05),
++            (5.5, -1.5, 1.0, 0.0, 0.05),
++            (6.5, -0.75, 0.5, 0.0, 0.025),
++            (7.4, -0.009, 0.006, 0.0, 0.0),
++        ] {
++            let h = head_at(Kind::Sad, t);
++            let p = pose_at(Kind::Sad, t).expect("posing");
++            assert!(
++                (h.neck_pitch - neck).abs() < 0.003,
++                "neck at {t}: {}",
++                h.neck_pitch
++            );
++            assert!(
++                (h.head_pitch - pitch).abs() < 0.003,
++                "pitch at {t}: {}",
++                h.head_pitch
++            );
++            assert!(
++                (h.head_yaw - yaw).abs() < 0.003,
++                "yaw at {t}: {}",
++                h.head_yaw
++            );
++            assert!((p.pitch - body).abs() < 0.002, "body at {t}: {}", p.pitch);
++            assert!(p.active && p.z == 0.0 && p.roll == 0.0);
++            assert_eq!(h.head_roll, 0.0);
++        }
++        for i in 0..(SAD_LEN * 100.0) as usize {
++            let t = i as f64 / 100.0;
++            let h = head_at(Kind::Sad, t);
++            assert!(h.neck_pitch <= 0.0 && h.head_pitch >= 0.0 && h.head_yaw.abs() <= 0.4 + 1e-9);
++            assert!((0.0..=1.0).contains(&mouth_at(Kind::Sad, t)));
++        }
++        // The beak: open through the droop (the coo), shut from the first shake on.
++        assert!(mouth_at(Kind::Sad, 1.5) > 0.9);
++        assert_eq!(mouth_at(Kind::Sad, 0.0), 0.0);
++        assert_eq!(mouth_at(Kind::Sad, 3.3), 0.0);
++        assert_eq!(mouth_at(Kind::Sad, 6.0), 0.0);
++        // Sticks locked for the whole thing, then everything released.
++        assert_eq!(twist_at(Kind::Sad, 3.0), Some(proto::MoveParams::default()));
++        assert_eq!(twist_at(Kind::Sad, SAD_LEN), None);
++        assert_eq!(pose_at(Kind::Sad, SAD_LEN), None);
++        let e = Expression::start(Kind::Sad, Instant::now());
++        assert_eq!(e.kind(), Kind::Sad);
++        assert!(
++            e.head_at(e.started + Expression::duration(Kind::Sad))
++                .is_none()
++        );
++        assert!(
++            e.pose_at(e.started + Expression::duration(Kind::Sad))
++                .is_none()
++        );
+     }
+ }
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 4811e4f..f30a766 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -269,7 +269,8 @@ fn main() -> std::process::ExitCode {
+         "driving — Start once = stand up (init), Start again = policy on/off, Y head mode, \
+          B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+-         DPad-Up tap = emotion mode (B devastated), Select = soft release, Select (3s) shutdown"
++         DPad-Up tap = emotion mode (A sad, B devastated), Select = soft release, \
++         Select (3s) shutdown"
+     );
+ 
+     let period = Duration::from_secs_f64(1.0 / args.hz as f64);
+@@ -440,8 +441,9 @@ fn main() -> std::process::ExitCode {
+                 tracing::info!(?mode, "mode");
+             }
+         }
+-        // Emotion mode's face buttons. Only B is bound so far; the others log and do nothing.
++        // Emotion mode's face buttons. A and B are bound; the others log and do nothing yet.
+         match face {
++            Some(Face::A) => start_expression = Some(Kind::Sad),
+             Some(Face::B) => start_expression = Some(Kind::Devastated),
+             Some(other) => tracing::warn!(button = ?other, "emotion mode: nothing bound here yet"),
+             None => {}
+@@ -719,11 +721,25 @@ fn main() -> std::process::ExitCode {
+         // The expression's head intent for this tick, if one is playing. `None` when it has
+         // just ended: one explicit zero head is sent below so the head does not stay parked
+         // where the last frame left it until the intent expires.
++        // An expression with a body pose (sad bows a little) drives the pose slot the same
++        // way: every tick while it plays, and one `active: false` when it ends, which is the
++        // prototype's B-button exit — the body snaps back to nominal. Not while the sticks
++        // are posing the body (mode B), which would fight it.
++        let mut expression_pose: Option<proto::PoseParams> = None;
+         let expression_head = match expression {
+             Some(e) => match e.head_at(tick) {
+-                Some(head) => Some(head),
++                Some(head) => {
++                    expression_pose = e.pose_at(tick);
++                    Some(head)
++                }
+                 None => {
+                     expression = None;
++                    if Expression::has_pose(e.kind()) {
++                        expression_pose = Some(proto::PoseParams {
++                            active: false,
++                            ..Default::default()
++                        });
++                    }
+                     Some(proto::HeadParams::default())
+                 }
+             },
+@@ -736,6 +752,13 @@ fn main() -> std::process::ExitCode {
+             tracing::error!(error = %e, "send failed");
+             return std::process::ExitCode::FAILURE;
+         }
++        if let Some(pose) = expression_pose
++            && mode != Mode::BodyPose
++            && let Err(e) = notify(&mut stream, &proto::Call::RobotPose(pose))
++        {
++            tracing::error!(error = %e, "send failed");
++            return std::process::ExitCode::FAILURE;
++        }
+ 
+         let call = match mode {
+             Mode::Drive if roller => proto::Call::RobotMove(proto::MoveParams {
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index fb4e027..bf429f1 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -329,6 +329,7 @@ impl Intents {
+             SoundTag::Chirp,
+             SoundTag::Coo,
+             SoundTag::Devastated,
++            SoundTag::Sad,
+         ]
+         .into_iter()
+         .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
+-- 
+2.53.0
+

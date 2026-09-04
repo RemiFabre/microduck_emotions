@@ -123,3 +123,15 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Robot FIXED (deployment agent, read-only verification): root cause = the Sep 3 release moved the policies to `/opt/robot/policies/current/` and our branch (79 commits behind) looked in the release dir, so no network loaded, `driving` stayed false and everything gated on it (policy, sit, head, mouth) did nothing; init and sounds bypass the gate. Fix commit 67a6e37 on `pad-expressions` (`robotd-params`: prefer `/opt/robot/policies/current/<name>`), rebuilt and installed (rev 67a6e37-local), journal shows the walk policy loaded and driving=true. Volume: `PCM Playback Volume` set to 115/127 = -6 dB, persisted in `/usr/local/bin/aic3104-init.sh` and alsactl; 111 = -8 dB, 107 = -10 dB. Bank peaks at -3 dBFS (chirps -6); our wavs match. The agent drove the robot once more at 09:59/10:02 before my rule reached it; it has acknowledged the rule.
 - 2026-09-04, sadness v6 (sad: coo voice synthesized on the droop, no stretching; v5 granular stretch rejected as robotic): 10 pairs in `combined/v6/`, no falls. `v2.py --version v6`.
 - **Decided by Rémi**: sad = `sad_droop2.5` + `S6_coo_voice_200_140` (standing, body pitch 0.05, 2.5 s droop with the synthesized coo voice gliding 200->140 Hz, two silent swings at 3.1 / 4.3 s, hold, rise 5.5-7.5 s). **Devastated tested on the robot: "perfect".** Robot wav: `sounds/robot/sad_a.wav`. Shipping sad to the A button next.
+
+### Same day: devastated confirmed on the robot ("perfect"); SAD shipped on A
+
+- Commit `c9d0fed` on `pad-expressions`: `Kind::Sad` (standing, no sit; `down = ramp(t,2.5)*(1-ramp(t-5.5,2))`,
+  neck -1.5*down, head_pitch +1.0*down, two yaw swings +0.4 @3.1 s / -0.4 @4.3 s with 0.6 s fades as in the
+  v6 JSON, body_pitch 0.05*down on the pose slot sent every tick and released with `active:false` at the end,
+  sticks locked, 7.5 s), `SoundTag::Sad` -> `/var/lib/robot/sounds/sad/sad_a.wav`, mouth table from the
+  JSON (open through the droop, shut by 3.2 s). Head-shake yaw factored into `swings()` shared with devastated.
+- Installed rev c9d0fed-local (robotd/padd/robotctl/btd), verified read-only: policy loaded from the hub,
+  healthy, padd's line lists "A sad, B devastated". Robot torque OFF throughout (Select at 10:09:06).
+- Bank md5: sad_a.wav 31d9ef09d4dbd5a02c509eba7ba3b1cf, devastated_a.wav 2366d3644145d5ee94fd75e0d8637702.
+- Sad installed on the robot: commit c9d0fed on `pad-expressions` (A = sad, B = devastated in emotion mode), rev c9d0fed-local, verified read-only (journal, version, health); bank md5 sad_a 31d9ef09d4dbd5a02c509eba7ba3b1cf, devastated_a 2366d3644145d5ee94fd75e0d8637702. Not yet tested by Rémi. `rl/emotions-stomp.patch` unchanged.
