@@ -204,3 +204,4 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Installed 8922e49-local (guard: no torque event since the 12:15 boot; none since the restart). Verified read-only:
   policy loaded from the hub, driving=true, healthy, mapping line "A sad, B devastated, Y curious".
 - Curious roll-only installed: rev 8922e49-local (Y), neck and head_pitch 0 throughout, roll and chirps unchanged; verified read-only. Not yet tested by Rémi.
+- Rémi: cut 2 s between "I have to talk to you" and the lake line (the duck_curious hold). Scene agent trimming.
