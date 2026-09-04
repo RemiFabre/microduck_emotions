@@ -1,0 +1,34 @@
+{
+ "n_stomps": 1,
+ "stomps": [
+  {
+   "t_lift": 1.24,
+   "t_touch": 2.7,
+   "lift_mm": 186.1,
+   "down_speed": 0.96,
+   "yaw_at_touch": 0.71,
+   "yaw_peak": 0.74,
+   "touched": true
+  }
+ ],
+ "max_joint_speed": 16.18,
+ "max_joint_speed_joint": 13,
+ "support_lifted_frac": 0.08,
+ "support_lift_mm": 32.2,
+ "max_tilt": 0.7,
+ "fell": false,
+ "end_upright": true,
+ "end_two_feet": true,
+ "end_head_yaw": -0.03,
+ "end_pose_dev": 0.14,
+ "end_z": 0.116,
+ "yaw_range": [
+  -0.6,
+  0.74
+ ],
+ "window": [
+  1.0,
+  3.98
+ ],
+ "verdict": "1 stomp(s)"
+}

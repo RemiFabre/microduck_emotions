@@ -198,4 +198,36 @@ falls and the end state, and builds the contact sheets + `index.html`.
   for the whole run (no collapse, no tax step); `stomp_success` stayed 0 (the all-or-nothing
   metric: three ≥ 2 cm lifts + head ≥ 0.5 rad each way + upright at the last tick). Falls: ≈ 0.5–1
   `fell_over` per iteration of 4096 envs, i.e. rare. Cost: 71 min running (18 min bootstrap) ≈ $3.3.
-- Rollouts (both engines, `/Users/remi/microduck/notes/emotions/motion/anger-rl/r2/index.html`): (pending)
+- Rollouts (both engines, `/Users/remi/microduck/notes/emotions/motion/anger-rl/r2/index.html`, 9 clips + contact sheets):
+  **it stomps, but it is not a little stomp.** Per rollout (CPU proxy 5 seeds / Warp ck 1999 3 seeds + ck 1000):
+  1–3 counted stomps (the analyser merges lifts that touch down for a single tick), right foot lifted
+  **12–19 cm** (the whole leg swung up to hip height; the design asked for 3 cm), touchdown speed
+  **0.65–1.15 m/s** (cap for reward was 0.3 m/s; overspeed tax at 0.8 barely bit), trunk tilt up to
+  **0.70–0.80** (≈ 44–53°: the body is thrown sideways over the left foot for each swing), the LEFT
+  (support) foot also leaves the floor by 32–40 mm at moments (a hop component), max joint speed
+  15–17 rad/s, commanded targets up to 8 rad beyond HOME. The head part WORKS: yaw goes
+  +0.7 → −0.6 → +0.7 with the stomps and re-centres, in every rollout. Ends upright in 8/9 (Warp ck 1999
+  seed 1 falls at the end; ck 1000 ends standing but 1 rad off the stand pose). Verdict against Rémi's
+  veto: violent (leg to hip height, 45° lean, 1 m/s slams, 8 rad targets) — fails "physically
+  plausible, no thrashing", although it is recognisably three angry foot slams with head turns.
+  Cause (reward-side, measured): the lift ramp saturates at 3 cm and never says "lower"; a huge
+  swing buys a long fast descent through the impact window; the upright Gaussian (std² 0.05) is
+  already ≈ 0 at 25° so a 45° lean costs nothing more; nothing taxed foot height, tilt or targets
+  beyond the joint range.
+- Cost: ≈ $3.3 (+ $0.3 for the cancelled 12:21 job, + $0.4 for the 12:33 infra failure).
+
+### r3 — `stomp-r3-clean-20260904-1428` (job `6a9ab958259f8e97255de669`), launched 14:28, task `Mjlab-StompClean-Flat-MicroDuck`
+
+- What changed vs r2 (`clean=True`, env commit `10ed505`): the lift reward is a TRIANGLE (0 at 5 mm, full at 3 cm,
+  back to 0 at 6 cm) and a `foot_too_high` tax (self-negating, weight 2; 10 cm over 6 cm costs 1/step) so higher is
+  worse, not neutral; both stomp terms are gated on the trunk being upright (projected gravity z < −0.94 ≈ tilt < 20°:
+  a stomp with the body thrown sideways does not count) and the impact term only counts in the last 4 cm of the descent
+  (a drop from hip height pays nothing); a `trunk_tilt` tax (weight 10, quadratic above 20°); `foot_overspeed` limit
+  0.8 → 0.6 m/s and weight 1 → 10 (1 m/s now costs −1.6/step); commanded targets HARD-clamped to 98 % of the joint
+  ranges (Rémi's 2026-09-02 rule, the robot's safety.rs does the same) plus an `action_overrun` cost (−0.5). Head
+  terms, weights 9/9, flat action-rate, everything else identical to r2.
+- Why: each item answers one measured excess of r2 (18 cm lift, 45° lean, 1 m/s slam, 8 rad targets). Same weights
+  on the stomp terms so the stomping itself is not discouraged; the gates and taxes shape HOW.
+- Risk: the upright gate + tilt tax may push the policy back toward "just stand" (r1). Watch `stomp_foot_lift`
+  staying near its 2.16 ceiling and `trunk_tilt` shrinking together.
+- Result: (pending)
