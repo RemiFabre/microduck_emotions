@@ -246,3 +246,15 @@ Spec `v6_spec.json`, rendered by `v2.py --version v6` (same as v5: body pitch +0
 `sad_droop2.0` and `sad_droop2.5`: 10 pairs in `motion/sadness/v6/` and `/Users/remi/microduck/notes/emotions/combined/v6/`
 (`index.html`). Verified: jaw opens at 0.28-0.36 s, open through the droop, back to 0.00-0.06 by the first swing and 0.00
 after; yaw joint +0.28 / -0.38 on every pair; no fall in the 10 renders. (v5 was rejected: the granular stretch sounded robotic.)
+
+---
+
+# v7 (2026-09-04): sad, half depth with a small lift first (robot feedback: full droop too heavy, the duck walked forward)
+
+Spec `v7_spec.json`, rendered by `v2.py --version v7`. Same 2.5 s droop and speed, half the net depth: head_pitch 0 -> -0.25
+(beak up, neck 0) over 0.625 s, then down to head_pitch +0.5 / neck -0.75 over 1.875 s (two half-cosines, continuous); swings
+3.1 / 4.3 s, rise 5.5-7.5 s, the decided coo voice. Variants: body pitch 0.05 and 0. Outputs: `motion/sadness/v7/` and
+`/Users/remi/microduck/notes/emotions/combined/v7/` (`index.html`, the decided v6 card first). Trunk forward drift measured
+in the simulation for the v6 decided clip and both v7 variants: all within +-1 cm, i.e. the simulation does NOT reproduce
+the forward walk seen on the robot (its stand net holds the pose); the sim can check the geometry and the beak, not the
+balance problem. Joint numbers are in the table in NOTES.md / the page.

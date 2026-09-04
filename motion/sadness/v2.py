@@ -60,15 +60,28 @@ def make_motion(name):
     knots = [ss] + ext + [se]
     vals = [0.0] + [YAW_AMP * (1 if i % 2 == 0 else -1) for i in range(len(ext))] + [0.0]
 
+    up_end, up_amp, amp = b.get("droop_up_end"), b.get("droop_up_amp", 0.0), b.get("droop_amp", 1.0)
+
     def fn(t):
-        down = ramp(t - b["droop_start"], droop_len) * (1.0 - ramp(t - b["rise_start"], rise_len))
+        if up_end is None:
+            down = ramp(t - b["droop_start"], droop_len)
+        else:
+            # v7: the head first RISES up_amp (head_pitch negative = beak up, neck stays 0) over [droop_start, up_end], then
+            # DESCENDS up_amp + amp over the rest of the droop, ending at a net depth of amp. Two half-cosines, continuous.
+            t0, t1 = b["droop_start"], b["droop_start"] + up_end
+            if t < t1:
+                down = -up_amp * ramp(t - t0, t1 - t0)
+            else:
+                down = -up_amp + (up_amp + amp) * ramp(t - t1, b["droop_end"] - t1)
+        down *= 1.0 - ramp(t - b["rise_start"], rise_len)
         yaw = 0.0
         for i in range(len(knots) - 1):
             if knots[i] <= t < knots[i + 1]:
                 yaw = vals[i] + (vals[i + 1] - vals[i]) * ramp(t - knots[i], knots[i + 1] - knots[i])
                 break
         skill = "sit" if (b["sit"] is not None and t >= b["sit"]) else None
-        return dict(neck=NECK * down, head_pitch=PITCH * down, head_yaw=yaw, head_roll=0.0, body_pitch=bp * down, skill=skill)
+        pos = max(down, 0.0)                      # the neck only goes down; the body bow scales with the descent, reaching bp at full depth
+        return dict(neck=NECK * pos, head_pitch=PITCH * down, head_yaw=yaw, head_roll=0.0, body_pitch=bp * pos / amp, skill=skill)
     return fn, b
 
 
@@ -119,7 +132,8 @@ def render_pair(motion, sound, wav, desc, with_open=False):
         S.step(m, d, du, t)
         q = du.q()
         jd = {nm: float(q[F.HEAD_IDX[i]] - F.HOME[F.HEAD_IDX[i]]) for i, nm in enumerate(S.NAMES)}
-        log.append(dict(t=round(t, 3), net=du.net, mouth=mouth, jaw=float(du.jaw_open / F.JAW_MAX), beak_z=float(du.beak_pos()[2]), **jd))
+        log.append(dict(t=round(t, 3), net=du.net, mouth=mouth, jaw=float(du.jaw_open / F.JAW_MAX), beak_z=float(du.beak_pos()[2]),
+                        trunk_x=float(du.pos()[0]), trunk_y=float(du.pos()[1]), **jd))
         if k % 5 == 0:
             keys.append(dict(t=round(t, 2), neck=round(h["neck"], 3), head_pitch=round(h["head_pitch"], 3), head_yaw=round(h["head_yaw"], 3),
                              head_roll=0.0, body_pitch=round(h["body_pitch"], 3), mouth=round(mouth, 3), skill=h["skill"]))
@@ -157,7 +171,11 @@ def render_pair(motion, sound, wav, desc, with_open=False):
     sgn = sgn[sgn != 0]
     swings = int(1 + np.sum(sgn[1:] != sgn[:-1])) if len(sgn) else 0
     silent_ticks = mo < 0.05
-    meas = dict(motion=motion, sound=sound, wav=str(wav), desc=desc, duration_s=round(total, 2), fell=du.fell_at is not None, fell_at=du.fell_at,
+    tx = np.array([l["trunk_x"] for l in log]); ty = np.array([l["trunk_y"] for l in log])
+    meas = dict(
+        trunk_dx_cm=round(float((tx[-1] - tx[0]) * 100), 1), trunk_x_max_cm=round(float((tx - tx[0]).max() * 100), 1), trunk_x_min_cm=round(float((tx - tx[0]).min() * 100), 1),
+        trunk_dy_cm=round(float((ty[-1] - ty[0]) * 100), 1),
+        head_pitch_joint_min_deg=round(math.degrees(hp.min()), 1),motion=motion, sound=sound, wav=str(wav), desc=desc, duration_s=round(total, 2), fell=du.fell_at is not None, fell_at=du.fell_at,
                 head_pitch_joint_max_deg=round(math.degrees(hp.max()), 1), neck_joint_min_deg=round(math.degrees(nk.min()), 1),
                 yaw_joint_at_extremes=[round(float(v), 2) for v in ext], yaw_swings_measured=swings,
                 head_down_fraction_at_first_extreme=round(float(at(b["shake_extremes"][0])["head_pitch"] / hp.max()), 2),
@@ -167,6 +185,7 @@ def render_pair(motion, sound, wav, desc, with_open=False):
     json.dump(dict(keyframes=keys, measured=meas, fps=S.FPS), open(OUT_MOTION / f"{stem}.json", "w"), indent=1)
     json.dump(log, open(OUT_MOTION / f"{stem}.log.json", "w"))
     beats_sheet(stem, frames, b, log, mo)
+    print(f"{stem}: trunk x end {meas['trunk_dx_cm']:+.1f} cm (max {meas['trunk_x_max_cm']:+.1f}, min {meas['trunk_x_min_cm']:+.1f}), y {meas['trunk_dy_cm']:+.1f} cm; head_pitch joint min {meas['head_pitch_joint_min_deg']:+.0f} deg")
     print(f"{stem}: {total:.1f} s fell={meas['fell']} swings={swings} yaw@extremes={meas['yaw_joint_at_extremes']} head down at e1 {meas['head_down_fraction_at_first_extreme']:.0%} "
           f"mouth first opens {meas['sound_first_open_s']} s, jaw max {meas['jaw_open_max']:.2f}, jaw in silence max {meas['jaw_in_silence_max']}")
     return meas
@@ -208,31 +227,52 @@ def beats_sheet(stem, frames, b, log, mo):
 
 
 # ---------------------------------------------------------------------------------------------------------------
-def index():
-    cards = {"sad": [], "devastated": []}
-    for r in SPEC["renders"]:
+def card(r, folder=None, label=""):
         stem = f"{r['motion']}__{r['sound']}"
-        p = OUT_MOTION / f"{stem}.json"
+        p = (folder or OUT_MOTION) / f"{stem}.json"
         if not p.exists():
-            continue
+            return ""
         m = json.load(open(p))["measured"]
         b = m["beats"]
-        emo = b["base"]
+        rel = f"../../motion/sadness/{(folder or OUT_MOTION).name}"
+        vid = f"../{(folder or OUT_MOTION).name}/{stem}.mp4" if folder else f"{stem}.mp4"
         beats = (f"sit {b['sit']} s &middot; " if b["sit"] is not None else "") + \
                 f"droop {b['droop_start']}-{b['droop_end']} s &middot; swings at {', '.join(str(x) for x in b['shake_extremes'])} s (shake {b['shake_start']}-{b['shake_end']}) &middot; hold to {b['hold_end']} &middot; rise {b['rise_start']}-{b['head_level']} s &middot; {m['duration_s']} s"
-        cards[emo].append(f"""
+        return f"""
 <div class="card">
-  <h3>{r['motion']} + {r['sound']}{' &nbsp;<span class="note">option: ' + b['note'] + '</span>' if b.get('note') else ''}</h3>
-  <video src="{stem}.mp4" controls playsinline width="640" height="480"></video>
+  <h3>{r['motion']} + {r['sound']}{' &nbsp;<span class="note">option: ' + b['note'] + '</span>' if b.get('note') else ''}{label}</h3>
+  {('<p class="snd"><b>droop:</b> ' + b['desc_droop'] + '</p>') if b.get('desc_droop') else ''}
+  <video src="{vid}" controls playsinline width="640" height="480"></video>
   <p class="beats"><b>beats:</b> {beats}</p>
   <p class="snd"><b>sound:</b> {r['desc']}</p>
-  <p class="meas">measured: {'FELL' if m['fell'] else 'no fall'} &middot; {m['yaw_swings_measured']} swings (yaw joint at the extremes {m['yaw_joint_at_extremes']}) &middot;
+  <p class="meas">{('<b>trunk forward drift:</b> end %+.1f cm, max %+.1f cm (min %+.1f) &middot; head_pitch joint from %+.0f to %+.0f deg, neck %+.0f deg<br>' % (m['trunk_dx_cm'], m['trunk_x_max_cm'], m['trunk_x_min_cm'], m.get('head_pitch_joint_min_deg', 0), m['head_pitch_joint_max_deg'], m['neck_joint_min_deg'])) if 'trunk_dx_cm' in m else ''}
+     measured: {'FELL' if m['fell'] else 'no fall'} &middot; {m['yaw_swings_measured']} swings (yaw joint at the extremes {m['yaw_joint_at_extremes']}) &middot;
      head {m['head_down_fraction_at_first_extreme']:.0%} down at the first swing &middot; head_pitch {m['head_pitch_joint_max_deg']:+.0f} deg, neck {m['neck_joint_min_deg']:+.0f} deg &middot;
      mouth first opens at {m['sound_first_open_s']} s, jaw max {m['jaw_open_max']:.2f}, in silence {m['jaw_in_silence_max']}</p>
-  <p><a href="../../motion/sadness/v2/{stem}_beats.png">beats sheet</a> &middot; <a href="../../motion/sadness/v2/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/sadness/v2/{stem}.mp4">silent mp4</a></p>
-  <img class="sheet" src="../../motion/sadness/v2/{stem}_beats.png">
-</div>""")
-    if VERSION == "v6":
+  <p><a href="{rel}/{stem}_beats.png">beats sheet</a> &middot; <a href="{rel}/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="{rel}/{stem}.mp4">silent mp4</a></p>
+  <img class="sheet" src="{rel}/{stem}_beats.png">
+</div>"""
+
+
+COMPARE = []          # (version, motion, sound, sound_desc) shown first, for comparison
+if VERSION == "v7":
+    COMPARE = [("v6", "sad_droop2.5", "S6_coo_voice_200_140", "the decided v6 sad: full droop, the one the robot walked forward on")]
+
+
+def index():
+    cards = {"sad": [], "devastated": []}
+    for (ver, mo, so, de) in COMPARE:
+        cards["sad"].append(card(dict(motion=mo, sound=so, desc=de), folder=HERE / ver, label=' &nbsp;<span class="note">for comparison: decided ' + ver + '</span>'))
+    for r in SPEC["renders"]:
+        b = SPEC["motions"][r["motion"]]
+        cards[b["base"]].append(card(r))
+    if VERSION == "v7":
+        intro = {"sad": "Remi tested v6 on the robot: the full droop makes the head too heavy and the duck walks forward to keep its balance. v7 keeps the 2.5 s "
+                        "droop and its speed but halves the net depth: the head first lifts 0.25 (beak up, neck still) over 0.625 s, then descends 0.75 over 1.875 s "
+                        "to head_pitch +0.5 / neck -0.75. Two silent swings at 3.1 / 4.3 s, hold, rise 5.5-7.5 s, the decided coo voice unchanged. "
+                        "Two variants: body pitch 0.05 (as decided) and 0 (no bow). The trunk's forward drift is measured on each card, including the v6 card.",
+                 "devastated": ""}
+    elif VERSION == "v6":
         intro = {"sad": "Standing, body pitch +0.05. Same motions as v4 (droop 2.0 s: swings 2.6 / 3.8 s, 7.8 s; droop 2.5 s: swings 3.1 / 4.3 s, 8.3 s). "
                         "The sound is the robot's coo voice synthesized directly on the droop glide (no granular stretching), plus one tape-only wheee-loop variant; "
                         "swings silent. The beak follows the sound's loudness with a 0.15 s delay.",
@@ -267,6 +307,7 @@ video{{background:#000;border-radius:6px}} .decided{{background:#fff8e6;border:2
 </style>
 <h1>Microduck sadness {VERSION}: sound + motion, re-synced</h1>
 {'<p class="decided"><b>Devastated is decided</b> (devastated_3x1.0 + D3v2_sobs_gentler, see <a href="../v2/index.html">v2</a>). This page is SAD only, v3: shorter (about half of v2) and softer.</p>' if VERSION == "v3" else ''}
+{'<p class="decided"><b>sad v7: half depth, lift first.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v6/index.html">v6</a>.</p>' if VERSION == "v7" else ''}
 {'<p class="decided"><b>sad v6: the coo voice synthesized, descending with the head, no stretching.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous rounds: <a href="../v4/index.html">v4</a>, <a href="../v5/index.html">v5</a>.</p>' if VERSION == "v6" else ''}
 {'<p class="decided"><b>sad v5: the coo sound in the duck\'s own register, descending with the head.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v4/index.html">v4</a>.</p>' if VERSION == "v5" else ''}
 {'<p class="decided"><b>sad v4: the sound descends with the head, the shakes are silent.</b> Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler). Previous round: <a href="../v3/index.html">v3</a>.</p>' if VERSION == "v4" else ''}
