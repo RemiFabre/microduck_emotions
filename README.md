@@ -10,8 +10,8 @@ synchronized beat by beat, and the beak opens with the sound.
 
 | emotion | motion | sound | status |
 |---|---|---|---|
-| **devastated** | `motion/sadness/v2/devastated_3x1.0__D3v2_sobs.mp4`: sit (surprise), head droops, three slow head shakes starting while the head is still going down, hold, rise. Beats in `motion/sadness/v2_spec.json` | `sounds/synced_v2/devastated_3x1.0__D3v2_sobs.wav`: inquire shock at the sit, silence, three soft sobs on the head extremes, the third dying into the ending | **Rémi: "perfect"** (2026-09-04) |
-| **sad** | standing, head down, three slower shakes (`sad_3x1.3` or `sad_3x1.6`) | `S1v2_glide`: one soft glide starting when the tilt is nearly done, three slow slides | in review (`combined/v2/index.html`) |
+| **devastated** | `motion/sadness/v2/devastated_3x1.0__D3v2_sobs.mp4`: sit (surprise), head droops, three slow head shakes starting while the head is still going down, hold, rise. Beats in `motion/sadness/v2_spec.json` | `sounds/synced_v2/devastated_3x1.0__D3v2_sobs.wav`: inquire shock at the sit, silence, three soft sobs on the head extremes, the third dying into the ending | **decided, tested on the robot: "perfect"** (2026-09-04) |
+| **sad** | `motion/sadness/v6/sad_droop2.5__S6_coo_voice_200_140.mp4`: standing, body pitch 0.05, head droops over 2.5 s, two silent slow shakes, hold, rise. Beats in `motion/sadness/v6_spec.json` | `sounds/synced_v6/sad_droop2.5__S6_coo_voice_200_140.wav`: the robot's coo recipe synthesized, gliding 200 -> 140 Hz with the head, silent shakes; robot file `sounds/robot/sad_a.wav` | **decided** (2026-09-04) |
 | **angry** | RL stomp: three quick stomps on the same foot, head left / right / left (`Mjlab-Stomp-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`) | to design on the trained motion's beats (barks on the foot contacts) | training runs in progress (`motion/anger-rl/REPORT.md`) |
 
 Later: excited, scared (see `HANDOFF.md`).
