@@ -200,3 +200,17 @@ keyframes incl. the `mouth` channel, `_beats.png`) and `/Users/remi/microduck/no
   commanded swings show as ONE visible swing (yaw joint +0.01 / -0.39 / 0.00). The extra `sad_3x1.3_bp05` and
   `sad_3x1.6_bp05` pairs (body pitch +0.05, everything else identical) swing both ways (+0.29 / -0.39 / +0.35) with the
   head still deep (head_pitch +58 deg). Recommendation: make `sad` use body pitch 0.05.
+
+---
+
+# v3 (2026-09-04): sad, shorter and softer. Devastated is decided (devastated_3x1.0 + D3v2_sobs_gentler)
+
+Spec `v3_spec.json`, rendered by `v2.py --v3`. Outputs: `motion/sadness/v3/` (silent mp4, keyframes json with `mouth`,
+`_beats.png`) and `/Users/remi/microduck/notes/emotions/combined/v3/` (muxed mp4s, `index.html`). All three motions use
+body pitch +0.05 so both swing directions show. Clips are cut at the spec's total (7.8 / 7.6 / 7.4 s).
+
+- `sad_2x1.2`: two swings at 2.6 / 3.8 s (yaw joint +0.28 / -0.38), shake ends 4.4, rise 5.0-7.0.
+- `sad_2x1.0`: two swings at 2.5 / 3.5 s (+0.24 / -0.36), shake ends 4.0, rise 4.8-6.8.
+- `sad_1x_slow`: one slow swing to +0.33 at 2.8 s (0.8 s out, 1.0 s back), rise 4.6-6.6.
+- Beak: opens at 1.96-1.98 s (the sound starts at the end of the tilt), fully open during the 2.2-2.7 s phrase, shut
+  (<= 0.08) afterwards. No fall in the six renders. Head 98-99% down at the first swing.

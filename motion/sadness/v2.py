@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Sadness v2: three head swings instead of four, slower, and the beak moves with the sound.
+"""Sadness v2 / v3 (--v3): fewer, slower head swings, and the beak moves with the sound.
 
     /Users/remi/microduck/.venv-mjlab/bin/python /Users/remi/microduck/notes/emotions/motion/sadness/v2.py [--only NAME] [--no-open]
 
@@ -21,14 +21,15 @@ sys.path.insert(0, "/Users/remi/microduck/notes/reachy-encounter")
 import duckfilm as F
 import sadness as S
 
-SPEC = json.load(open(HERE / "v2_spec.json"))
+VERSION = "v3" if "--v3" in sys.argv else "v2"
+SPEC = json.load(open(HERE / f"{VERSION}_spec.json"))
 # Extra option, not in the spec: the standing `sad` with body pitch +0.05 instead of +0.10. At +0.10 the stand net turns
 # the head only one way (yaw joint ~0 at the + extremes), so "three swings" shows as one; at +0.05 it swings both ways.
-for _n in [n for n in SPEC["motions"] if n.startswith("sad")]:
+for _n in [n for n in SPEC["motions"] if n.startswith("sad") and VERSION == "v2"]:
     SPEC["motions"][_n + "_bp05"] = dict(SPEC["motions"][_n], body_pitch=0.05, note="body pitch +0.05 (two-sided swings)")
-SPEC["renders"] += [dict(r, motion=r["motion"] + "_bp05") for r in list(SPEC["renders"]) if r["motion"].startswith("sad")]
-OUT_MOTION = HERE / "v2"
-OUT_COMBINED = Path("/Users/remi/microduck/notes/emotions/combined/v2")
+SPEC["renders"] += [dict(r, motion=r["motion"] + "_bp05") for r in list(SPEC["renders"]) if r["motion"].startswith("sad") and VERSION == "v2"]
+OUT_MOTION = HERE / VERSION
+OUT_COMBINED = Path("/Users/remi/microduck/notes/emotions/combined") / VERSION
 COMBINE = "/Users/remi/microduck/notes/emotions/combine.py"
 PY = "/Users/remi/microduck/.venv-mjlab/bin/python"
 YAW_AMP = 0.4
@@ -45,23 +46,20 @@ def make_motion(name):
     base = b["base"]
     droop_len = b["droop_end"] - b["droop_start"]
     rise_len = b["head_level"] - b["rise_start"]
-    e1, e2, e3 = b["shake_extremes"]
+    ext = list(b["shake_extremes"])
     ss, se = b["shake_start"], b["shake_end"]
     bp = b.get("body_pitch", BODY_PITCH[base])
+    # yaw targets at the knots: 0 at shake_start, +A, -A, +A ... at the extremes, 0 at shake_end
+    knots = [ss] + ext + [se]
+    vals = [0.0] + [YAW_AMP * (1 if i % 2 == 0 else -1) for i in range(len(ext))] + [0.0]
 
     def fn(t):
         down = ramp(t - b["droop_start"], droop_len) * (1.0 - ramp(t - b["rise_start"], rise_len))
-        # three swings: 0 -> +A (e1) -> -A (e2) -> +A (e3) -> 0 (shake_end), half-cosines between the extremes
-        if ss <= t < e1:
-            yaw = YAW_AMP * ramp(t - ss, e1 - ss)
-        elif e1 <= t < e2:
-            yaw = YAW_AMP - 2 * YAW_AMP * ramp(t - e1, e2 - e1)
-        elif e2 <= t < e3:
-            yaw = -YAW_AMP + 2 * YAW_AMP * ramp(t - e2, e3 - e2)
-        elif e3 <= t < se:
-            yaw = YAW_AMP * (1.0 - ramp(t - e3, se - e3))
-        else:
-            yaw = 0.0
+        yaw = 0.0
+        for i in range(len(knots) - 1):
+            if knots[i] <= t < knots[i + 1]:
+                yaw = vals[i] + (vals[i + 1] - vals[i]) * ramp(t - knots[i], knots[i + 1] - knots[i])
+                break
         skill = "sit" if (b["sit"] is not None and t >= b["sit"]) else None
         return dict(neck=NECK * down, head_pitch=PITCH * down, head_yaw=yaw, head_roll=0.0, body_pitch=bp * down, skill=skill)
     return fn, b
@@ -89,7 +87,7 @@ def mouth_envelope(wav_path):
 def render_pair(motion, sound, wav, desc, with_open=False):
     fn, b = make_motion(motion)
     env = mouth_envelope(wav)
-    total = max(b["total"], len(env) * F.CDT)
+    total = b["total"] if VERSION == "v3" else max(b["total"], len(env) * F.CDT)   # v3: the clip ends at the spec's total (the wav's tail is silence)
     m, d, du = S.fresh()
     r = mujoco.Renderer(m, S.SIZE[1], S.SIZE[0])
     cam = mujoco.MjvCamera()
@@ -147,7 +145,7 @@ def render_pair(motion, sound, wav, desc, with_open=False):
     at = lambda t: min(log, key=lambda l: abs(l["t"] - t))
     ext = [at(e)["head_yaw"] for e in b["shake_extremes"]]
     # count the yaw swings actually made (sign changes of the joint beyond 0.1 rad)
-    sgn = np.sign(np.where(np.abs(yw) > 0.1, yw, 0))
+    sgn = np.sign(np.where(np.abs(yw) > 0.15, yw, 0))
     sgn = sgn[sgn != 0]
     swings = int(1 + np.sum(sgn[1:] != sgn[:-1])) if len(sgn) else 0
     silent_ticks = mo < 0.05
@@ -226,7 +224,12 @@ def index():
   <p><a href="../../motion/sadness/v2/{stem}_beats.png">beats sheet</a> &middot; <a href="../../motion/sadness/v2/{stem}.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/sadness/v2/{stem}.mp4">silent mp4</a></p>
   <img class="sheet" src="../../motion/sadness/v2/{stem}_beats.png">
 </div>""")
-    intro = {"sad": "Standing. Three slow head swings, the sound starts only once the tilt is nearly finished. Options: 1.3 s or 1.6 s between swings. "
+    if VERSION == "v3":
+        intro = {"sad": "Standing, body pitch +0.05 (both swing directions visible). Shorter and softer than v2: two swings 1.2 s or 1.0 s apart, or ONE slow swing; "
+                        "everything ends by 6.6-7.0 s. The sound (2.2-2.7 s) starts at the end of the tilt; the beak follows its loudness and shuts after it.",
+                 "devastated": ""}
+    else:
+        intro = {"sad": "Standing. Three slow head swings, the sound starts only once the tilt is nearly finished. Options: 1.3 s or 1.6 s between swings. "
                     "NOTE: with the decided body pitch +0.10 the stand net turns the head only one way (the yaw joint stays near 0 on the + side), so the three "
                     "commanded swings show as ONE visible swing; the <b>_bp05</b> cards (body pitch +0.05, everything else identical) swing both ways and are the ones to compare.",
              "devastated": "With the sit. Three swings starting while the head is still going down. Options: 1.0 s or 1.3 s between swings."}
@@ -237,15 +240,17 @@ h1{{margin-bottom:4px}} .sub{{color:#666;margin-top:0}} h2{{margin-top:36px}}
 .card{{background:#fff;border-radius:10px;padding:16px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}}
 .card h3{{margin:0 0 8px}} .note{{font-size:13px;color:#b06000;font-weight:normal}} .beats,.snd,.meas{{font-size:14px;margin:6px 0}} .meas{{color:#555}}
 .sheet{{width:100%;max-width:1360px;margin-top:10px;border-radius:6px}}
-video{{background:#000;border-radius:6px}}
+video{{background:#000;border-radius:6px}} .decided{{background:#fff8e6;border:2px solid #e9b949;border-radius:8px;padding:10px 14px}}
 </style>
-<h1>Microduck sadness v2: sound + motion, re-synced</h1>
+<h1>Microduck sadness {VERSION}: sound + motion, re-synced</h1>
+{'<p class="decided"><b>Devastated is decided</b> (devastated_3x1.0 + D3v2_sobs_gentler, see <a href="../v2/index.html">v2</a>). This page is SAD only, v3: shorter (about half of v2) and softer.</p>' if VERSION == "v3" else ''}
 <p class="sub">Remi's notes: three swings not four; sad slower and its sound only once the tilt is nearly done; the beak moves with the sound.
 The mouth is driven by the wav's loudness (RMS at 50 Hz, 60 ms smoothing, fully open at 60% of the peak) through the same mouth intent the robot accepts.
 Simulation (640x480, 30 fps). Motions and json: <code>/Users/remi/microduck/notes/emotions/motion/sadness/v2/</code>. Spec: <code>v2_spec.json</code>.</p>
 """
     for emo in ("devastated", "sad"):
-        html += f"<h2>{emo}</h2><p>{intro[emo]}</p>" + "".join(cards[emo])
+        if cards[emo]:
+            html += f"<h2>{emo}</h2><p>{intro[emo]}</p>" + "".join(cards[emo])
     (OUT_COMBINED / "index.html").write_text(html)
     print("wrote", OUT_COMBINED / "index.html")
 
@@ -254,6 +259,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default=None, help="substring filter on motion__sound")
     ap.add_argument("--no-open", action="store_true")
+    ap.add_argument("--v3", action="store_true", help="use v3_spec.json and the v3 output folders (default: v2)")
     a = ap.parse_args()
     opened = a.no_open
     for r in SPEC["renders"]:
@@ -262,7 +268,7 @@ if __name__ == "__main__":
             continue
         render_pair(r["motion"], r["sound"], Path(r["wav"]), r["desc"])
         index()
-        if not opened and r["motion"].startswith("devastated"):
+        if not opened and (r["motion"].startswith("devastated") or VERSION == "v3"):
             subprocess.run(["open", str(OUT_COMBINED / "index.html")])
             opened = True
     index()
