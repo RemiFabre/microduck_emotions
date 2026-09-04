@@ -10,7 +10,7 @@ synchronized beat by beat, and the beak opens with the sound.
 
 | emotion | motion | sound | status |
 |---|---|---|---|
-| **devastated** | `motion/sadness/v2/devastated_3x1.0__D3v2_sobs.mp4`: sit (surprise), head droops, three slow head shakes starting while the head is still going down, hold, rise. Beats in `motion/sadness/v2_spec.json` | `sounds/synced_v2/devastated_3x1.0__D3v2_sobs.wav`: inquire shock at the sit, silence, three soft sobs on the head extremes, the third dying into the ending | **decided, tested on the robot: "perfect"** (2026-09-04) |
+| **devastated** | `motion/sadness/v2/devastated_3x1.0__D3v2_sobs_gentler.mp4`: sit (surprise), head droops, three slow head shakes starting while the head is still going down, hold, rise. Beats in `motion/sadness/v2_spec.json` | `sounds/synced_v2/devastated_3x1.0__D3v2_sobs_gentler.wav`: inquire shock at the sit, silence, three soft sobs (gentler voice) on the head extremes, the third dying into the ending | **decided, tested on the robot: "perfect"** (2026-09-04) |
 | **sad** | `motion/sadness/v6/sad_droop2.5__S6_coo_voice_200_140.mp4`: standing, body pitch 0.05, head droops over 2.5 s, two silent slow shakes, hold, rise. Beats in `motion/sadness/v6_spec.json` | `sounds/synced_v6/sad_droop2.5__S6_coo_voice_200_140.wav`: the robot's coo recipe synthesized, gliding 200 -> 140 Hz with the head, silent shakes; robot file `sounds/robot/sad_a.wav` | **decided** (2026-09-04) |
 | **angry** | RL stomp: three quick stomps on the same foot, head left / right / left (`Mjlab-Stomp-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`) | to design on the trained motion's beats (barks on the foot contacts) | training runs in progress (`motion/anger-rl/REPORT.md`) |
 
@@ -25,7 +25,7 @@ Later: excited, scared (see `HANDOFF.md`).
 - `combine.py` muxes one or more wavs into a motion mp4 at given times.
 - `reference/` the four Reachy Mini reference sounds as wav (dataset `pollen-robotics/reachy-mini-emotions-library`).
 - `sounds/` candidates and generators: `make_A_port.py` (port of the Reachy flute sounds), `make_B_notes.py` (music
-  theory), `make_C_grains.py` (bank grains), `make_long_sad.py`, `make_synced.py` / `make_synced_v2.py` (soundtracks
+  theory), `make_C_grains.py` (bank grains), `make_long_sad.py`, `make_synced*.py` (soundtracks
   designed on the motion beats), `make_index.py` (audition page `sounds/index.html`), `analysis/` plots.
 - `motion/sadness/` the programmatic sad motions: `sadness.py` (simulation renderer built on
   `notes/reachy-encounter/duckfilm.py`: the duck is driven only through what the real robot accepts), per candidate
@@ -34,7 +34,7 @@ Later: excited, scared (see `HANDOFF.md`).
 - `motion/anger-rl/` the RL stomp: report, curves, evaluation videos. `rl/` = patch of the `emotions-stomp` branch
   (env, mdp functions, tests, spec) so it can be re-applied on `microduck_rl`.
 - `motion/anger-programmatic/` a rejected probe (kept as a record; its two-stomp claims for B4/B5/B8 are wrong).
-- `combined/` sound + motion preview pages: `synced/` v1, `v2/` current.
+- `combined/` sound + motion preview pages, one folder per round (`synced/`, `v2/` ... `v6/`); the decided pairs are named in the table above.
 
 ## How to make a new emotion (the recipe that worked)
 
