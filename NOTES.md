@@ -365,3 +365,30 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   actions), the README frontmatter builds from source (`app_build_command`). `EMOTIONS-PORT.md` in the fork documents
   it. Gaps: no BAM servo model, no leash, browser TTS for Reachy, only four Reachy moves. Local: `npm ci && npm run
   dev`; clone at `/Users/remi/microduck/forks/microduck-reachy-simulator`.
+
+### Same night: Rémi's review of the v2 scene in both simulators, round 3
+
+- Rémi (voice): the recurring problem is dead time between lines and actions; everything closer. Specifics: the lake
+  line starts as soon as the pick's beak is on the ground; after the water-resistance line a **defiant** answer (beak
+  up-left with a quack, up-right with a quack); after "We shouldn't go" an **impatient** answer (he saw one in
+  Laureen's simulator; not in her published source, so `motion/impatient/` is our own take); the yes / no exchange
+  much faster (cut Reachy's moves or use shorter ones); Reachy's exclamation right after the angry; a new joke in the
+  offended line ("And my face is, like, fifty percent of me"); during the lament Reachy turns its BODY ~90 deg away so
+  it does not see the duck wake; the quack right on "first quacks"; keep the "alive" synchronisation (excited + amazed
+  head bobs); check the wobble on the relieved line; after "Can you promise me that?" the duck nods (yes), Reachy
+  "What a relief.", the roulade at once, "Did you die again?". The duck falls forward in Laureen's sim, backward in
+  ours: investigate, and he will check on the real robot. Also: the cued quacks sometimes do not move the jaw.
+- Done: scene v3 (27 beats, `say_at` / `cap` / `body_yaw` beat keys in `robot/skit.py`: the line delayed inside the
+  beat, Reachy's move chain cut at a cap, a body-yaw goto held across beats (recorded moves may reset it on the real
+  robot: to verify); every hold = its emotion's length, gaps 0-0.2 s; ~124 s + the pause). `motion/defiant/` and
+  `motion/impatient/` designed one-shot (pages `combined/defiant/`, `combined/impatient/`), ported to padd as cues
+  (commit ccf3116, 20 tests) with the cued-sound beak fix (a `{"sound":..}` cue opens the beak 0.25 s, as RT does).
+  Lines `bad_duck` (with the face joke) and `what_a_relief` rendered.
+- **Fall direction** (`motion/playdead/SIM-DIFF.md`): the browser sim's sit hands the posture flag over 0.8 s late,
+  so stage 1 (legs straight) hit a still-standing duck and toppled it forward; ours seats by 1.0-1.4 s and rolls
+  backward. The real runtime has no hand-over (seat in ~0.8 s), so the robot should roll backward, but a late seat
+  carries the same forward risk: stage 1 moved to **1.8 s** and stage 2 to 4.0 s (commit 8880fa6; PICK.json follows).
+  Better later: fire stage 1 on the seat itself.
+- Laureen pushed upstream again ("consistent Reachy voice and wobbler", "fix static entrypoint"): the fork agent merges
+  it, adds the v3 beat keys to the script builder, the new emotions, the wobble check, a `--watch` interactive mode
+  (Rémi's wish: keep the browser alive and replay when scene.json changes) and re-records.

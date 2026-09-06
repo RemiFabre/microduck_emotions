@@ -22,7 +22,7 @@
  ],
  "pose_joints": [
   {
-   "at": 1.4,
+   "at": 1.8,
    "targets": [
     0.0,
     0.0,
@@ -48,7 +48,7 @@
    "ramp_s": 1.5
   },
   {
-   "at": 3.6,
+   "at": 4.0,
    "targets": [
     0.0,
     0.0,
@@ -78,5 +78,6 @@
  "death_len": 1.8,
  "rest_at": 3.0,
  "skill_at_start": "sit_toggle",
- "robot_wav": "/Users/remi/microduck/notes/emotions/sounds/robot/play_dead_a.wav"
+ "robot_wav": "/Users/remi/microduck/notes/emotions/sounds/robot/play_dead_a.wav",
+ "note": "stage times moved to 1.8 / 4.0 s after the browser-sim finding (SIM-DIFF.md): a late seat topples the duck forward"
 }

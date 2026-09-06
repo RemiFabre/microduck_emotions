@@ -1,7 +1,7 @@
 From 013c0c7f93206e819d5c1791c3f8d6112b38a259 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:43:22 +0200
-Subject: [PATCH 01/21] robot.rebootMotors: reboot servos in place, `robotctl
+Subject: [PATCH 01/22] robot.rebootMotors: reboot servos in place, `robotctl
  robot reboot-motors`, D-pad-up on the pad
 
 A servo that trips its shutdown mask (overload, overheating, electrical shock) latches with
@@ -580,7 +580,7 @@ index 1f04de3..3dc5c9f 100644
 From 9660d73c0f66750d87da02861c03ce88a14fbd8b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:16:16 +0200
-Subject: [PATCH 02/21] padd: reboot the servos on any D-pad-up press
+Subject: [PATCH 02/22] padd: reboot the servos on any D-pad-up press
 
 ---
  docs/robot/cheatsheet.md |  2 +-
@@ -645,7 +645,7 @@ index 10aea72..307d817 100644
 From a56532541ac05a2e1edeb5903581090feca32030 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:18:42 +0200
-Subject: [PATCH 03/21] padd: the servo reboot is D-pad right, D-pad up already
+Subject: [PATCH 03/22] padd: the servo reboot is D-pad right, D-pad up already
  has the mode-switch hold
 
 ---
@@ -707,7 +707,7 @@ index 307d817..56798b1 100644
 From e0f4b5489142d7911fcf54f59e21e22a2541c515 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 14:42:40 +0200
-Subject: [PATCH 04/21] padd: LB curious / RB peck head expressions, Select =
+Subject: [PATCH 04/22] padd: LB curious / RB peck head expressions, Select =
  robot.soften (gentle release), kicks on the D-pad
 
 - padd/src/expressions.rs: timed head-intent sequences played through the policy's command
@@ -1543,7 +1543,7 @@ index 3dc5c9f..c906860 100644
 From db2c70efe43c0562aec1fd2f614b0df706169aad Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:16:34 +0200
-Subject: [PATCH 05/21] padd: Start once stands the robot up (robot.init),
+Subject: [PATCH 05/22] padd: Start once stands the robot up (robot.init),
  Start again drives
 
 The first Start on a booted duck used to run the gait straight out of the home ramp. The pad
@@ -1656,7 +1656,7 @@ index 07489b5..2301850 100644
 From 5492ea602e3aef59b2a19d702977aab2da2cd88e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 20:25:46 +0200
-Subject: [PATCH 06/21] padd: R3 = startled (head up, a step back); expressions
+Subject: [PATCH 06/22] padd: R3 = startled (head up, a step back); expressions
  can drive the twist
 
 ---
@@ -1829,7 +1829,7 @@ index 2301850..c523949 100644
 From fdc09eef5c62abe6ead89edca323a4985a7d5d51 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 11:43:36 +0200
-Subject: [PATCH 07/21] padd: emotion mode on a DPad-Up tap, B = devastated
+Subject: [PATCH 07/22] padd: emotion mode on a DPad-Up tap, B = devastated
  (sit, droop, three sobs); robotd: a devastated sound tag
 
 ---
@@ -2276,7 +2276,7 @@ index c84d08d..fb4e027 100644
 From 67a6e37f03b70b83f122a79f2c67bc2eac217874 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:05:28 +0200
-Subject: [PATCH 08/21] robotd: load the policies from
+Subject: [PATCH 08/22] robotd: load the policies from
  /opt/robot/policies/current when that hub exists (newer releases ship none in
  the release dir)
 
@@ -2324,7 +2324,7 @@ index 5aa8ba0..109543a 100644
 From c9d0fedfbdd2c4bde3fec13c0d78d833044fe0d4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:17:09 +0200
-Subject: [PATCH 09/21] padd: emotion mode A = sad (standing droop with a small
+Subject: [PATCH 09/22] padd: emotion mode A = sad (standing droop with a small
  bow, two shakes, coo); robotd: a sad sound tag
 
 ---
@@ -2714,7 +2714,7 @@ index fb4e027..bf429f1 100644
 From 4bd8cc4df2db60641dc13ae1bae5834b5aa59c83 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:51:30 +0200
-Subject: [PATCH 10/21] padd: emotion mode Y = curious with quacks (head
+Subject: [PATCH 10/22] padd: emotion mode Y = curious with quacks (head
  forward, tilt right then left on two chirps); robotd: a curious sound tag
 
 ---
@@ -2965,7 +2965,7 @@ index bf429f1..0be480e 100644
 From 262a739ae903abbc8b1267e092e47325918dd252 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 13:02:43 +0200
-Subject: [PATCH 11/21] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
+Subject: [PATCH 11/22] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
  =?UTF-8?q?=20lifts=20first,=20then=20droops=20to=20half=20depth=20(the=20?=
  =?UTF-8?q?full=20droop=20was=20too=20heavy=20on=20the=20robot)?=
 MIME-Version: 1.0
@@ -3117,7 +3117,7 @@ index 71c8b01..3f15a3b 100644
 From bab9102a0e8f23f28d366af18096b0df7b95c5db Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 13:05:27 +0200
-Subject: [PATCH 12/21] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
+Subject: [PATCH 12/22] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
  =?UTF-8?q?=E2=80=94=20the=20neck=20and=20the=20bow=20follow=20the=20beak?=
  =?UTF-8?q?=20only=20below=20level?=
 MIME-Version: 1.0
@@ -3214,7 +3214,7 @@ index 3f15a3b..550422d 100644
 From 8922e49bfc7d1e8bedf04b0663c26e749cb76642 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 15:01:23 +0200
-Subject: [PATCH 13/21] =?UTF-8?q?padd:=20curious=20keeps=20the=20head=20ba?=
+Subject: [PATCH 13/22] =?UTF-8?q?padd:=20curious=20keeps=20the=20head=20ba?=
  =?UTF-8?q?ck=20=E2=80=94=20roll=20only=20(the=20forward=20phase=20made=20?=
  =?UTF-8?q?the=20robot=20step=20forward)?=
 MIME-Version: 1.0
@@ -3335,7 +3335,7 @@ index 550422d..bfe23fa 100644
 From e10529864d6c1773e3bca2bb2870127a89762c52 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 16:09:58 +0200
-Subject: [PATCH 14/21] =?UTF-8?q?padd:=20episode=203=20=E2=80=94=20cue=20p?=
+Subject: [PATCH 14/22] =?UTF-8?q?padd:=20episode=203=20=E2=80=94=20cue=20p?=
  =?UTF-8?q?ort=20(TCP=207777:=20express/skill/sound/move/stop),=20emotion-?=
  =?UTF-8?q?mode=20bindings=20(X=20angry,=20LB=20yes,=20RB=20no,=20DPad-Dow?=
  =?UTF-8?q?n=20excited,=20DPad-Left=20play=20dead),=20draft=20kinds,=20rob?=
@@ -4093,7 +4093,7 @@ index 0be480e..4f916ef 100644
 From 93ab422f0741d03b72f606da97b0e69e9a4d6772 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 16:31:53 +0200
-Subject: [PATCH 15/21] =?UTF-8?q?padd:=20episode=203=20picks=20from=20the?=
+Subject: [PATCH 15/22] =?UTF-8?q?padd:=20episode=203=20picks=20from=20the?=
  =?UTF-8?q?=20simulation=20=E2=80=94=20yes,=20no,=20angry,=20excited,=20pl?=
  =?UTF-8?q?ay=20dead,=20closed=20quack=20(keyframe=20tests=20against=20the?=
  =?UTF-8?q?=20sim=20JSON);=20SoundTag::Closed?=
@@ -4670,7 +4670,7 @@ index 4f916ef..4d77115 100644
 From 24f508f871abda280675a4c2c4124e9075131fc4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:06:51 +0200
-Subject: [PATCH 16/21] episode 3, round 2: mmh (Y), fast yes (L3), laugh (R3),
+Subject: [PATCH 16/22] episode 3, round 2: mmh (Y), fast yes (L3), laugh (R3),
  pick with the beak opening on the way down (cue), excited sound X1; cues init
  / policy (the scene's Start presses); robotd: the mouth intent also while
  holding at home with torque on (play dead's death quack)
@@ -5233,7 +5233,7 @@ index 16bb756..1706692 100644
 From 85d3ae8d860ef9f02df0f6c7321086bc4409455f Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:10:50 +0200
-Subject: [PATCH 17/21] =?UTF-8?q?padd:=20play=20dead=20v2=20=E2=80=94=20he?=
+Subject: [PATCH 17/22] =?UTF-8?q?padd:=20play=20dead=20v2=20=E2=80=94=20he?=
  =?UTF-8?q?ad=20hard=20to=20the=20side=20from=20the=20press,=20back=20at?=
  =?UTF-8?q?=20once,=20robot.relax=20at=201.4=20s,=20robot.init=20at=203.0?=
  =?UTF-8?q?=20s,=20death=20quack=205.5-7.3=20s=20(R=C3=A9mi's=20feedback)?=
@@ -5486,7 +5486,7 @@ index 8cc8401..2680ac6 100644
 From 024fd816ee79ef0efdf79d861f6c92b35642dba8 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:13:00 +0200
-Subject: [PATCH 18/21] padd: laugh v2 (head up more, dying-of-laughter sound),
+Subject: [PATCH 18/22] padd: laugh v2 (head up more, dying-of-laughter sound),
  mock (laugh_roll + the staccato run, cue only), SoundTag::Mock
 
 ---
@@ -5778,7 +5778,7 @@ index 6cdbf33..4e95173 100644
 From 776f1c0492c83f1f1f100a6444db8d6f1ca38550 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:25:06 +0200
-Subject: [PATCH 19/21] =?UTF-8?q?robot.poseJoints:=20a=20scripted=20joint?=
+Subject: [PATCH 19/22] =?UTF-8?q?robot.poseJoints:=20a=20scripted=20joint?=
  =?UTF-8?q?=20pose=20with=20some=20servos=20hanging=20free=20(per-servo=20?=
  =?UTF-8?q?torque=20off,=20targets=20ramped=20at=20a=20given=20gain,=20hel?=
  =?UTF-8?q?d=20until=20init=20/=20relax=20/=20soften);=20play=20dead=20sen?=
@@ -6466,7 +6466,7 @@ index c906860..a6230fe 100644
 From ed0d46054260320cb85f301e90321baeb22f90b9 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:26:51 +0200
-Subject: [PATCH 20/21] =?UTF-8?q?padd:=20play=20dead=20v3=20=E2=80=94=20tw?=
+Subject: [PATCH 20/22] =?UTF-8?q?padd:=20play=20dead=20v3=20=E2=80=94=20tw?=
  =?UTF-8?q?o=20robot.poseJoints=20stages=20(legs=20straight:=20the=20roll?=
  =?UTF-8?q?=20onto=20the=20back;=20legs=20up),=20head=20servos=20free,=20d?=
  =?UTF-8?q?eath=20quack=20at=205.0=20s,=20held=20until=20Start?=
@@ -6687,7 +6687,7 @@ index 692f6d9..7757ee0 100644
 From ccf3116fd0435ac7bc56cab3bf68f74236e70e7c Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 19:42:39 +0200
-Subject: [PATCH 21/21] padd: defiant and impatient (cues), a cued bank sound
+Subject: [PATCH 21/22] padd: defiant and impatient (cues), a cued bank sound
  opens the beak; SoundTags defiant / impatient
 
 ---
@@ -6967,6 +6967,56 @@ index 0e03ef8..c114377 100644
          ]
          .into_iter()
          .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
+-- 
+2.53.0
+
+
+From 8880fa64873d729deb47e8f76fd76101baddef1d Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 19:44:12 +0200
+Subject: [PATCH 22/22] play dead: stage 1 at 1.8 s (a late seat topples the
+ duck forward: browser-sim finding), stage 2 at 4.0 s
+
+---
+ padd/src/expressions.rs | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index 29e3407..df23931 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -269,6 +269,10 @@ const EXCITED_MOUTH: [f64; 31] = [
+ /// hip roll, hip pitch, knee, ankle) over `PD_DEAD2_RAMP`, the body unmoved; the death quack from
+ /// 5.0 s with the beak barely open (the jaw stays powered). The robot holds the dead pose after
+ /// the end; Start (robot.init: torque back on everywhere, ramp home) is the way up, Rémi's call.
++/// Stage 1 waits until 1.8 s (the seat lands by ~1 s, the head is back by 1.0 s): straight legs
++/// on a duck that has not sat yet topple it FORWARD (seen in the browser simulator, whose sit
++/// hands over 0.8 s late; `motion/playdead/SIM-DIFF.md`). A late seat on the robot has the same
++/// risk: 0.4 s of margin, at the cost of a beat of suspense.
+ const PD_LEN: f64 = 7.5;
+ const PD_SHOCK: f64 = -0.5;
+ const PD_YAW: f64 = 1.0;
+@@ -278,9 +282,9 @@ const PD_BACK_AT: f64 = 0.4;
+ const PD_BACK_LEN: f64 = 0.6;
+ const PD_DEAD_OFF: [&str; 3] = ["neck_pitch", "head_pitch", "head_yaw"];
+ const PD_DEAD_GAIN: u16 = 160;
+-const PD_DEAD1_AT: f64 = 1.4;
++const PD_DEAD1_AT: f64 = 1.8;
+ const PD_DEAD1_RAMP: f64 = 1.5;
+-const PD_DEAD2_AT: f64 = 3.6;
++const PD_DEAD2_AT: f64 = 4.0;
+ const PD_DEAD2_RAMP: f64 = 1.0;
+ const PD_DEAD2_LEFT: [f64; 5] = [0.0, 0.0, -1.0, 1.5, 0.0];
+ const PD_DEAD2_RIGHT: [f64; 5] = [0.0, 0.0, 1.0, -1.5, 0.0];
+@@ -1495,7 +1499,7 @@ mod tests {
+         assert_eq!(Expression::sound_at_start(Kind::PlayDead), Some(proto::SoundTag::PlayDead));
+         let poses = Expression::pose_joints(Kind::PlayDead);
+         assert_eq!(poses.len(), 2, "legs straight, then legs up");
+-        assert_eq!((poses[0].0, poses[1].0), (1.4, 3.6));
++        assert_eq!((poses[0].0, poses[1].0), (1.8, 4.0));
+         for (_, p) in &poses {
+             assert_eq!(p.targets.len(), 15);
+             assert_eq!(p.targets[9], None, "the mouth slot stays the mouth intent's");
 -- 
 2.53.0
 
