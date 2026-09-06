@@ -205,3 +205,4 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   policy loaded from the hub, driving=true, healthy, mapping line "A sad, B devastated, Y curious".
 - Curious roll-only installed: rev 8922e49-local (Y), neck and head_pitch 0 throughout, roll and chirps unchanged; verified read-only. Not yet tested by Rémi.
 - Rémi: cut 2 s between "I have to talk to you" and the lake line (the duck_curious hold). Scene agent trimming.
+- 2026-09-06: both repos PUBLIC; theater `scene/lake` fast-forwarded into `main` (structure was already right: scene files under scenes/lake, shared tools in robot/ video/ microduck/), branch deleted. Episode 3 brief written: `EPISODE3-HANDOFF.md` (copy in the theater repo as microduck/EPISODE3-BRIEF.md). README gained the "three kinds of emotion" section.

@@ -17,6 +17,15 @@ synchronized beat by beat, and the beak opens with the sound.
 
 Later: excited, scared (see `HANDOFF.md`). Real-robot lessons: anything that moves the head's mass forward makes the walking policy step forward (sad went to half depth, curious lost its head-forward); the simulation does not show it. The Reachy Mini side (scenes, voice, captions) is https://github.com/RemiFabre/agentic_robot_theater (`microduck/EMOTIONS.md` there is the bridge back here).
 
+## What an emotion is
+
+An emotion = a motion + a sound designed together, on one pad button in emotion mode. The motion is one of three kinds:
+1. a **program**: head deltas, body pose and mouth as a pure function of time on top of the shipped standing / walking policy (sad, curious);
+2. a **policy**: a trained network started as a skill (sit, ground pick, kicks, roulade, the RL stomp when it works);
+3. a **combination**: a skill plus a program on top while the skill's policy holds the pose (devastated = sit, then a head program; the head slots track while seated).
+
+Next episode's brief: `EPISODE3-HANDOFF.md` (yes, no, programmatic angry, play dead, excited, a two-robot scripted scene).
+
 ## Layout
 
 - `HANDOFF.md` the original brief; `NOTES.md` the running log (what was tried, what failed, why; Rémi's decisions).
