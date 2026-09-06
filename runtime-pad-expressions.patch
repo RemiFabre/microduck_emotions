@@ -1,7 +1,7 @@
 From 013c0c7f93206e819d5c1791c3f8d6112b38a259 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:43:22 +0200
-Subject: [PATCH 01/22] robot.rebootMotors: reboot servos in place, `robotctl
+Subject: [PATCH 01/28] robot.rebootMotors: reboot servos in place, `robotctl
  robot reboot-motors`, D-pad-up on the pad
 
 A servo that trips its shutdown mask (overload, overheating, electrical shock) latches with
@@ -580,7 +580,7 @@ index 1f04de3..3dc5c9f 100644
 From 9660d73c0f66750d87da02861c03ce88a14fbd8b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:16:16 +0200
-Subject: [PATCH 02/22] padd: reboot the servos on any D-pad-up press
+Subject: [PATCH 02/28] padd: reboot the servos on any D-pad-up press
 
 ---
  docs/robot/cheatsheet.md |  2 +-
@@ -645,7 +645,7 @@ index 10aea72..307d817 100644
 From a56532541ac05a2e1edeb5903581090feca32030 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:18:42 +0200
-Subject: [PATCH 03/22] padd: the servo reboot is D-pad right, D-pad up already
+Subject: [PATCH 03/28] padd: the servo reboot is D-pad right, D-pad up already
  has the mode-switch hold
 
 ---
@@ -707,7 +707,7 @@ index 307d817..56798b1 100644
 From e0f4b5489142d7911fcf54f59e21e22a2541c515 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 14:42:40 +0200
-Subject: [PATCH 04/22] padd: LB curious / RB peck head expressions, Select =
+Subject: [PATCH 04/28] padd: LB curious / RB peck head expressions, Select =
  robot.soften (gentle release), kicks on the D-pad
 
 - padd/src/expressions.rs: timed head-intent sequences played through the policy's command
@@ -1543,7 +1543,7 @@ index 3dc5c9f..c906860 100644
 From db2c70efe43c0562aec1fd2f614b0df706169aad Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:16:34 +0200
-Subject: [PATCH 05/22] padd: Start once stands the robot up (robot.init),
+Subject: [PATCH 05/28] padd: Start once stands the robot up (robot.init),
  Start again drives
 
 The first Start on a booted duck used to run the gait straight out of the home ramp. The pad
@@ -1656,7 +1656,7 @@ index 07489b5..2301850 100644
 From 5492ea602e3aef59b2a19d702977aab2da2cd88e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 20:25:46 +0200
-Subject: [PATCH 06/22] padd: R3 = startled (head up, a step back); expressions
+Subject: [PATCH 06/28] padd: R3 = startled (head up, a step back); expressions
  can drive the twist
 
 ---
@@ -1829,7 +1829,7 @@ index 2301850..c523949 100644
 From fdc09eef5c62abe6ead89edca323a4985a7d5d51 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 11:43:36 +0200
-Subject: [PATCH 07/22] padd: emotion mode on a DPad-Up tap, B = devastated
+Subject: [PATCH 07/28] padd: emotion mode on a DPad-Up tap, B = devastated
  (sit, droop, three sobs); robotd: a devastated sound tag
 
 ---
@@ -2276,7 +2276,7 @@ index c84d08d..fb4e027 100644
 From 67a6e37f03b70b83f122a79f2c67bc2eac217874 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:05:28 +0200
-Subject: [PATCH 08/22] robotd: load the policies from
+Subject: [PATCH 08/28] robotd: load the policies from
  /opt/robot/policies/current when that hub exists (newer releases ship none in
  the release dir)
 
@@ -2324,7 +2324,7 @@ index 5aa8ba0..109543a 100644
 From c9d0fedfbdd2c4bde3fec13c0d78d833044fe0d4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:17:09 +0200
-Subject: [PATCH 09/22] padd: emotion mode A = sad (standing droop with a small
+Subject: [PATCH 09/28] padd: emotion mode A = sad (standing droop with a small
  bow, two shakes, coo); robotd: a sad sound tag
 
 ---
@@ -2714,7 +2714,7 @@ index fb4e027..bf429f1 100644
 From 4bd8cc4df2db60641dc13ae1bae5834b5aa59c83 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:51:30 +0200
-Subject: [PATCH 10/22] padd: emotion mode Y = curious with quacks (head
+Subject: [PATCH 10/28] padd: emotion mode Y = curious with quacks (head
  forward, tilt right then left on two chirps); robotd: a curious sound tag
 
 ---
@@ -2965,7 +2965,7 @@ index bf429f1..0be480e 100644
 From 262a739ae903abbc8b1267e092e47325918dd252 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 13:02:43 +0200
-Subject: [PATCH 11/22] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
+Subject: [PATCH 11/28] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
  =?UTF-8?q?=20lifts=20first,=20then=20droops=20to=20half=20depth=20(the=20?=
  =?UTF-8?q?full=20droop=20was=20too=20heavy=20on=20the=20robot)?=
 MIME-Version: 1.0
@@ -3117,7 +3117,7 @@ index 71c8b01..3f15a3b 100644
 From bab9102a0e8f23f28d366af18096b0df7b95c5db Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 13:05:27 +0200
-Subject: [PATCH 12/22] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
+Subject: [PATCH 12/28] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
  =?UTF-8?q?=E2=80=94=20the=20neck=20and=20the=20bow=20follow=20the=20beak?=
  =?UTF-8?q?=20only=20below=20level?=
 MIME-Version: 1.0
@@ -3214,7 +3214,7 @@ index 3f15a3b..550422d 100644
 From 8922e49bfc7d1e8bedf04b0663c26e749cb76642 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 15:01:23 +0200
-Subject: [PATCH 13/22] =?UTF-8?q?padd:=20curious=20keeps=20the=20head=20ba?=
+Subject: [PATCH 13/28] =?UTF-8?q?padd:=20curious=20keeps=20the=20head=20ba?=
  =?UTF-8?q?ck=20=E2=80=94=20roll=20only=20(the=20forward=20phase=20made=20?=
  =?UTF-8?q?the=20robot=20step=20forward)?=
 MIME-Version: 1.0
@@ -3335,7 +3335,7 @@ index 550422d..bfe23fa 100644
 From e10529864d6c1773e3bca2bb2870127a89762c52 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 16:09:58 +0200
-Subject: [PATCH 14/22] =?UTF-8?q?padd:=20episode=203=20=E2=80=94=20cue=20p?=
+Subject: [PATCH 14/28] =?UTF-8?q?padd:=20episode=203=20=E2=80=94=20cue=20p?=
  =?UTF-8?q?ort=20(TCP=207777:=20express/skill/sound/move/stop),=20emotion-?=
  =?UTF-8?q?mode=20bindings=20(X=20angry,=20LB=20yes,=20RB=20no,=20DPad-Dow?=
  =?UTF-8?q?n=20excited,=20DPad-Left=20play=20dead),=20draft=20kinds,=20rob?=
@@ -4093,7 +4093,7 @@ index 0be480e..4f916ef 100644
 From 93ab422f0741d03b72f606da97b0e69e9a4d6772 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 16:31:53 +0200
-Subject: [PATCH 15/22] =?UTF-8?q?padd:=20episode=203=20picks=20from=20the?=
+Subject: [PATCH 15/28] =?UTF-8?q?padd:=20episode=203=20picks=20from=20the?=
  =?UTF-8?q?=20simulation=20=E2=80=94=20yes,=20no,=20angry,=20excited,=20pl?=
  =?UTF-8?q?ay=20dead,=20closed=20quack=20(keyframe=20tests=20against=20the?=
  =?UTF-8?q?=20sim=20JSON);=20SoundTag::Closed?=
@@ -4670,7 +4670,7 @@ index 4f916ef..4d77115 100644
 From 24f508f871abda280675a4c2c4124e9075131fc4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:06:51 +0200
-Subject: [PATCH 16/22] episode 3, round 2: mmh (Y), fast yes (L3), laugh (R3),
+Subject: [PATCH 16/28] episode 3, round 2: mmh (Y), fast yes (L3), laugh (R3),
  pick with the beak opening on the way down (cue), excited sound X1; cues init
  / policy (the scene's Start presses); robotd: the mouth intent also while
  holding at home with torque on (play dead's death quack)
@@ -5233,7 +5233,7 @@ index 16bb756..1706692 100644
 From 85d3ae8d860ef9f02df0f6c7321086bc4409455f Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:10:50 +0200
-Subject: [PATCH 17/22] =?UTF-8?q?padd:=20play=20dead=20v2=20=E2=80=94=20he?=
+Subject: [PATCH 17/28] =?UTF-8?q?padd:=20play=20dead=20v2=20=E2=80=94=20he?=
  =?UTF-8?q?ad=20hard=20to=20the=20side=20from=20the=20press,=20back=20at?=
  =?UTF-8?q?=20once,=20robot.relax=20at=201.4=20s,=20robot.init=20at=203.0?=
  =?UTF-8?q?=20s,=20death=20quack=205.5-7.3=20s=20(R=C3=A9mi's=20feedback)?=
@@ -5486,7 +5486,7 @@ index 8cc8401..2680ac6 100644
 From 024fd816ee79ef0efdf79d861f6c92b35642dba8 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:13:00 +0200
-Subject: [PATCH 18/22] padd: laugh v2 (head up more, dying-of-laughter sound),
+Subject: [PATCH 18/28] padd: laugh v2 (head up more, dying-of-laughter sound),
  mock (laugh_roll + the staccato run, cue only), SoundTag::Mock
 
 ---
@@ -5778,7 +5778,7 @@ index 6cdbf33..4e95173 100644
 From 776f1c0492c83f1f1f100a6444db8d6f1ca38550 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:25:06 +0200
-Subject: [PATCH 19/22] =?UTF-8?q?robot.poseJoints:=20a=20scripted=20joint?=
+Subject: [PATCH 19/28] =?UTF-8?q?robot.poseJoints:=20a=20scripted=20joint?=
  =?UTF-8?q?=20pose=20with=20some=20servos=20hanging=20free=20(per-servo=20?=
  =?UTF-8?q?torque=20off,=20targets=20ramped=20at=20a=20given=20gain,=20hel?=
  =?UTF-8?q?d=20until=20init=20/=20relax=20/=20soften);=20play=20dead=20sen?=
@@ -6466,7 +6466,7 @@ index c906860..a6230fe 100644
 From ed0d46054260320cb85f301e90321baeb22f90b9 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 18:26:51 +0200
-Subject: [PATCH 20/22] =?UTF-8?q?padd:=20play=20dead=20v3=20=E2=80=94=20tw?=
+Subject: [PATCH 20/28] =?UTF-8?q?padd:=20play=20dead=20v3=20=E2=80=94=20tw?=
  =?UTF-8?q?o=20robot.poseJoints=20stages=20(legs=20straight:=20the=20roll?=
  =?UTF-8?q?=20onto=20the=20back;=20legs=20up),=20head=20servos=20free,=20d?=
  =?UTF-8?q?eath=20quack=20at=205.0=20s,=20held=20until=20Start?=
@@ -6687,7 +6687,7 @@ index 692f6d9..7757ee0 100644
 From ccf3116fd0435ac7bc56cab3bf68f74236e70e7c Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 19:42:39 +0200
-Subject: [PATCH 21/22] padd: defiant and impatient (cues), a cued bank sound
+Subject: [PATCH 21/28] padd: defiant and impatient (cues), a cued bank sound
  opens the beak; SoundTags defiant / impatient
 
 ---
@@ -6974,7 +6974,7 @@ index 0e03ef8..c114377 100644
 From 8880fa64873d729deb47e8f76fd76101baddef1d Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Sun, 6 Sep 2026 19:44:12 +0200
-Subject: [PATCH 22/22] play dead: stage 1 at 1.8 s (a late seat topples the
+Subject: [PATCH 22/28] play dead: stage 1 at 1.8 s (a late seat topples the
  duck forward: browser-sim finding), stage 2 at 4.0 s
 
 ---
@@ -7017,6 +7017,453 @@ index 29e3407..df23931 100644
          for (_, p) in &poses {
              assert_eq!(p.targets.len(), 15);
              assert_eq!(p.targets[9], None, "the mouth slot stays the mouth intent's");
+-- 
+2.53.0
+
+
+From 29353cbdb70e41721199081bf39b9215b4f701fc Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 20:52:09 +0200
+Subject: [PATCH 23/28] btd: RobotPoseJoints is never permitted over BLE
+ (missed in the poseJoints commit)
+
+---
+ btd/src/route.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/btd/src/route.rs b/btd/src/route.rs
+index 9dce76f..382ea5b 100644
+--- a/btd/src/route.rs
++++ b/btd/src/route.rs
+@@ -203,7 +203,7 @@ fn permits(call: &proto::Call) -> bool {
+         // link that does not exist for the first ~73s of a boot is not a control transport. The
+         // skills, the body pose and the mouth are motor control like the rest.
+         RobotMove(_) | RobotHead(_) | RobotLook(_) | RobotEnable(_) | RobotDo(_) | RobotPose(_)
+-        | RobotMouth(_) => false,
++        | RobotMouth(_) | RobotPoseJoints(_) => false,
+ 
+         // Harmless and rather charming from a phone — but it rides the same refusal as the
+         // rest of robot.* until the app path exists to want it: opening one call to the
+-- 
+2.53.0
+
+
+From c34330fb5e37c7115ff9556bd2a3e49ad4488e60 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 20:56:02 +0200
+Subject: [PATCH 24/28] padd.service: allow AF_INET/AF_INET6 for the cue port
+ (was sandboxed out: bind failed on the robot)
+
+---
+ padd/systemd/padd.service | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/padd/systemd/padd.service b/padd/systemd/padd.service
+index 26348fc..5156d29 100644
+--- a/padd/systemd/padd.service
++++ b/padd/systemd/padd.service
+@@ -70,7 +70,7 @@ ProtectKernelTunables=yes
+ ProtectKernelModules=yes
+ ProtectControlGroups=yes
+ RestrictSUIDSGID=yes
+-RestrictAddressFamilies=AF_UNIX AF_NETLINK
++RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+ RestrictNamespaces=yes
+ LockPersonality=yes
+ MemoryDenyWriteExecute=yes
+-- 
+2.53.0
+
+
+From b62ae77eaaf96d1cdd71b4fe3f0cf7f4f73c50ee Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 20:56:02 +0200
+Subject: [PATCH 25/28] notes: installed on the duck, cue port sandbox fix
+
+---
+ NOTES.md | 6 ++++++
+ 1 file changed, 6 insertions(+)
+ create mode 100644 NOTES.md
+
+diff --git a/NOTES.md b/NOTES.md
+new file mode 100644
+index 0000000..44a7265
+--- /dev/null
++++ b/NOTES.md
+@@ -0,0 +1,6 @@
++
++- Installed on the duck (rev 8880fa6-local, all 17 wavs md5-checked, duck limp throughout). The cue port was
++  sandboxed out by `RestrictAddressFamilies=AF_UNIX AF_NETLINK` in padd.service (bind failed with os error 97):
++  fixed on the robot with a drop-in `/etc/systemd/system/padd.service.d/cue-port.conf` (AF_INET AF_INET6) and in
++  the repo unit (commit on pad-expressions). `duck_cue.py ping` answers with the 18 kinds. Sudo password saved
++  in the agent memory. Trickle of bus checksum / timeout warnings as on Sep 4; CPU 65 C.
+-- 
+2.53.0
+
+
+From 2494db637671bdeeccd8437714ce9696f553f5ea Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 21:10:14 +0200
+Subject: [PATCH 26/28] padd: emotion mode leaves the D-pad alone (DPad-Down
+ stands a seated duck up); RT = excited, LT = play dead on the triggers'
+ rising edge, their quack / wheee off meanwhile
+
+---
+ padd/src/main.rs | 28 +++++++++++++++++++---------
+ 1 file changed, 19 insertions(+), 9 deletions(-)
+
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index c4a5a0e..15e6d0a 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -289,7 +289,7 @@ fn main() -> std::process::ExitCode {
+          B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+          DPad-Up tap = emotion mode (A sad, B devastated, X angry, Y mmh, LB yes, RB no, \
+-         L3 fast yes, R3 laugh, DPad-Down excited, DPad-Left play dead), Select = soft release, \
++         L3 fast yes, R3 laugh, RT excited, LT play dead), Select = soft release, \
+          Select (3s) shutdown"
+     );
+ 
+@@ -375,12 +375,11 @@ fn main() -> std::process::ExitCode {
+                     Button::West if emotion => face = Some(Face::X),
+                     Button::LeftThumb if emotion => start_expression = Some(Kind::YesFast),
+                     Button::RightThumb if emotion => start_expression = Some(Kind::Laugh),
+-                    // Emotion mode takes the bumpers and two D-pad directions too; Start,
+-                    // Select, the sticks, the triggers and DPad-Right keep their jobs.
++                    // Emotion mode takes the bumpers and the stick clicks too; the D-pad keeps
++                    // its jobs (Rémi: DPad-Down must still stand a seated duck up after
++                    // devastated), and the analog triggers become emotion buttons below.
+                     Button::LeftTrigger if emotion => start_expression = Some(Kind::Yes),
+                     Button::RightTrigger if emotion => start_expression = Some(Kind::No),
+-                    Button::DPadDown if emotion => start_expression = Some(Kind::Excited),
+-                    Button::DPadLeft if emotion => start_expression = Some(Kind::PlayDead),
+                     Button::North => toggle_head = true,
+                     Button::East => toggle_body = true,
+                     Button::South => ground_pick = true,
+@@ -444,7 +443,7 @@ fn main() -> std::process::ExitCode {
+             tracing::warn!(
+                 emotion,
+                 "DPad-Up tap — emotion mode {} (A sad, B devastated, X angry, Y mmh, LB yes, \
+-                 RB no, L3 fast yes, R3 laugh, DPad-Down excited, DPad-Left play dead; tap again \
++                 RB no, L3 fast yes, R3 laugh, RT excited, LT play dead; tap again \
+                  to leave)",
+                 if emotion { "ON" } else { "off" }
+             );
+@@ -779,7 +778,8 @@ fn main() -> std::process::ExitCode {
+         let rt = trigger(Button::RightTrigger2);
+         let lt = trigger(Button::LeftTrigger2);
+         let cued = if cue_mouth_until.is_some_and(|until| tick < until) { 1.0 } else { 0.0 };
+-        let mouth = rt.max(lt).max(cued).max(expression.map_or(0.0, |e| e.mouth_at(tick)));
++        let triggers = if emotion { 0.0 } else { rt.max(lt) };
++        let mouth = triggers.max(cued).max(expression.map_or(0.0, |e| e.mouth_at(tick)));
+         if let Err(e) = notify(
+             &mut stream,
+             &proto::Call::RobotMouth(proto::MouthParams { open: mouth }),
+@@ -794,17 +794,27 @@ fn main() -> std::process::ExitCode {
+         // that decays, so a padd that dies mid-ride leaves a ride that lands. Release cuts
+         // it instantly, as the prototype does.
+         const SOUND_THRESHOLD: f64 = 0.3;
++        // In emotion mode the triggers are emotion buttons: RT excited, LT play dead, on the
++        // rising edge; their quack / wheee and the mouth they open are off meanwhile.
++        if emotion {
++            if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
++                start_expression = Some(Kind::Excited);
++            }
++            if prev_lt < SOUND_THRESHOLD && lt >= SOUND_THRESHOLD {
++                start_expression = Some(Kind::PlayDead);
++            }
++        }
+         let mut sound_calls: Vec<proto::SoundParams> = cue_sounds
+             .drain(..)
+             .map(|tag| proto::SoundParams { tag, hold: None })
+             .collect();
+-        if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
++        if !emotion && prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
+             sound_calls.push(proto::SoundParams {
+                 tag: proto::SoundTag::Chirp,
+                 hold: None,
+             });
+         }
+-        if lt >= SOUND_THRESHOLD {
++        if !emotion && lt >= SOUND_THRESHOLD {
+             sound_calls.push(proto::SoundParams {
+                 tag: proto::SoundTag::Wheee,
+                 hold: Some(true),
+-- 
+2.53.0
+
+
+From 0d022888e56ded8dbaa93d2b911265c9749cd075 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 21:25:17 +0200
+Subject: [PATCH 27/28] padd: the trigger emotions were detected after the
+ expression start (never fired); read the triggers first
+
+---
+ padd/src/main.rs | 29 +++++++++++++++--------------
+ 1 file changed, 15 insertions(+), 14 deletions(-)
+
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 15e6d0a..86ef4fb 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -745,6 +745,21 @@ fn main() -> std::process::ExitCode {
+         let right_x = deadzone(pad.value(Axis::RightStickX));
+         let right_y = deadzone(pad.value(Axis::RightStickY));
+ 
++        // The analog triggers, read here because in emotion mode they are emotion buttons
++        // (RT excited, LT play dead, on the rising edge) and the expression starts just below.
++        let trigger = |b: Button| pad.button_data(b).map(|d| d.value()).unwrap_or(0.0) as f64;
++        let rt = trigger(Button::RightTrigger2);
++        let lt = trigger(Button::LeftTrigger2);
++        const SOUND_THRESHOLD: f64 = 0.3;
++        if emotion {
++            if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
++                start_expression = Some(Kind::Excited);
++            }
++            if prev_lt < SOUND_THRESHOLD && lt >= SOUND_THRESHOLD {
++                start_expression = Some(Kind::PlayDead);
++            }
++        }
++
+         if let Some(kind) = start_expression {
+             tracing::info!(?kind, "expression");
+             expression = Some(Expression::start(kind, tick));
+@@ -774,9 +789,6 @@ fn main() -> std::process::ExitCode {
+         // Either trigger opens the mouth; the max wins, as in the prototype — where RT
+         // also chirps and LT rides the wheee, which they now do here too. An expression
+         // with a voice opens the beak the same way, through the same intent.
+-        let trigger = |b: Button| pad.button_data(b).map(|d| d.value()).unwrap_or(0.0) as f64;
+-        let rt = trigger(Button::RightTrigger2);
+-        let lt = trigger(Button::LeftTrigger2);
+         let cued = if cue_mouth_until.is_some_and(|until| tick < until) { 1.0 } else { 0.0 };
+         let triggers = if emotion { 0.0 } else { rt.max(lt) };
+         let mouth = triggers.max(cued).max(expression.map_or(0.0, |e| e.mouth_at(tick)));
+@@ -793,17 +805,6 @@ fn main() -> std::process::ExitCode {
+         // press, then a hold notification per tick — the robot treats the hold as a level
+         // that decays, so a padd that dies mid-ride leaves a ride that lands. Release cuts
+         // it instantly, as the prototype does.
+-        const SOUND_THRESHOLD: f64 = 0.3;
+-        // In emotion mode the triggers are emotion buttons: RT excited, LT play dead, on the
+-        // rising edge; their quack / wheee and the mouth they open are off meanwhile.
+-        if emotion {
+-            if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
+-                start_expression = Some(Kind::Excited);
+-            }
+-            if prev_lt < SOUND_THRESHOLD && lt >= SOUND_THRESHOLD {
+-                start_expression = Some(Kind::PlayDead);
+-            }
+-        }
+         let mut sound_calls: Vec<proto::SoundParams> = cue_sounds
+             .drain(..)
+             .map(|tag| proto::SoundParams { tag, hold: None })
+-- 
+2.53.0
+
+
+From fc685a3cc6f62e279fc6ff9f651ddecf198aa350 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 21:30:23 +0200
+Subject: [PATCH 28/28] padd: emotion mode = short / long presses (A
+ sad/devastated, B excited/impatient, X angry/mock, Y mmh/curious, LB yes/fast
+ yes, RB no/defiant, L3 laugh/play dead); RT/LT keep quack/wheee everywhere
+
+---
+ padd/src/main.rs | 107 +++++++++++++++++++++++++++--------------------
+ 1 file changed, 62 insertions(+), 45 deletions(-)
+
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 86ef4fb..50c99d6 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -180,13 +180,27 @@ const MODE_HOLD: Duration = Duration::from_secs(3);
+ /// usual jobs. Well under `MODE_HOLD`, so a tap and the mode-switch hold cannot be confused.
+ const EMOTION_TAP: Duration = Duration::from_millis(600);
+ 
+-/// A face button, as pressed in emotion mode.
+-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+-enum Face {
+-    A,
+-    B,
+-    X,
+-    Y,
++/// In emotion mode a button carries two emotions: a short press (released under
++/// `LONG_PRESS`) and a long press (held to `LONG_PRESS`, fired at the threshold). Rémi's map
++/// of 2026-09-06 evening: RT / LT keep their quack / wheee in both modes, the D-pad its jobs.
++const LONG_PRESS: Duration = Duration::from_millis(600);
++
++/// (button, short, long)
++const EMOTION_MAP: [(Button, Kind, Kind); 7] = [
++    (Button::South, Kind::Sad, Kind::Devastated),
++    (Button::East, Kind::Excited, Kind::Impatient),
++    (Button::West, Kind::Angry, Kind::Mock),
++    (Button::North, Kind::Mmh, Kind::CuriousQuacks),
++    (Button::LeftTrigger, Kind::Yes, Kind::YesFast),
++    (Button::RightTrigger, Kind::No, Kind::Defiant),
++    (Button::LeftThumb, Kind::Laugh, Kind::PlayDead),
++];
++
++fn emotion_of(button: Button) -> Option<(Kind, Kind)> {
++    EMOTION_MAP
++        .iter()
++        .find(|(b, _, _)| *b == button)
++        .map(|(_, short, long)| (*short, *long))
+ }
+ 
+ /// Body-pose stick ranges, from the training env via the prototype: z is asymmetric
+@@ -289,7 +303,7 @@ fn main() -> std::process::ExitCode {
+          B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+          DPad-Up tap = emotion mode (A sad, B devastated, X angry, Y mmh, LB yes, RB no, \
+-         L3 fast yes, R3 laugh, RT excited, LT play dead), Select = soft release, \
++         long presses: A devastated, B impatient, X mock, Y curious, LB fast yes, RB defiant, L3 play dead; short: A sad, B excited, X angry, Y mmh, LB yes, RB no, L3 laugh), Select = soft release, \
+          Select (3s) shutdown"
+     );
+ 
+@@ -324,6 +338,8 @@ fn main() -> std::process::ExitCode {
+     // Emotion mode: a D-pad-up tap toggles it. While on, the face buttons play emotions and
+     // nothing else; every other control keeps its meaning (Start and Select especially).
+     let mut emotion = false;
++    // Emotion-mode presses in flight: (button, pressed at, long already fired).
++    let mut emotion_presses: Vec<(Button, Instant, bool)> = Vec::new();
+     // A scripted walk (`{"move":..}` cue): the twist and when it ends. The sticks are back in
+     // charge the moment it expires.
+     let mut scripted_move: Option<(proto::MoveParams, Instant)> = None;
+@@ -355,8 +371,20 @@ fn main() -> std::process::ExitCode {
+         let mut start_expression: Option<Kind> = None;
+         let mut soften = false;
+         let mut toggle_emotion = false;
+-        let mut face: Option<Face> = None;
+         while let Some(event) = gilrs.next_event() {
++            // Emotion mode: a mapped button's release before `LONG_PRESS` is its short emotion.
++            if let gilrs::EventType::ButtonReleased(button, _) = event.event
++                && emotion
++                && let Some(i) = emotion_presses.iter().position(|(b, _, _)| *b == button)
++            {
++                let (_, since, fired) = emotion_presses.remove(i);
++                if !fired
++                    && tick.duration_since(since) < LONG_PRESS
++                    && let Some((short, _)) = emotion_of(button)
++                {
++                    start_expression = Some(short);
++                }
++            }
+             // A D-pad-up tap (released before `EMOTION_TAP`; the 3 s hold is the mode switch).
+             // `dpad_up_held_since` is still the press time here: it is only cleared further
+             // down this tick. `None` is a press and release inside one tick — a tap too.
+@@ -368,18 +396,12 @@ fn main() -> std::process::ExitCode {
+             if let gilrs::EventType::ButtonPressed(button, _) = event.event {
+                 match button {
+                     Button::Start => toggle_enable = true,
+-                    // The face buttons: emotions in emotion mode, the prototype's jobs otherwise.
+-                    Button::North if emotion => face = Some(Face::Y),
+-                    Button::East if emotion => face = Some(Face::B),
+-                    Button::South if emotion => face = Some(Face::A),
+-                    Button::West if emotion => face = Some(Face::X),
+-                    Button::LeftThumb if emotion => start_expression = Some(Kind::YesFast),
+-                    Button::RightThumb if emotion => start_expression = Some(Kind::Laugh),
+-                    // Emotion mode takes the bumpers and the stick clicks too; the D-pad keeps
+-                    // its jobs (Rémi: DPad-Down must still stand a seated duck up after
+-                    // devastated), and the analog triggers become emotion buttons below.
+-                    Button::LeftTrigger if emotion => start_expression = Some(Kind::Yes),
+-                    Button::RightTrigger if emotion => start_expression = Some(Kind::No),
++                    // Emotion mode: a mapped button starts a press (short / long decided
++                    // below); the D-pad, the triggers, Start and Select keep their jobs.
++                    b if emotion && emotion_of(b).is_some() => {
++                        emotion_presses.retain(|(x, _, _)| *x != b);
++                        emotion_presses.push((b, tick, false));
++                    }
+                     Button::North => toggle_head = true,
+                     Button::East => toggle_body = true,
+                     Button::South => ground_pick = true,
+@@ -443,7 +465,7 @@ fn main() -> std::process::ExitCode {
+             tracing::warn!(
+                 emotion,
+                 "DPad-Up tap — emotion mode {} (A sad, B devastated, X angry, Y mmh, LB yes, \
+-                 RB no, L3 fast yes, R3 laugh, RT excited, LT play dead; tap again \
++                 RB no, long presses: A devastated, B impatient, X mock, Y curious, LB fast yes, RB defiant, L3 play dead; short: A sad, B excited, X angry, Y mmh, LB yes, RB no, L3 laugh; tap again \
+                  to leave)",
+                 if emotion { "ON" } else { "off" }
+             );
+@@ -482,15 +504,19 @@ fn main() -> std::process::ExitCode {
+                 tracing::info!(?mode, "mode");
+             }
+         }
+-        // Emotion mode's face buttons.
+-        match face {
+-            Some(Face::A) => start_expression = Some(Kind::Sad),
+-            Some(Face::B) => start_expression = Some(Kind::Devastated),
+-            Some(Face::X) => start_expression = Some(Kind::Angry),
+-            // Y lost curious to mmh (Rémi, 2026-09-06): curious stays on LB outside emotion
+-            // mode (silent) and on the cue port.
+-            Some(Face::Y) => start_expression = Some(Kind::Mmh),
+-            None => {}
++        // Emotion mode: a press held to `LONG_PRESS` is its long emotion, fired once at the
++        // threshold (no need to release). Leaving emotion mode forgets the presses.
++        if emotion {
++            for (button, since, fired) in emotion_presses.iter_mut() {
++                if !*fired && tick.duration_since(*since) >= LONG_PRESS {
++                    *fired = true;
++                    if let Some((_, long)) = emotion_of(*button) {
++                        start_expression = Some(long);
++                    }
++                }
++            }
++        } else {
++            emotion_presses.clear();
+         }
+ 
+         // Scripted cues, applied like the presses above: an expression starts (any mode, the
+@@ -745,20 +771,12 @@ fn main() -> std::process::ExitCode {
+         let right_x = deadzone(pad.value(Axis::RightStickX));
+         let right_y = deadzone(pad.value(Axis::RightStickY));
+ 
+-        // The analog triggers, read here because in emotion mode they are emotion buttons
+-        // (RT excited, LT play dead, on the rising edge) and the expression starts just below.
++        // The analog triggers: quack and wheee in both modes (Rémi: manual quacks are useful
++        // in emotion mode too).
+         let trigger = |b: Button| pad.button_data(b).map(|d| d.value()).unwrap_or(0.0) as f64;
+         let rt = trigger(Button::RightTrigger2);
+         let lt = trigger(Button::LeftTrigger2);
+         const SOUND_THRESHOLD: f64 = 0.3;
+-        if emotion {
+-            if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
+-                start_expression = Some(Kind::Excited);
+-            }
+-            if prev_lt < SOUND_THRESHOLD && lt >= SOUND_THRESHOLD {
+-                start_expression = Some(Kind::PlayDead);
+-            }
+-        }
+ 
+         if let Some(kind) = start_expression {
+             tracing::info!(?kind, "expression");
+@@ -790,8 +808,7 @@ fn main() -> std::process::ExitCode {
+         // also chirps and LT rides the wheee, which they now do here too. An expression
+         // with a voice opens the beak the same way, through the same intent.
+         let cued = if cue_mouth_until.is_some_and(|until| tick < until) { 1.0 } else { 0.0 };
+-        let triggers = if emotion { 0.0 } else { rt.max(lt) };
+-        let mouth = triggers.max(cued).max(expression.map_or(0.0, |e| e.mouth_at(tick)));
++        let mouth = rt.max(lt).max(cued).max(expression.map_or(0.0, |e| e.mouth_at(tick)));
+         if let Err(e) = notify(
+             &mut stream,
+             &proto::Call::RobotMouth(proto::MouthParams { open: mouth }),
+@@ -809,13 +826,13 @@ fn main() -> std::process::ExitCode {
+             .drain(..)
+             .map(|tag| proto::SoundParams { tag, hold: None })
+             .collect();
+-        if !emotion && prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
++        if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
+             sound_calls.push(proto::SoundParams {
+                 tag: proto::SoundTag::Chirp,
+                 hold: None,
+             });
+         }
+-        if !emotion && lt >= SOUND_THRESHOLD {
++        if lt >= SOUND_THRESHOLD {
+             sound_calls.push(proto::SoundParams {
+                 tag: proto::SoundTag::Wheee,
+                 hold: Some(true),
 -- 
 2.53.0
 

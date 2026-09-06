@@ -410,3 +410,7 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Rémi on the robot: DPad-Down must stay the sit/stand toggle (to get up after devastated): the D-pad keeps its
   jobs in emotion mode; RT = excited and LT = play dead instead (the triggers quack / wheee only outside emotion
   mode). The quack after "first quacks" must come ~1 s after the line, then "Yes. Like that." right after it.
+
+- Short / long presses in emotion mode (Rémi: RT/LT must stay quack/wheee; the D-pad free): A sad/devastated,
+  B excited/impatient, X angry/mock, Y mmh/curious, LB yes/fast yes, RB no/defiant, L3 laugh/play dead; commit
+  fc685a3, installed and verified on the duck. Handoff for the next agent: `EPISODE3-HANDOFF-2.md`.

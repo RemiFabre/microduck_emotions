@@ -54,4 +54,4 @@ robotctl version | head -3
 systemctl is-active robotd padd btd
 ls /var/lib/robot/sounds/
 journalctl -u padd -b --no-pager | tail -2'
-echo "==> done. Start = stand up, Start again = drive, DPad-Up TAP = emotion mode (chirp): A sad, B devastated, X angry, Y mmh, LB yes, RB no, L3 fast yes, R3 laugh, RT excited, LT play dead (mat! head servos free, Start = init to get up); the D-pad keeps its jobs. Cue-only (TCP 7777): curious, mock, defiant, impatient, pick."
+echo "==> done. Start = stand up, Start again = drive, DPad-Up TAP = emotion mode (chirp): short / long: A sad / devastated, B excited / impatient, X angry / mock, Y mmh / curious, LB yes / fast yes, RB no / defiant, L3 laugh / play dead (mat!). RT/LT quack/wheee, D-pad unchanged. Cue-only (TCP 7777): pick."
