@@ -442,3 +442,10 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   same macOS engine Chrome uses (AVSpeechSynthesizer, voice **Arthur** = Chrome's pick by her regex on this Mac,
   pitchMultiplier 1.28, rate 1.02 mapped as Chromium's `tts_mac.mm`) with `motion/episode3/laureen-film/avsay.m`,
   fed as `audio` lines (`laureen-film.json`, film-only, untracked in the PR worktree). README there.
+- Rémi on take 3: "really good", but the camera pans left-right too fast. Take 4 = a slow ORBIT: when the duck acts the
+  camera swings left around the pair and turns right (to almost the duck's face, ~29 deg, ~3 s), the mirror for
+  Reachy; `combined/episode3/laureen_conversation_v4_orbit_cam.mp4`, PR 2 updated (+ the voice-recording heads-up in
+  its text, as he asked). Reachy's lament turn: he says the direction is wrong -> the duck stands on Reachy's LEFT:
+  scene.json `lament` body_yaw = -1.4 (README staging fixed; the sim builder no longer negates). Launcher for the
+  two-robot scene: `robot/run_episode3.sh` in the theater repo (checks both robots, syncs, ENTER = start at once;
+  START_DELAY=5 for a delay; ENTER again at duck_rises).
