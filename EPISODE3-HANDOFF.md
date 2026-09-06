@@ -101,7 +101,7 @@ in quacks. Short exchanges, reacting to each other, not monologues.
     "Microduck! You are alive!" Duck: **excited**. Reachy: "I am so relieved to see you well and
     alive. I will never talk to you like that again. But please, please, be careful. The world is
     dangerous and you are fragile."
-12. Duck immediately does the **wheee** (roller / the joy ride) or tries to walk, and very likely
+12. Duck immediately does the "roulade" and very likely
     falls forward (may even lose its battery). Reachy, hesitant: "Did... did you die again?" End.
 
 Ask Rémi: the exact free buttons for yes / no / play dead / excited; whether play dead may end

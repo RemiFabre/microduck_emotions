@@ -1,0 +1,275 @@
+[
+ {
+  "recipe": "1_sit_hold1_soften",
+  "end": "upright",
+  "g_end": [
+   0.29,
+   0.03,
+   -0.96
+  ],
+  "left_upright_at": null,
+  "rest_at": 2.5,
+  "peak_trunk_w_rad_s": 2.2,
+  "peak_head_speed_m_s": 0.59,
+  "head_z_min": 0.048,
+  "trunk_z_end": 0.057,
+  "x_end": -0.045,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "1b_sit_hold2_soften",
+  "end": "upright",
+  "g_end": [
+   0.21,
+   0.02,
+   -0.98
+  ],
+  "left_upright_at": null,
+  "rest_at": 3.48,
+  "peak_trunk_w_rad_s": 2.2,
+  "peak_head_speed_m_s": 0.56,
+  "head_z_min": 0.054,
+  "trunk_z_end": 0.057,
+  "x_end": -0.046,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "2_sit_headback_yaw_soften",
+  "end": "ON BACK",
+  "g_end": [
+   -0.99,
+   0.13,
+   -0.01
+  ],
+  "left_upright_at": 2.98,
+  "rest_at": 4.28,
+  "peak_trunk_w_rad_s": 6.61,
+  "peak_head_speed_m_s": 0.82,
+  "head_z_min": 0.029,
+  "trunk_z_end": 0.048,
+  "x_end": -0.14,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "3_sit_rise0.2_soften",
+  "end": "upright",
+  "g_end": [
+   0.43,
+   0.03,
+   -0.9
+  ],
+  "left_upright_at": 2.68,
+  "rest_at": 4.54,
+  "peak_trunk_w_rad_s": 4.59,
+  "peak_head_speed_m_s": 0.75,
+  "head_z_min": 0.088,
+  "trunk_z_end": 0.054,
+  "x_end": -0.021,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "3_sit_rise0.4_soften",
+  "end": "ON BACK",
+  "g_end": [
+   -1.0,
+   0.0,
+   0.01
+  ],
+  "left_upright_at": 2.9,
+  "rest_at": 3.12,
+  "peak_trunk_w_rad_s": 9.08,
+  "peak_head_speed_m_s": 1.39,
+  "head_z_min": 0.028,
+  "trunk_z_end": 0.046,
+  "x_end": -0.171,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "3_sit_rise0.6_soften",
+  "end": "ON BACK",
+  "g_end": [
+   -1.0,
+   0.0,
+   0.01
+  ],
+  "left_upright_at": 2.94,
+  "rest_at": 3.18,
+  "peak_trunk_w_rad_s": 10.85,
+  "peak_head_speed_m_s": 1.45,
+  "head_z_min": 0.023,
+  "trunk_z_end": 0.046,
+  "x_end": -0.18,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "3_sit_rise0.8_soften",
+  "end": "ON BACK",
+  "g_end": [
+   -1.0,
+   0.0,
+   0.01
+  ],
+  "left_upright_at": 3.0,
+  "rest_at": 3.18,
+  "peak_trunk_w_rad_s": 9.18,
+  "peak_head_speed_m_s": 1.45,
+  "head_z_min": 0.028,
+  "trunk_z_end": 0.046,
+  "x_end": -0.199,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "3_sit_rise1.2_soften",
+  "end": "upright",
+  "g_end": [
+   0.31,
+   0.04,
+   -0.95
+  ],
+  "left_upright_at": null,
+  "rest_at": 4.46,
+  "peak_trunk_w_rad_s": 3.84,
+  "peak_head_speed_m_s": 0.66,
+  "head_z_min": 0.056,
+  "trunk_z_end": 0.062,
+  "x_end": -0.079,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "4_sit_pose-0.2_soften",
+  "end": "ON BACK",
+  "g_end": [
+   -0.9,
+   0.0,
+   -0.44
+  ],
+  "left_upright_at": 3.78,
+  "rest_at": 4.02,
+  "peak_trunk_w_rad_s": 5.69,
+  "peak_head_speed_m_s": 0.57,
+  "head_z_min": 0.031,
+  "trunk_z_end": 0.06,
+  "x_end": -0.116,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "4_sit_pose-0.3_soften",
+  "end": "ON BACK",
+  "g_end": [
+   -0.9,
+   0.05,
+   -0.44
+  ],
+  "left_upright_at": 3.94,
+  "rest_at": 4.18,
+  "peak_trunk_w_rad_s": 6.27,
+  "peak_head_speed_m_s": 0.55,
+  "head_z_min": 0.031,
+  "trunk_z_end": 0.059,
+  "x_end": -0.115,
+  "nets": [
+   "sitstand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "5_sit_relax",
+  "end": "upright",
+  "g_end": [
+   0.22,
+   0.02,
+   -0.98
+  ],
+  "left_upright_at": null,
+  "rest_at": 3.96,
+  "peak_trunk_w_rad_s": 2.2,
+  "peak_head_speed_m_s": 0.55,
+  "head_z_min": 0.067,
+  "trunk_z_end": 0.059,
+  "x_end": -0.053,
+  "nets": [
+   "sitstand",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "6_crouch_headback_soften",
+  "end": "face down",
+  "g_end": [
+   1.0,
+   -0.08,
+   -0.02
+  ],
+  "left_upright_at": 2.0,
+  "rest_at": 2.96,
+  "peak_trunk_w_rad_s": 6.82,
+  "peak_head_speed_m_s": 1.28,
+  "head_z_min": 0.048,
+  "trunk_z_end": 0.036,
+  "x_end": 0.073,
+  "nets": [
+   "stand",
+   "soften",
+   "relax"
+  ]
+ },
+ {
+  "recipe": "7_headback_backstep_soften",
+  "end": "face down",
+  "g_end": [
+   0.99,
+   0.0,
+   -0.12
+  ],
+  "left_upright_at": 1.62,
+  "rest_at": 2.18,
+  "peak_trunk_w_rad_s": 8.0,
+  "peak_head_speed_m_s": 1.26,
+  "head_z_min": 0.052,
+  "trunk_z_end": 0.032,
+  "x_end": 0.078,
+  "nets": [
+   "stand",
+   "walk",
+   "soften",
+   "relax"
+  ]
+ }
+]

@@ -206,3 +206,42 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Curious roll-only installed: rev 8922e49-local (Y), neck and head_pitch 0 throughout, roll and chirps unchanged; verified read-only. Not yet tested by Rémi.
 - Rémi: cut 2 s between "I have to talk to you" and the lake line (the duck_curious hold). Scene agent trimming.
 - 2026-09-06: both repos PUBLIC; theater `scene/lake` fast-forwarded into `main` (structure was already right: scene files under scenes/lake, shared tools in robot/ video/ microduck/), branch deleted. Episode 3 brief written: `EPISODE3-HANDOFF.md` (copy in the theater repo as microduck/EPISODE3-BRIEF.md). README gained the "three kinds of emotion" section.
+
+## 2026-09-06, episode 3 (brief: `EPISODE3-HANDOFF.md`)
+
+- Simulator Space forked: https://huggingface.co/spaces/RemiFabre/microduck-reachy-simulator (copy of
+  `FormaLau/microduck-reachy-simulator`, cpu-basic, public). It is a compiled Vite bundle (React Three Fiber +
+  MuJoCo WASM + ONNX Runtime) with the assets and `scripts/*.json` (actions for both robots: `robot`,
+  `action`, `value`, `parallelGroup`); the JavaScript source is NOT in the Space, so iterating on it means
+  editing minified JS. Its duck emotions are simple hard-coded loops (joy = walk + head sine, sadness = sit
+  + three head shakes, anger = drive twitches). Ask Laureen for the source repo; until then the local MuJoCo
+  pipeline (`notes/reachy-encounter/duckfilm.py`) stays the design tool.
+- Shared episode 3 renderer: `motion/episode3/lib.py` (Motion = pure function of time returning head, body
+  z / pitch, twist, skill, soften, relax, mouth; render = silent mp4 + muxed mp4 + keyframes json with mouth
+  + beats sheet + measurements; `Duck3` adds `robot.soften` to the film duck: gain 50 at once, to 0 over 1 s
+  holding the joints, then torque off). Cameras: front34 (default), side, wide.
+- Runtime, branch `pad-expressions` commit e105298 (tests green, `cargo check` clean):
+  - `padd/src/cue.rs`: **cue port** TCP 7777 (`--cue-port`, 0 disables), one JSON line per cue, one answer per
+    line: `{"express":"yes"}` -> `{"ok":true,"duration":1.40}`; `{"skill":"ground_pick"}` (nominal duration
+    back: ground_pick 4, sit_toggle 2.5, kicks 0.6, roulade 1.5); `{"sound":"chirp"}`; `{"move":[vx,vy,wz],
+    "for":1.5}` (overrides the sticks for that long, then the sticks again); `{"stop":true}`; `{"ping":true}`
+    lists the kinds. Cues are queued by a thread and applied by the pad loop like button presses, so a PAD
+    MUST BE CONNECTED (the loop idles without one) and the sticks stay alive between cues. Verified on the
+    Mac against a fake robotd (all answers as designed).
+  - Emotion mode bindings: A sad, B devastated, **X angry, Y curious, LB yes, RB no, DPad-Down excited,
+    DPad-Left play dead**. Start, Select, sticks, RT/LT (mouth + chirp / wheee), DPad-Right (servo reboot)
+    unchanged in both modes, as Rémi asked.
+  - `Kind::{Yes, No, Angry, Excited, PlayDead, ClosedQuack}` with DRAFT bodies (numbers from the brief, to be
+    replaced by the simulation picks), `Kind::NAMES` / `from_name` for the wire, `Expression::soften_at`
+    (play dead sends `robot.soften` mid-expression, once). `SoundTag::{Yes, No, Angry, Excited, PlayDead}`
+    (folders `yes`, `no`, `angry`, `excited`, `play_dead`) in the proto and in `take_sounds()`.
+  - Docker arm64 build of the four daemons warmed up (43 s incremental).
+- Theater repo (main, commits 4daebb7, 236b390): `robot/duck_cue.py` (stdlib client of the cue port, CLI
+  too), `robot/skit.py` plays duck cues in beats (`duck`, `duck_skill`, `duck_sound`, `duck_move` + `for`),
+  `wait: "key"` beats (ENTER when Rémi has piloted the duck), `--no-duck`, `--dry-duck`; run_on_robot.sh
+  ships duck_cue.py and `DUCK_CUE`. `scenes/episode3/scene.json` (21 beats, 10 lines) and its audio
+  rendered with the same voice `0m5sA4wKd4nKxBtRAu0n` (eleven_v3). `microduck/sim/episode3_preview.py`:
+  the whole scene in simulation (sim duck with the picked motions + wavs, ground pick added with robotd's
+  phase encoding, Reachy puppet with talking bob and crude gestures per move name, lines mixed in).
+- Four design forks launched in parallel on the shared renderer: yes + no + closed-beak quack, angry
+  (programmatic, X), excited, play dead (with a probe of fall recipes from the seat).

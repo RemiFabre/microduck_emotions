@@ -1,0 +1,134 @@
+{
+ "motions": {
+  "pd_faint": {
+   "recipe": "headback",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "headback": [
+    1.0,
+    2.0
+   ],
+   "yaw": [
+    1.2,
+    2.0
+   ],
+   "yaw_amp": 0.6,
+   "soften": 2.2,
+   "rest": 4.5,
+   "death": 4.8,
+   "death_len": 1.8,
+   "total": 7.5,
+   "desc": "shock (head up, sit at once), the head goes back and to the side over 1 s, soften at 2.2 s: the duck keels over backwards on its own weight as the torque dies (tips ~3.2 s, still by ~4.5 s), death quack at 4.8 s, beak barely open"
+  },
+  "pd_faint_slow": {
+   "recipe": "headback",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "headback": [
+    1.0,
+    2.5
+   ],
+   "yaw": [
+    1.3,
+    2.5
+   ],
+   "yaw_amp": 0.6,
+   "soften": 2.8,
+   "rest": 5.1,
+   "death": 5.6,
+   "death_len": 2.0,
+   "total": 8.5,
+   "desc": "same faint, slower: the head goes back over 1.5 s, soften at 2.8 s, more silence, death quack at 5.6 s"
+  },
+  "pd_lean": {
+   "recipe": "lean",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "lean": [
+    1.2,
+    2.0
+   ],
+   "lean_pitch": -0.3,
+   "yaw": [
+    1.2,
+    2.0
+   ],
+   "yaw_amp": 0.6,
+   "soften": 2.4,
+   "rest": 4.4,
+   "death": 5.0,
+   "death_len": 1.8,
+   "total": 7.5,
+   "desc": "shock + sit, a body-pose lean back (-0.3, seated: the net moves the neck back) with the head to the side, soften at 2.4 s; the duck tips over ~1.3 s after the torque is gone (probe: the softest fall, but a marginal balance)"
+  },
+  "pd_legs": {
+   "recipe": "rise",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    1.2,
+    1.9
+   ],
+   "yaw_amp": 0.6,
+   "rise": 2.0,
+   "soften": 2.4,
+   "rest": 3.4,
+   "death": 4.2,
+   "death_len": 1.8,
+   "total": 7.0,
+   "desc": "shock + sit, head to the side, then the sit-stand RISE for 0.4 s (the legs straighten) and soften: the duck goes over backwards from its heels (the brief's idea; the fastest fall in the probe)"
+  }
+ },
+ "renders": [
+  {
+   "motion": "pd_faint",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_faint__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_faint",
+   "sound": "D2_inquire_coo_fall",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_faint__D2_inquire_coo_fall.wav",
+   "desc": "the bank's inquire shock (as devastated), silence, then the robot's coo voice falling 230 -> 110 Hz with a dying wobble: a breathy last sigh"
+  },
+  {
+   "motion": "pd_faint",
+   "sound": "D3_alarm_wheee_tape",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_faint__D3_alarm_wheee_tape.wav",
+   "desc": "alarm at the press, silence, then the bank's wheee loop backwards on a slowing tape: a real-timbre fall that dies"
+  },
+  {
+   "motion": "pd_faint_slow",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_faint_slow__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_faint_slow",
+   "sound": "D2_inquire_coo_fall",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_faint_slow__D2_inquire_coo_fall.wav",
+   "desc": "the bank's inquire shock (as devastated), silence, then the robot's coo voice falling 230 -> 110 Hz with a dying wobble: a breathy last sigh"
+  },
+  {
+   "motion": "pd_lean",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_lean__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_legs",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_legs__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  }
+ ]
+}
