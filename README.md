@@ -15,7 +15,7 @@ synchronized beat by beat, and the beak opens with the sound.
 | **curious** (Y, "what? what?") | `motion/curious/curious_two_tilts_r35_leftboost__Q3_up2.mp4`: standing, head forward (neck -0.8, head_pitch -0.35), tilt right +0.35 on the first quack, tilt left -0.44 on the second, hold, back; 3.0 s. Spec `motion/curious/spec_v3.json` | `sounds/curious/curious_two_tilts_r35_leftboost__Q3_up2.wav`: two of the bank's rising chirp blips at 0.6 / 1.2 s, the second 2 semitones higher; robot file `sounds/robot/curious_a.wav` | **decided** (2026-09-04) |
 | **angry** | RL stomp: three quick stomps on the same foot, head left / right / left (`Mjlab-Stomp-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`) | to design on the trained motion's beats (barks on the foot contacts) | training runs in progress (`motion/anger-rl/REPORT.md`) |
 
-Later: excited, scared (see `HANDOFF.md`).
+Later: excited, scared (see `HANDOFF.md`). Real-robot lessons: anything that moves the head's mass forward makes the walking policy step forward (sad went to half depth, curious lost its head-forward); the simulation does not show it. The Reachy Mini side (scenes, voice, captions) is https://github.com/RemiFabre/agentic_robot_theater (`microduck/EMOTIONS.md` there is the bridge back here).
 
 ## Layout
 
