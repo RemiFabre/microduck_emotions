@@ -298,7 +298,7 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   turn much more and much earlier (from the sit, like devastated) then tilt back, cut with `robot.relax`, torque back
   on 0.5-1 s after the fall so the beak and later emotions work; a **laugh** emotion (beak up, head left-right, body
   moving) for the scene; a **bindings file** kept up to date (`BINDINGS.md`); more emotions than buttons is fine.
-  Scene: the pick must open the beak on the way down; "not a dog. You are a Microduck." (no extra Microduck); the
+  Scene: the pick must open the beak on the way down; "not a duck. You are a Microduck." (no extra Microduck); the
   duck's answers = mmh after the lake line and after the sunscreen line, a double quack after the water-resistance
   line; the sun line stops at "our circuits?" and ends "We shouldn't go."; then yes / "No." / fast yes / "No!" / fast
   yes / "Oh, Asimov, give me the strength for this one" (references for the adults); the offended line gets a hurt
@@ -307,9 +307,9 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   "your first quacks"; the duck laughs after "I still hear you in my mind"; the relieved line shortened, ending "Can
   you promise me that?"; one second later the roulade (he handles Select). Later: `laugh_roll` + L1 = a **mock**
   ("gnagnagnagna", after a scolding); the laugh's head aimed up more and its sound = a long "haaa" then a dying run.
-- Rémi heard "dog" where the text says "duck": whisper (faster-whisper medium) transcribes the rendered lines as
-  written ("But you are not a dog, Microduck. You are a Microduck." / "you are a bad dog"), so the TTS says what the
-  text says; the joke line stays "not a dog", the insult "bad dog". To confirm with him.
+- Rémi: it is always DUCK, never dog ("You are obsessed with the lake, but you are not a duck. You are a
+  Microduck." / "you are a bad duck"); his speech-to-text writes "dog" for "duck". The two lines were re-rendered
+  (`lake`, `bad_duck`); the word "dog" is banned from the scene.
 - Laureen published the simulator's full source (Space commits 15:33-15:36 UTC): `src/` (React, game.js, the duck
   runtime, `src/game/microduck/microduckEmotions.js` = three hard-coded loops), `public/`, vite. The fork was synced
   (`RemiFabre/microduck-reachy-simulator` main = FormaLau's source, merge commit 9380a73) and cloned at
