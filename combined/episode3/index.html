@@ -14,81 +14,81 @@ Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> 
 
 <h2>The scene, in simulation</h2>
 <p>Whole of <code>scenes/episode3/scene.json</code> played by the same player logic: the sim duck runs the motions and wavs below, the Reachy puppet the rendered lines.
-<a href="preview_sim.mp4">preview_sim.mp4</a> (also in the theater repo, <code>scenes/episode3/preview_sim.mp4</code>).</p>
-<video src="preview_sim.mp4" controls playsinline preload="metadata" style="max-width:960px"></video>
+<a href="preview_sim.mp4?v=1788721956">preview_sim.mp4</a> (also in the theater repo, <code>scenes/episode3/preview_sim.mp4</code>).</p>
+<video src="preview_sim.mp4?v=1788721956" controls playsinline preload="metadata" style="max-width:960px"></video>
 
 <h2>The scene in Laureen's browser simulator (real Reachy Mini model + its recorded moves)</h2>
 <p>Your fork of the simulator now plays the same scene: the real Reachy Mini (MuJoCo model + IK) with the library's recorded moves, the rendered lines as audio with the head wobbling on the voice, the duck's real emotions (same formulas as the runtime, incl. the dead pose), both actors 0.6 m apart facing each other.
 Live: <a href="https://remifabre-microduck-reachy-simulator.hf.space/?boot=1&amp;script=episode3&amp;autoplay=1">remifabre-microduck-reachy-simulator.hf.space/?boot=1&amp;script=episode3&amp;autoplay=1</a> (add <code>&amp;ambient=0</code> to mute the hum).
-Recording (with sound): <a href="preview_browser.mp4">preview_browser.mp4</a>. Not modelled there: the BAM servos, the leash, the daemon's own wobbler.</p>
-<video src="preview_browser.mp4" controls playsinline preload="metadata" style="max-width:960px"></video>
-<p>Laureen's own conversation script (her latest mapping and voice), recorded with the same tool and the soft follow cam: <a href="laureen_conversation.mp4">laureen_conversation.mp4</a> (21 s).
+Recording (with sound): <a href="preview_browser.mp4?v=1788722020">preview_browser.mp4</a>. Not modelled there: the BAM servos, the leash, the daemon's own wobbler.</p>
+<video src="preview_browser.mp4?v=1788722020" controls playsinline preload="metadata" style="max-width:960px"></video>
+<p>Laureen's own conversation script (her latest mapping and voice), recorded with the same tool and the soft follow cam: <a href="laureen_conversation.mp4?v=1788721667">laureen_conversation.mp4</a> (21 s).
 The follow cam is <code>?camera=follow</code> on the URL. The head wobble is now a line-for-line port of the daemon's speech tapper and wobbler, fed by each line's wav.</p>
-<video src="laureen_conversation.mp4" controls playsinline preload="metadata" style="max-width:640px"></video>
+<video src="laureen_conversation.mp4?v=1788721667" controls playsinline preload="metadata" style="max-width:640px"></video>
 
 <h2>The picks</h2>
 <div class="grid">
 <div class="card"><h3>YES (LB), 1.5 s</h3>
-<video src="yes_single__Y2_synth_fall.mp4" controls playsinline preload="metadata"></video>
+<video src="yes_single__Y2_synth_fall.mp4?v=1788705146" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> one nod: head_pitch 0 → +0.7 over 0.25 s from 0.05 s, hold 0.1 s, back over 0.35 s (the joint bottoms out at ~0.45 s, 38°). Neck 0, yaw 0.</p>
 <p><b>sound:</b> one quack at 0.45 s, 250 Hz falling 3 semitones over 0.3 s. Robot wav <code>sounds/robot/yes_a.wav</code>.</p>
 <p class="q">Choices: one nod or two (<code>yes_double</code>)? flat, falling or the bank's greet? <a href="../yes/index.html">all 12 pairs</a></p></div>
 
 <div class="card"><h3>YES, FAST (L3), 1.5 s</h3>
-<video src="yes_single__Y3_synth_wak.mp4" controls playsinline preload="metadata"></video>
+<video src="yes_single__Y3_synth_wak.mp4?v=1788710872" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> the same nod as yes.</p>
 <p><b>sound:</b> a curt 0.18 s "wak" falling a fourth (Rémi's second yes: the quick one for the yes / no / yes exchange). Robot wav <code>yes_fast_a.wav</code>.</p></div>
 
 <div class="card"><h3>NO (RB), 1.8 s</h3>
-<video src="no_one__N2_synth_m5.mp4" controls playsinline preload="metadata"></video>
+<video src="no_one__N2_synth_m5.mp4?v=1788705146" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> one head shake, yaw only: +0.55 at 0.35 s, −0.55 at 0.85 s, 0.25 s fades, centre at 1.10 s (joint ±0.4, lags 0.25 s).</p>
 <p><b>sound:</b> "no" at 0.60 s (250 Hz, flat), "ah" at 1.10 s a fourth lower, falling. Robot wavs <code>no_a</code> (this), <code>no_b</code> (nasal, sulky), <code>no_c</code> (drawn-out "aaah"): the robot picks one at random per play.</p>
 <p class="q">Choices: interval of the second note (−3 / −5 / −7 semitones), synth or the bank's voice, one shake or two. <a href="../no/index.html">all 18 pairs</a></p></div>
 
 <div class="card"><h3>ANGRY (X), 2.6 s</h3>
-<video src="bow_snaps__S1_hard_barks.mp4" controls playsinline preload="metadata"></video>
+<video src="bow_snaps__S1_hard_barks.mp4?v=1788705146" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> beak-up glare (head_pitch −0.35), four snaps at 0.30 / 0.90 / 1.50 / 2.00 s: yaw +0.7 / −0.7 / +0.7 / centre, a short head jab (+0.45), a small fast bow pulse (+0.14) on the first three. Neck 0. <b>Beak forced wide 0.30–0.70 s</b> so the leash drops.</p>
 <p><b>sound:</b> four hard barks (300 Hz, click attack, rasp), the last held and chopped. Robot wavs <code>angry_a</code> (barks) and <code>angry_b</code> (a growl swelling into the same barks).</p>
 <p><b>finding:</b> a body-pose "bow" above ~0.2 folds the whole duck forward (trunk −20..−37°, 5–14 cm drift) = the head-forward mass that makes the real robot walk. Only small fast pulses are clean; body z does nothing on the stand net.</p>
 <p class="q">Choices: is 0.4 s of wide beak enough for the leash? scold (this) or menace (<code>crouch_shake_lunge</code>, growl)? <a href="../angry/index.html">all 12 pairs</a></p></div>
 
 <div class="card"><h3>EXCITED (RT), 3.4 s</h3>
-<video src="excited_wag_pump__X1_synth_rise_climb.mp4" controls playsinline preload="metadata"></video>
+<video src="excited_wag_pump__X1_synth_rise_climb.mp4?v=1788710872" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> six accelerating head swings ±0.6 (extremes at 0.40 / 0.95 / 1.45 / 1.90 / 2.30 / 2.65 s), the beak climbing from −0.15 to −0.70, a body bob (+0.12 bow pulse, 12–16 mm dip) on each swing, a bow flourish at the end. Neck 0.</p>
 <p><b>sound:</b> X1 synth climb (Rémi's pick): each quack higher, shorter and rising more. Robot wav <code>excited_a.wav</code>.</p>
 <p><a href="../excited/index.html">all 14 pairs</a></p></div>
 
 <div class="card"><h3>LAUGH (R3), 3.0 s</h3>
-<video src="laugh_wag_v2__L4_dying.mp4" controls playsinline preload="metadata"></video>
+<video src="laugh_wag_v2__L4_dying.mp4?v=1788711216" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> beak aimed up (−0.7), the head wagging ±0.45 on the long "haaa" and every other short "ha", a body dip on every "ha".</p>
 <p><b>sound:</b> Rémi's "dying of laughter": one longer falling "haaa", then seven short ha's getting shorter, softer and further apart. Robot wav <code>laugh_a.wav</code>. <a href="../laugh/index.html">the laugh page</a></p></div>
 
 <div class="card"><h3>MOCK (cue only, "gnagnagnagna"), 2.6 s</h3>
-<video src="mock__L1_synth_haha.mp4" controls playsinline preload="metadata"></video>
+<video src="mock__L1_synth_haha.mp4?v=1788711216" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> <code>laugh_roll</code>: beak up (−0.55), the head ROLLING ±0.35 on every other "ha", a body dip on every "ha".</p>
 <p><b>sound:</b> the first laugh's staccato run (seven short quacks stepping down). Robot wav <code>mock_a.wav</code>. Rémi: "a great move for a mockery, after someone scolds the duck".</p>
 <p class="q">No free button left: cue only (<code>{"express":"mock"}</code>). Say which emotion it should replace on the pad, if any.</p></div>
 
 <div class="card"><h3>PLAY DEAD (LT), 7.5 s, v3 "the dead animal"</h3>
-<video src="pd_v3_dead__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
+<video src="pd_v3_dead__D1_alarm_glide_wobble.mp4?v=1788712088" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> sit + alarm on the press while the head snaps up and turns hard to the side (yaw 1.0 over 0.5 s); 0.4–1.0 s the head goes back; <b>1.4 s: the three head servos hang free and every leg joint is driven to zero over 1.5 s</b> (a new runtime call, <code>robot.poseJoints</code>): the seated duck rolls flat onto its back (tips at 2.0 s, still at 3.0 s), the limp head on the side; <b>3.6 s: the legs come up</b> (hips ±1.0, knees ±1.5 over 1 s), the body unmoved; 5.0–6.8 s the death quack, beak 0.3 (the jaw stays powered). No relax, no re-init: the robot holds the dead pose until your Start.</p>
 <p><b>sound:</b> alarm, silence, the falling synth glide with a dying wobble. Robot wav <code>play_dead_a.wav</code>.</p>
 <p><b>probe (27 recipes):</b> every "legs to zero" recipe rolls the duck onto its back; the slower the leg ramp the softer (1.5 s: 7.5 rad/s, 0.5 s: 9.6); gain 100/160/200 make no difference; straight to legs-up is marginal (rocks or ends propped); two stages is the softest and lands flat. The unpowered head ends folded back on the shoulder shell (own weight only). Head roll servo kept on (off: the head hangs crooked).</p>
 <p class="q">Mat first (7.45 rad/s, head 1.0 m/s; a 2 s leg ramp would be softer). Options: legs flat instead of up (<code>pd_v3_flat</code>), four head servos off (<code>pd_v3_dead_off4</code>). Check the head cable where the limp head rests on the shoulder. <a href="../playdead/index.html">probe table + videos (v3, v2, v1)</a></p></div>
 
 <div class="card"><h3>DEFIANT, "says who?" (cue only), 2.2 s</h3>
-<video src="defiant__D1_two_waks.mp4" controls playsinline preload="metadata"></video>
+<video src="defiant__D1_two_waks.mp4?v=1788716615" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> the beak up (−0.6) and to the left (yaw +0.6) with a quack, then over to the right (yaw −0.6) with a second quack; level by 2.0 s. Rémi's one-shot request for the answer after the water-resistance line.</p>
 <p><b>sound:</b> two curt "wak"s falling a third. Robot wav <code>defiant_a.wav</code>.</p></div>
 
 <div class="card"><h3>IMPATIENT, "come on!" (cue only), 2.6 s</h3>
-<video src="impatient__I1_grumbles_huff.mp4" controls playsinline preload="metadata"></video>
+<video src="impatient__I1_grumbles_huff.mp4?v=1788716615" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> four quick yaw shakes ±0.4 (0.4 s apart) with a body bob on each, then the beak flicks up (−0.7) on a huff. The answer after "We shouldn't go."</p>
 <p><b>sound:</b> four short nasal grumbles stepping down, then a rising-falling huff. Robot wav <code>impatient_a.wav</code>.</p>
 <p class="q">Rémi mentioned an "impatient" duck move in Laureen's simulator; it is not in her published source (nor in her latest commits), so this is our own take. Point me to hers if it exists.</p></div>
 
 <div class="card"><h3>MMH, "what do you mean?" (Y), 2.0 s</h3>
-<video src="mmh__C3_mmh.mp4" controls playsinline preload="metadata"></video>
+<video src="mmh__C3_mmh.mp4?v=1788710872" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> a roll tilt +0.22 from 0.45 s, held, back by 1.6 s; the beak opens normally (in the scene the leash falls here).</p>
 <p><b>sound:</b> a muffled rising "mmh?" (205 → 300 Hz, low-passed). Robot wav <code>mmh_a.wav</code>. Rémi's pick from the closed-beak page; the grumbles are dropped.</p></div>
 </div>
