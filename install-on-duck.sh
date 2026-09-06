@@ -27,11 +27,14 @@ ssh "$BOARD" 'mkdir -p ~/duck-sideload/sounds'
 scp -q $(for b in $BINS; do printf '%s ' "$OUT/$b"; done) "$BOARD:duck-sideload/"
 scp -q "$WAVS"/*.wav "$BOARD:duck-sideload/sounds/"
 
+# DUCK_SUDO_PASS=... makes the swap non-interactive (the password is `microduck`, see the agent memory).
+SUDO='sudo'
+[ -n "${DUCK_SUDO_PASS:-}" ] && SUDO="echo '$DUCK_SUDO_PASS' | sudo -S"
 ssh -t "$BOARD" 'set -e
 REL=$(readlink -f /opt/robot/daemon/current)
 SRC=$HOME/duck-sideload
 echo "release dir: $REL"
-sudo sh -c "set -e
+'"$SUDO"' sh -c "set -e
   systemctl stop padd robotd
   for b in '"$BINS"'; do
     [ -f $REL/bin/\$b.orig ] || cp -p $REL/bin/\$b $REL/bin/\$b.orig
@@ -51,4 +54,4 @@ robotctl version | head -3
 systemctl is-active robotd padd btd
 ls /var/lib/robot/sounds/
 journalctl -u padd -b --no-pager | tail -2'
-echo "==> done. Start = stand up, Start again = drive, DPad-Up TAP = emotion mode (chirp): A sad, B devastated, X angry, Y curious, LB yes, RB no, DPad-Down excited, DPad-Left play dead. Cue port TCP 7777."
+echo "==> done. Start = stand up, Start again = drive, DPad-Up TAP = emotion mode (chirp): A sad, B devastated, X angry, Y mmh, LB yes, RB no, L3 fast yes, R3 laugh, DPad-Down excited, DPad-Left play dead (mat! head servos free, Start = init to get up). Cue-only (TCP 7777): curious, mock, defiant, impatient, pick."
