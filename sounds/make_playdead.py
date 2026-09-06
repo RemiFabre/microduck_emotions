@@ -30,6 +30,22 @@ ST = 2 ** (1 / 12)
 # (gain 50 at once, to 0 over 1 s, torque off), the duck tips over as the torque dies and is still by `rest`;
 # `death` = the death quack starts, `death_len` its length; `total` = the emotion's length.
 MOTIONS = {
+    # ---- v2 (Rémi's feedback, 2026-09-06): the head yaws hard to the side FROM THE PRESS, with the sit ("like devastated,
+    # he just turns his head"), then tilts back at once (beak to the sky); the torque is cut with robot.relax (at once);
+    # the duck keels over backwards; 0.6 s after it is at rest, robot.init (torque on + a 2 s ramp to the home pose:
+    # the last twitch, the head straightens); then the death quack with the beak open 0.3. Times from probe.py (v2 rows).
+    "pd_v2_faint": dict(recipe="v2", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.0], relax=1.4, init=3.0,
+                        rest=2.4, death=5.5, death_len=1.8, total=7.6,
+                        desc="v2: alarm + sit at the press while the head turns hard to the side (yaw 1.0 over 0.5 s), the head goes back at once (0.4-1.0 s), robot.relax at 1.4 s: the duck keels over backwards (tips 2.0 s, still by 2.4 s), robot.init at 3.0 s (2 s ramp: the head straightens, the legs fold to home), death quack at 5.5 s with the beak open 0.3"),
+    "pd_v2_faint_late": dict(recipe="v2", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.0], relax=1.7, init=3.3,
+                             rest=2.7, death=5.8, death_len=1.8, total=7.9,
+                             desc="v2, a beat of suspense: same head choreography, robot.relax at 1.7 s (the head hangs back for 0.7 s before the cut), init at 3.3 s, death quack at 5.8 s"),
+    "pd_v2_soft": dict(recipe="v2", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.2], headback_amp=-0.8, relax=1.5, init=3.1,
+                       rest=2.5, death=5.6, death_len=1.8, total=7.7,
+                       desc="v2, softer lever: the head goes back only to -0.8 over 0.8 s, robot.relax at 1.5 s (probe: head 0.79 m/s instead of 0.90), init at 3.1 s, death quack at 5.6 s"),
+    "pd_v2_slowback": dict(recipe="v2", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.6, 1.4], relax=1.8, init=3.4,
+                           rest=2.8, death=5.9, death_len=1.8, total=8.0,
+                           desc="v2, slower: the head turns first, then goes back over 0.8 s (0.6-1.4 s), robot.relax at 1.8 s, init at 3.4 s, death quack at 5.9 s"),
     # A. the faint: seated, the head goes up/back (beak to the sky) and to the side, the torque goes, the duck keels
     #    over backwards on its own weight. The head is the lever (probe recipe 2).
     "pd_faint": dict(recipe="headback", shock=[0.0, 0.55], headback=[1.0, 2.0], yaw=[1.2, 2.0], yaw_amp=0.6, soften=2.2,
@@ -110,7 +126,11 @@ def main():
         variants = sounds_for(b)
         # every motion gets D1; the two faint motions get all three
         for sname, parts, desc in variants:
-            if not mname.startswith("pd_faint") and sname != "D1_alarm_glide_wobble":
+            if mname == "pd_v2_faint" and sname == "D3_alarm_wheee_tape":
+                continue
+            if mname.startswith("pd_v2") and mname != "pd_v2_faint" and sname != "D1_alarm_glide_wobble":
+                continue
+            if not mname.startswith(("pd_faint", "pd_v2")) and sname != "D1_alarm_glide_wobble":
                 continue
             if mname == "pd_faint_slow" and sname == "D3_alarm_wheee_tape":
                 continue

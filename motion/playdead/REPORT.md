@@ -1,4 +1,100 @@
-# Play dead (episode 3): shock, sit, keel over backwards, death quack
+# Play dead, v2 (Rémi's feedback, 2026-09-06 evening)
+
+Rémi on the v1 pick (`pd_faint`): the idea (the head as the lever) is right, but on the real robot the back of the head
+would hit the shoulders with only 0.6 of yaw; the head must turn MUCH more and MUCH earlier (from the press, with the sit,
+"like devastated, he just turns his head"), then tilt back at once; cut the torque with `robot.relax` (not soften); once the
+fall is over, torque back ON (so the beak works and further emotions are possible); the death quack after that.
+Page: `/Users/remi/microduck/notes/emotions/combined/playdead/index.html` (v2 pick first, three v2 alternatives, v1 for comparison).
+Code: `pdduck.py` (the play-dead duck: relax, then `robot.init` = 2 s ramp to home, then hold; head-shell / trunk gap),
+`probe.py` (v2 rows), `playdead.py` (`pd_v2_*`, `pick()`), `../../sounds/make_playdead.py` (v2 beats -> wavs).
+
+## v2 probe (probe.json, v2 rows; no video)
+
+Sit at 0, head yaw 1.0 over 0-0.5 s, head back (-1.0) over the window, `relax` at the time; ON BACK = trunk's back on the floor.
+"gap" = closest approach between the head shell and the trunk collision meshes BEFORE the cut (54 mm at the home pose).
+
+| recipe (head back window, relax) | ends | leaves upright | at rest | peak trunk rot (rad/s) | peak head v (m/s) | gap before cut | joints at cut (yaw / pitch) |
+|---|---|---|---|---|---|---|---|
+| 0.4-1.0, **relax 1.4** (pick) | ON BACK | 2.04 | 2.40 | **7.03** | 0.90 | **27 mm** | 0.84 / -0.73 |
+| 0.4-1.0, relax 1.2 | ON BACK | 1.84 | 2.22 | 7.45 | 0.90 | 28 mm | 0.84 / -0.72 |
+| 0.4-1.0, relax 1.7 | ON BACK | 2.34 | 2.70 | 7.43 | 0.85 | 27 mm | 0.84 / -0.73 |
+| 0.4-1.0, relax 2.0 | ON BACK | 2.64 | 3.34 | 7.65 | 0.85 | 27 mm | 0.83 / -0.73 |
+| 0.4-1.0, relax 1.0 (head not back yet) | ON BACK | 1.58 | 2.14 | 8.42 | 0.90 | 36 mm | 0.85 / -0.62 |
+| 0.4-1.0, relax 0.8 | **upright** (no fall) | - | - | 2.2 | 0.38 | 48 mm | 0.65 / -0.21 |
+| 0.6-1.4, relax 1.8 | ON BACK | 2.48 | 2.82 | 7.66 | 0.89 | 24 mm | 0.85 / -0.72 |
+| 0.6-1.4, relax 2.2 | ON BACK | 2.86 | 3.22 | 8.37 | 0.90 | 24 mm | 0.84 / -0.73 |
+| 0.4-1.2 to -0.8 only, relax 1.5 | ON BACK | 2.12 | 2.46 | 7.46 | **0.79** | 32 mm | 0.86 / -0.60 |
+| 0.4-1.6, relax 1.3 (cut mid-ramp) | ON BACK | 1.90 | 2.58 | 7.89 | 0.86 | 35 mm | 0.88 / -0.53 |
+| yaw 0.6 only, 0.4-1.0, relax 1.4 | ON BACK | 2.08 | 4.26 | 7.88 | 0.83 | 23 mm | 0.52 / -0.75 |
+| v1: yaw 0.6 late + soften | ON BACK | 2.98 | 4.28 | 6.61 | 0.82 | 23 mm | 0.48 / -0.75 |
+| pick + init at 3.0 / 3.5 / 4.0 | ON BACK | 2.04 | 2.40 (+ the ramp) | 7.03 | 0.90 | | init ramp: trunk 0.4 rad/s, head 0.03 m/s; joints at the end yaw 0.02, pitch -0.22..-0.28, neck +0.2 |
+
+Verdict:
+- Every v2 recipe lands on the back, sooner than v1 (at rest 2.4 s vs 4.3 s). The torque must be cut once the head is
+  back (relax at 0.8 s = no fall; at 1.0 s the head is still travelling and the fall is harder, 8.4 rad/s).
+- Softest v2: **relax at 1.4 s** (7.0 rad/s, head 0.90 m/s). The instant cut is a little harder than v1's soften ramp
+  (6.6 rad/s), which is the price of Rémi's `relax`. The -0.8 head-back is gentler on the head (0.79 m/s) but the duck
+  ends propped at +76 deg instead of flat (the head does not go far enough back to roll it fully): kept as `pd_v2_soft`.
+- The sit-stand net tracks the yaw to 0.84 (asked 1.0) and the head back to -0.73 (asked -1.0) while seated. Yaw 1.0
+  buys 4 mm of head-shell / trunk clearance in the model (27 mm vs 23 mm): the simulated meshes never touch before the
+  cut with either yaw. Whether that is true of the real shells is Rémi's call: the yaw is at the joint's range anyway.
+- `robot.init` while lying on the back is gentle: the legs fold to the standing pose and the head straightens (yaw 1.2
+  -> 0.02, pitch -0.9 -> -0.25 over the 2 s ramp plus the hold) with 0.4 rad/s of trunk rotation, no roll, no thrash.
+  The duck stays where it lies (trunk +78-80 deg, the head shell on the floor, beak 12 cm up).
+
+## The v2 pick: `pd_v2_faint` + `D1_alarm_glide_wobble` (7.6 s from the press)
+
+| t (s) | what | how |
+|---|---|---|
+| 0.00 | press: sit_toggle fired, alarm played; the head snaps up (shock) AND starts turning hard to the side | `skill_at_start = SitToggle`, `sound_at_start = PlayDead`; head_pitch -0.5 over 0.12 s; head_yaw 0 -> +1.0 over 0-0.5 s |
+| 0.50 | head fully to the side (joint +0.51, still turning to +0.84) | |
+| 0.40 -> 1.00 | the head goes back: beak to the sky, still to the side (joint pitch -0.59 at 1.0, -0.73 at 1.4) | head_pitch += -1.0 * ramp(t - 0.4, 0.6) (the shock pulse is over by 0.55) |
+| **1.40** | **robot.relax sent** (torque off at once) | `relax_at = 1.4`; the sit skill is over |
+| 2.04 | the duck leaves upright, keels over backwards on the weight of its head | nothing sent |
+| 2.40 | at rest, flat on the back (trunk +80 deg), head on the side (yaw joint 0.9 -> 1.2 as it flops) | |
+| **3.00** | **robot.init sent** (torque on, 2 s ramp from where the joints are to the home pose) | `init_at = 3.0` = rest + 0.6 s |
+| 3.0 -> 5.0 | the last twitch: the legs fold to the standing pose, the head straightens (yaw -> 0.15 at 5.0, -> 0.04 at 5.5) | the robot holds the home pose afterwards (policy not driving) |
+| 5.50 -> 7.30 | the death quack; the beak opens to 0.3 | mouth = 0.3 x pulse(t, 5.5, 0.15, 1.05, 0.6) |
+| 7.60 | end | |
+
+Formulas (padd/src/expressions.rs, `t` from the press; `ramp` = half cosine, `pulse(t, t0, up, hold, down)`):
+- `head_pitch(t) = -0.5 * pulse(t, 0.0, 0.12, 0.13, 0.30) - 1.0 * ramp(t - 0.4, 0.6)`
+- `head_yaw(t) = 1.0 * ramp(t, 0.5)`; `neck_pitch = head_roll = 0`; no pose slot; twist forced to zero (sticks locked)
+- events: sit_toggle + sound at 0.0; **relax at 1.4 s** (`robot.relax`, torque off at once); **init at 3.0 s** (`robot.init`:
+  torque on + the runtime's 2 s home ramp); after the init the robot holds home (the policy is NOT driving until Start),
+  so the runtime must let the mouth intent through while holding (parent's change to robotd). The head/yaw commands
+  after 1.4 s are irrelevant (no torque) and after 3.0 s the init owns the joints: the expression may keep sending them.
+- mouth table, 0..1 every 0.1 s from the press (74 samples, zero after): the alarm 0.2-0.5 s (from the wav's envelope),
+  shut through the fall and the ramp, 0.3 for the death quack 5.5-7.3 s:
+  `0.000, 0.000, 1.000, 1.000, 0.611, 0.208, 0 x 50 (0.6-5.5 s), 0.225, 0.300 x 11, 0.280, 0.225, 0.150, 0.075, 0.020, 0.000`
+  (exact list: `pd_v2_faint__D1_alarm_glide_wobble.json`, `mouth` channel, or `../episode3/mouth_table.py` on it)
+- keyframes: `pd_v2_faint__D1_alarm_glide_wobble.json`; PICK.json has the event times (relax_at, init_at, death_at, rest_at).
+
+Measured (sim, side camera): tips at 2.04 s, at rest 2.40 s, 14 cm of backward travel, peak trunk rotation 7.0 rad/s,
+head 0.90 m/s; end trunk pitch +80 deg (flat on the back), beak 12 cm above the floor; head joints at the end yaw +0.02,
+pitch -0.27, neck +0.21 (straight); jaw 1.0 on the alarm, 0.30 on the death quack, shut otherwise. No forward drift before
+the fall. Robot wav `sounds/robot/play_dead_a.wav` (7.40 s, peak -3 dBFS, 48 kHz mono 16-bit): alarm at 0, death quack 5.5-7.3 s.
+
+### v2 alternatives on the page
+
+- `pd_v2_faint_late`: relax at 1.7 s (the head hangs back 0.7 s before the cut: a beat of suspense), init 3.3, quack 5.8; 7.9 s.
+- `pd_v2_soft`: head back to -0.8 only (0.4-1.2 s), relax 1.5: head 0.79 m/s but ends propped at +76 deg, not flat; 7.7 s.
+- `pd_v2_slowback`: head back over 0.8 s (0.6-1.4), relax 1.8, init 3.4, quack 5.9; 8.0 s. Flat (+90 deg), 7.7 rad/s.
+- `pd_v2_faint` + `D2_inquire_coo_fall`: the coo-voice death sigh on the pick (the inquire shock keeps the beak open longer).
+
+### Questions for Rémi (v2)
+
+1. 7.0 rad/s of trunk rotation and a 0.9 m/s head onto the back shell: test on a mat. If too hard: `pd_v2_faint_late`
+   is the same fall (the timing only), `pd_v2_soft` is gentler on the head but ends propped; a soften ramp (v1) was 6.6.
+2. The init ramp folds the legs to the standing pose while lying (the "twitch"); on the real robot the legs push against
+   the floor for a moment (sim: 0.4 rad/s, no roll). Acceptable? Otherwise a shorter hold: relax again after the quack.
+3. The mouth after the init: the runtime gates the jaw on "driving" today (parent is changing it so the jaw answers while
+   the robot holds home). Until then the death quack plays with the beak shut.
+4. Head side: yaw +1.0 = the duck's left. Flip the sign for the camera.
+
+---
+
+# Play dead v1 (episode 3, first round): shock, sit, keel over backwards, death quack
 
 Written 2026-09-06 by the play-dead fork. Simulation only (nothing was sent to the robot). Page:
 `/Users/remi/microduck/notes/emotions/combined/playdead/index.html`. Code: `probe.py` (fall recipes, no video),

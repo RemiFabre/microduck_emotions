@@ -17,11 +17,37 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "episode3"))
 import lib  # noqa: E402
+import duckfilm as F  # noqa: E402
+sys.path.insert(0, str(HERE))
+from pdduck import PDDuck  # noqa: E402
 
 ROOT = HERE.parent.parent
 SPEC = json.load(open(HERE / "spec.json"))
 PAGE = ROOT / "combined" / "playdead"
-PICK = ("pd_faint", "D1_alarm_glide_wobble")
+PICK = ("pd_v2_faint", "D1_alarm_glide_wobble")
+PICK_V1 = ("pd_faint", "D1_alarm_glide_wobble")
+CURRENT_INIT_AT = None      # set before each render: the v2 duck's robot.init time (motion clock)
+
+
+def fresh_pd(camera="side", reachy_at=None):
+    """lib.fresh with the play-dead duck (relax, then robot.init = 2 s ramp to home, then hold)."""
+    m, d = F.build_scene(lib.SIZE, reachy_at=reachy_at)
+    du = PDDuck(m, d, "duck_")
+    du.make_bam()
+    du.spawn(0.0, 0.0, 0.0)
+    import mujoco
+    mujoco.mj_forward(m, d)
+    du.bam.last_ts = d.time
+    du.init_at = CURRENT_INIT_AT
+    cam = mujoco.MjvCamera()
+    cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+    c = lib.CAMERAS[camera]
+    cam.lookat[:] = c["lookat"]
+    cam.distance, cam.azimuth, cam.elevation = c["distance"], c["azimuth"], c["elevation"]
+    return m, d, du, cam
+
+
+lib.fresh = fresh_pd
 SHOCK_UP = -0.5          # the startled look up at the press (head_pitch negative = beak up)
 HEADBACK = -1.0          # the lever: beak to the sky (tracks to about -0.9 seated)
 DEATH_MOUTH = 0.3        # the beak barely open on the death quack
@@ -31,6 +57,8 @@ ramp, pulse = lib.ramp, lib.pulse
 def make_motion(name):
     b = SPEC["motions"][name]
     y0, y1 = b["yaw"]
+    if b["recipe"] == "v2":
+        return make_motion_v2(name, b)
 
     def fn(t):
         h = dict(skill="sit" if t < b["soften"] else None, soften=t >= b["soften"], twist=(0.0, 0.0, 0.0))
@@ -64,6 +92,27 @@ def make_motion(name):
     return lib.Motion(name, b["desc"], b["total"], fn, beats=beats, camera="side", quacks=[0.15, b["death"] + 0.3]), b
 
 
+def make_motion_v2(name, b):
+    """v2: yaw hard to the side from the press (with the sit), head back at once, robot.relax, robot.init, death quack."""
+    y0, y1 = b["yaw"]
+    h0, h1 = b["headback"]
+    amp = b.get("headback_amp", HEADBACK)
+
+    def fn(t):
+        h = dict(skill="sit" if t < b["relax"] else None, relax=b["relax"] <= t < b["init"], twist=(0.0, 0.0, 0.0))
+        s0, s1 = b["shock"]
+        h["head_pitch"] = SHOCK_UP * pulse(t, s0, 0.12, s1 - s0 - 0.12 - 0.3, 0.3) + amp * ramp(t - h0, h1 - h0)
+        h["head_yaw"] = b["yaw_amp"] * ramp(t - y0, y1 - y0)
+        if t >= b["death"] - 0.1:
+            h["mouth"] = DEATH_MOUTH * pulse(t, b["death"], 0.15, b["death_len"] - 0.15 - 0.6, 0.6)
+        return h
+
+    beats = [(y1, "head to the side"), (h1, "head back"), (b["relax"], "relax (torque off)"), (b["relax"] + 0.6, "tipping"),
+             (b["rest"], "at rest"), (b["init"] + 1.0, "init ramp"), (b["init"] + 2.0, "home, held"),
+             (b["death"] + 0.4, "death quack"), (b["death"] + b["death_len"], "quack ends")]
+    return lib.Motion(name, b["desc"], b["total"], fn, beats=beats, camera="side", quacks=[0.15, b["death"] + 0.3]), b
+
+
 MOTIONS = {n: make_motion(n)[0] for n in SPEC["motions"]}
 
 
@@ -79,14 +128,17 @@ def probe_table():
         return ""
     rows = json.load(open(p))
     tr = "".join(f"<tr><td>{r['recipe']}</td><td><b>{r['end']}</b></td><td>{r['left_upright_at']}</td><td>{r['rest_at']}</td>"
-                 f"<td>{r['peak_trunk_w_rad_s']}</td><td>{r['peak_head_speed_m_s']}</td><td>{r['head_z_min']}</td></tr>" for r in rows)
-    return f"""<h2>Fall probe (probe.py, no video): which client-API recipe puts a seated duck on its back, and how hard</h2>
-<p>Every recipe: sit at t = 0 (the seat lands by ~1 s). "soften" = robot.soften (gain 50 at once, to 0 over 1 s, torque off). The sit itself
-peaks at 2.2 rad/s of trunk rotation and 0.55 m/s of head speed, so those are the floor. ON BACK = the trunk's back on the floor.</p>
-<table><tr><th>recipe</th><th>ends</th><th>leaves upright (s)</th><th>at rest (s)</th><th>peak trunk rot (rad/s)</th><th>peak head speed (m/s)</th><th>head z min (m)</th></tr>{tr}</table>
-<p>Verdict: the sit-stand RISE cut short (3_) always lands on the back but hardest (9-11 rad/s, head 1.4 m/s); the head thrown back + soften (2_) lands on the
-back at 6.6 rad/s / 0.82 m/s (the head goes first); the seated body-pose lean + soften (4_) is the softest (5.7-6.3 rad/s, the head no faster than the sit itself)
-but relies on the net's neck trade-off leaving the duck on the edge of balance once the torque is gone; plain sit + soften/relax (1_, 5_) just slumps in the seat.</p>"""
+                 f"<td>{r['peak_trunk_w_rad_s']}</td><td>{r['peak_head_speed_m_s']}</td><td>{r.get('gap_before_cut_mm', '')}</td>"
+                 f"<td>{r.get('joints_at_cut', '')}</td><td>{r.get('init_peak_trunk_w', '')}</td><td>{r.get('joints_end', '')}</td></tr>" for r in rows)
+    return f"""<h2>Fall probe v2 (probe.py, no video): the head hard to the side from the press, then back; robot.relax; robot.init</h2>
+<p>Every recipe: sit at t = 0 (the seat lands by ~1 s), yaw 1.0 over 0-0.5 s, the head back (-1.0) over the stated window, then <code>relax</code> at the stated time
+(torque off at once). "gap before cut" = closest approach between the head shell and the trunk collision meshes before the torque cut (54 mm at the home pose);
+the joints at the cut are what the sit-stand net reached (yaw asked 1.0 -> 0.84). Rows with <code>init</code>: robot.init at that time (2 s ramp to home while
+lying on the back): its peak trunk rotation and the joints at the end (the head straight = yaw 0, pitch ~0). ON BACK = the trunk's back on the floor.</p>
+<table><tr><th>recipe</th><th>ends</th><th>leaves upright (s)</th><th>at rest (s)</th><th>peak trunk rot (rad/s)</th><th>peak head speed (m/s)</th><th>gap before cut (mm)</th><th>joints at cut</th><th>init: peak trunk rot</th><th>joints at end</th></tr>{tr}</table>
+<p>Verdict: every v2 recipe lands on the back; relax at 1.4 s (the head just arrived back) is the softest of them (7.0 rad/s, head 0.90 m/s; v1's soften ramp gave
+6.6); relax at 0.8 s (head not back yet) does not fall; the -0.8 head-back is a little gentler on the head (0.79 m/s). The init ramp on the lying duck is gentle
+(trunk 0.4 rad/s, head 0.03 m/s), no roll, and it straightens the head (yaw 0.02, pitch -0.2). v1 rows (soften, rise, lean) are in REPORT.md.</p>"""
 
 
 def page(open_it):
@@ -94,20 +146,32 @@ def page(open_it):
     for r in SPEC["renders"]:
         stem = f"{r['motion']}__{r['sound']}"
         is_pick = (r["motion"], r["sound"]) == PICK
-        c = lib.card(HERE, PAGE, stem, f"{r['motion']} + {r['sound']}",
-                     note="recommended: the head is the lever (deterministic on the robot: the head slots track seated), the fall happens as the torque dies, the alarm is the surprise and the wobble dies with the duck" if is_pick else "")
+        is_v1 = (r["motion"], r["sound"]) == PICK_V1
+        note = ""
+        if is_pick:
+            note = ("v2 pick (Rémi's feedback): the head turns hard to the side (yaw 1.0) from the press, with the sit, then goes back at once; "
+                    "robot.relax at 1.4 s (torque off at once, no soften); robot.init 0.6 s after the duck is at rest (2 s ramp to home: the head "
+                    "straightens, the legs fold); then the death quack with the beak open 0.3")
+        elif is_v1:
+            note = "v1 pick, for comparison (yaw 0.6 only, late; soften; no torque afterwards)"
+        c = lib.card(HERE, PAGE, stem, f"{r['motion']} + {r['sound']}", note=note)
         if is_pick:
             c = c.replace('class="card"', 'class="card pick"', 1)
         cards_by.setdefault(r["motion"], []).append(c)
     pick_cards = cards_by.pop(PICK[0])
-    sections = [("The pick: " + PICK[0], SPEC["motions"][PICK[0]]["desc"], pick_cards)]
+    sections = [("The v2 pick: " + PICK[0], SPEC["motions"][PICK[0]]["desc"], pick_cards)]
+    for n in [n for n in cards_by if n.startswith("pd_v2")]:
+        sections.append((n + " (v2 alternative)", SPEC["motions"][n]["desc"], cards_by.pop(n)))
+    v1_cards = cards_by.pop(PICK_V1[0])
+    sections.append(("v1 pick, for comparison: " + PICK_V1[0], SPEC["motions"][PICK_V1[0]]["desc"], v1_cards))
     for n, cs in cards_by.items():
-        sections.append((n, SPEC["motions"][n]["desc"], cs))
-    intro = ("Combination emotion: sit_toggle + a head program + robot.soften. The duck is driven only through what the real robot accepts (sit skill, head deltas, "
-             "body pose, soften). Simulation, side camera, 640x480, 30 fps. The beak follows the wav for the shock; on the death quack it opens to 0.3 at most. "
-             "<b>After the torque cut the head cannot move any more</b>, so the head goes to its side BEFORE the soften and stays there (the brief's 'then the head "
-             "straightens' is not achievable without torque, see REPORT.md). Files: <code>/Users/remi/microduck/notes/emotions/motion/playdead/</code> "
-             "(spec.json, playdead.py, probe.py, REPORT.md), sounds in <code>sounds/playdead/</code>.") + probe_table()
+        sections.append((n + " (v1 alternative)", SPEC["motions"][n]["desc"], cs))
+    intro = ("<b>v2 (2026-09-06, Rémi's feedback)</b>: combination emotion = sit_toggle + a head program + <code>robot.relax</code> (torque off at once) + "
+             "<code>robot.init</code> once the fall is over (torque on, 2 s ramp to the home pose: the head straightens, the last twitch) + the death quack "
+             "with the beak open 0.3 (the runtime is being changed so the mouth works while the robot holds after an init). The head turns hard to the side "
+             "(yaw 1.0) from the press, with the sit, and goes back at once, so the back of the head clears the shoulders (sim: 27 mm gap vs 23 mm with yaw 0.6). "
+             "Simulation, side camera, 640x480, 30 fps. v1 (soften, head yaw 0.6 late, no torque afterwards) is kept below for comparison. "
+             "Files: <code>/Users/remi/microduck/notes/emotions/motion/playdead/</code> (spec.json, playdead.py, pdduck.py, probe.py, REPORT.md), sounds in <code>sounds/playdead/</code>.") + probe_table()
     lib.write_page(PAGE, "play dead (episode 3): shock, sit, keel over backwards, death quack", intro, sections, open_it=open_it)
 
 
@@ -119,7 +183,7 @@ def robot_wav():
     sr, x = read_wav(wav)
     loud = np.where(np.abs(x) > 10 ** (-60 / 20))[0]
     end = min(len(x), loud[-1] + int(0.1 * sr))
-    out = write_wav(ROOT / "sounds" / "robot" / "playdead_a.wav", x[:end], -3.0)
+    out = write_wav(ROOT / "sounds" / "robot" / "play_dead_a.wav", x[:end], -3.0)
     print("robot wav", out, f"{end / sr:.2f} s")
     return out
 
@@ -133,12 +197,15 @@ if __name__ == "__main__":
         stem = f"{r['motion']}__{r['sound']}"
         if a.only and a.only not in stem:
             continue
+        b = SPEC["motions"][r["motion"]]
+        CURRENT_INIT_AT = b.get("init") if b["recipe"] == "v2" else None
         lib.render(MOTIONS[r["motion"]], Path(r["wav"]), HERE, PAGE, sound=r["sound"], sound_desc=r["desc"])
         page(open_it=False)
     page(open_it=not a.no_open)
     m, wav, s = pick()
     b = SPEC["motions"][PICK[0]]
     json.dump(dict(motion=PICK[0], sound=s, wav=str(wav), duration=b["total"], keyframes_json=str(HERE / f"{PICK[0]}__{s}.json"),
-                   soften_at=b["soften"], death_at=b["death"], skill_at_start="sit_toggle", robot_wav=str(ROOT / "sounds" / "robot" / "playdead_a.wav")),
+                   relax_at=b["relax"], init_at=b["init"], death_at=b["death"], death_len=b["death_len"], rest_at=b["rest"],
+                   skill_at_start="sit_toggle", robot_wav=str(ROOT / "sounds" / "robot" / "play_dead_a.wav")),
               open(HERE / "PICK.json", "w"), indent=1)
     robot_wav()

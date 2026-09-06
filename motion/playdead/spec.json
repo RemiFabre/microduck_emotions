@@ -1,5 +1,98 @@
 {
  "motions": {
+  "pd_v2_faint": {
+   "recipe": "v2",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.0
+   ],
+   "relax": 1.4,
+   "init": 3.0,
+   "rest": 2.4,
+   "death": 5.5,
+   "death_len": 1.8,
+   "total": 7.6,
+   "desc": "v2: alarm + sit at the press while the head turns hard to the side (yaw 1.0 over 0.5 s), the head goes back at once (0.4-1.0 s), robot.relax at 1.4 s: the duck keels over backwards (tips 2.0 s, still by 2.4 s), robot.init at 3.0 s (2 s ramp: the head straightens, the legs fold to home), death quack at 5.5 s with the beak open 0.3"
+  },
+  "pd_v2_faint_late": {
+   "recipe": "v2",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.0
+   ],
+   "relax": 1.7,
+   "init": 3.3,
+   "rest": 2.7,
+   "death": 5.8,
+   "death_len": 1.8,
+   "total": 7.9,
+   "desc": "v2, a beat of suspense: same head choreography, robot.relax at 1.7 s (the head hangs back for 0.7 s before the cut), init at 3.3 s, death quack at 5.8 s"
+  },
+  "pd_v2_soft": {
+   "recipe": "v2",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.2
+   ],
+   "headback_amp": -0.8,
+   "relax": 1.5,
+   "init": 3.1,
+   "rest": 2.5,
+   "death": 5.6,
+   "death_len": 1.8,
+   "total": 7.7,
+   "desc": "v2, softer lever: the head goes back only to -0.8 over 0.8 s, robot.relax at 1.5 s (probe: head 0.79 m/s instead of 0.90), init at 3.1 s, death quack at 5.6 s"
+  },
+  "pd_v2_slowback": {
+   "recipe": "v2",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.6,
+    1.4
+   ],
+   "relax": 1.8,
+   "init": 3.4,
+   "rest": 2.8,
+   "death": 5.9,
+   "death_len": 1.8,
+   "total": 8.0,
+   "desc": "v2, slower: the head turns first, then goes back over 0.8 s (0.6-1.4 s), robot.relax at 1.8 s, init at 3.4 s, death quack at 5.9 s"
+  },
   "pd_faint": {
    "recipe": "headback",
    "shock": [
@@ -88,6 +181,36 @@
   }
  },
  "renders": [
+  {
+   "motion": "pd_v2_faint",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v2_faint__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_v2_faint",
+   "sound": "D2_inquire_coo_fall",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v2_faint__D2_inquire_coo_fall.wav",
+   "desc": "the bank's inquire shock (as devastated), silence, then the robot's coo voice falling 230 -> 110 Hz with a dying wobble: a breathy last sigh"
+  },
+  {
+   "motion": "pd_v2_faint_late",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v2_faint_late__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_v2_soft",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v2_soft__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_v2_slowback",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v2_slowback__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
   {
    "motion": "pd_faint",
    "sound": "D1_alarm_glide_wobble",

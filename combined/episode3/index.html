@@ -7,10 +7,10 @@ h1{margin-bottom:4px} .sub{color:#666;margin-top:0} h2{margin-top:36px}
 .card h3{margin:0 0 8px} .card p{font-size:14px;margin:6px 0} .q{color:#b06000} video{background:#000;border-radius:6px;width:100%}
 code{background:#eee;padding:1px 4px;border-radius:3px} table{border-collapse:collapse;font-size:14px} td,th{border:1px solid #ddd;padding:4px 8px;text-align:left}
 </style>
-<h1>Episode 3: yes, no, angry, excited, play dead, closed-beak quack</h1>
-<p class="sub">2026-09-06. Simulation picks (one per emotion, the recommended pair), already ported to the runtime (branch <code>pad-expressions</code>, tests check every keyframe against these JSONs).
-Each card links to its full page (all candidates, contact sheets, measurements). Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> angry, <b>Y</b> curious, <b>LB</b> yes, <b>RB</b> no, <b>DPad-Down</b> excited, <b>DPad-Left</b> play dead.
-Rémi's choices are marked in orange.</p>
+<h1>Episode 3: the duck's new emotions and the scene</h1>
+<p class="sub">2026-09-06, round 2 after Rémi's review. Every pick below is in the runtime (branch <code>pad-expressions</code>, keyframe tests against the simulation JSONs).
+Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> angry, <b>Y</b> mmh, <b>LB</b> yes, <b>RB</b> no, <b>L3</b> fast yes, <b>R3</b> laugh, <b>DPad-Down</b> excited, <b>DPad-Left</b> play dead
+(the full list: <code>BINDINGS.md</code>). Open questions in orange.</p>
 
 <h2>The scene, in simulation</h2>
 <p>Whole of <code>scenes/episode3/scene.json</code> played by the same player logic: the sim duck runs the motions and wavs below, the Reachy puppet the rendered lines.
@@ -24,6 +24,11 @@ Rémi's choices are marked in orange.</p>
 <p><b>motion:</b> one nod: head_pitch 0 → +0.7 over 0.25 s from 0.05 s, hold 0.1 s, back over 0.35 s (the joint bottoms out at ~0.45 s, 38°). Neck 0, yaw 0.</p>
 <p><b>sound:</b> one quack at 0.45 s, 250 Hz falling 3 semitones over 0.3 s. Robot wav <code>sounds/robot/yes_a.wav</code>.</p>
 <p class="q">Choices: one nod or two (<code>yes_double</code>)? flat, falling or the bank's greet? <a href="../yes/index.html">all 12 pairs</a></p></div>
+
+<div class="card"><h3>YES, FAST (L3), 1.5 s</h3>
+<video src="yes_single__Y3_synth_wak.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> the same nod as yes.</p>
+<p><b>sound:</b> a curt 0.18 s "wak" falling a fourth (Rémi's second yes: the quick one for the yes / no / yes exchange). Robot wav <code>yes_fast_a.wav</code>.</p></div>
 
 <div class="card"><h3>NO (RB), 1.8 s</h3>
 <video src="no_one__N2_synth_m5.mp4" controls playsinline preload="metadata"></video>
@@ -39,10 +44,16 @@ Rémi's choices are marked in orange.</p>
 <p class="q">Choices: is 0.4 s of wide beak enough for the leash? scold (this) or menace (<code>crouch_shake_lunge</code>, growl)? <a href="../angry/index.html">all 12 pairs</a></p></div>
 
 <div class="card"><h3>EXCITED (DPad-Down), 3.4 s</h3>
-<video src="excited_wag_pump__X2_bank_chirps_up.mp4" controls playsinline preload="metadata"></video>
+<video src="excited_wag_pump__X1_synth_rise_climb.mp4" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> six accelerating head swings ±0.6 (extremes at 0.40 / 0.95 / 1.45 / 1.90 / 2.30 / 2.65 s), the beak climbing from −0.15 to −0.70, a body bob (+0.12 bow pulse, 12–16 mm dip) on each swing, a bow flourish at the end. Neck 0.</p>
-<p><b>sound:</b> the bank's own chirps in rising pitch order (236 → 300 Hz), one per swing. Robot wav <code>excited_a.wav</code>.</p>
-<p class="q">Choices: bank chirps (this), synth climb (X1) or the giddy "wak" (X3)? bigger body (<code>excited_hops</code>, 30 mm dips)? <a href="../excited/index.html">all 14 pairs</a></p></div>
+<p><b>sound:</b> X1 synth climb (Rémi's pick): each quack higher, shorter and rising more. Robot wav <code>excited_a.wav</code>.</p>
+<p><a href="../excited/index.html">all 14 pairs</a></p></div>
+
+<div class="card"><h3>LAUGH (R3), 2.6 s</h3>
+<video src="laugh_wag__L1_synth_haha.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> beak up (−0.55), the head wagging ±0.45 on every other "ha", a body dip (+0.10 bow pulse) on every "ha": the body shakes as two dips (ha-ha-ha-ha, breath, ha-ha-ha).</p>
+<p><b>sound:</b> seven staccato synth quacks stepping down from 300 Hz. Robot wav <code>laugh_a.wav</code>.</p>
+<p class="q">Alternatives: <code>laugh_roll</code> (head rolls instead of yawing: softer), sounds L2 (chopped chirps, "wek-wek") and L3 (giggle glide in, falling "haaa" out). <a href="../laugh/index.html">9 pairs</a></p></div>
 
 <div class="card"><h3>PLAY DEAD (DPad-Left), 7.5 s</h3>
 <video src="pd_faint__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
@@ -51,23 +62,25 @@ Rémi's choices are marked in orange.</p>
 <p><b>probe:</b> sit + soften does NOT fall (the seat is stable limp); the head thrown back is the lever (6.5 rad/s); cutting the rise short falls harder (9–11 rad/s); a seated lean lands propped at 65°.</p>
 <p class="q">Questions: may it end limp (Start = the way up)? the head cannot straighten after the cut (it goes to the side before); on the real robot the jaw is gated on "driving", so the death quack will play with a shut beak; test the fall on a mat. <a href="../playdead/index.html">probe table + 7 videos</a></p></div>
 
-<div class="card"><h3>CLOSED-BEAK QUACK (scene only, <code>{"express":"closed_quack"}</code>), 2.2 s</h3>
-<video src="closed_grumble__C2_grumble.mp4" controls playsinline preload="metadata"></video>
-<p><b>motion:</b> a small yaw shake (−0.25 at 0.6 s, +0.25 at 1.05 s), beak shut throughout (the leash stays in).</p>
-<p><b>sound:</b> two low nasal buzzes at 0.50 / 0.95 s, low-passed at 900 Hz (the muffling is in the wav). Robot wav <code>closed_a.wav</code>.</p>
-<p class="q">Alternatives: the curious chirps with a roll wobble and the beak shut (friendlier), a muffled "mmh?". <a href="../closed/index.html">4 cards</a></p></div>
+<div class="card"><h3>MMH, "what do you mean?" (Y), 2.0 s</h3>
+<video src="mmh__C3_mmh.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> a roll tilt +0.22 from 0.45 s, held, back by 1.6 s; the beak opens normally (in the scene the leash falls here).</p>
+<p><b>sound:</b> a muffled rising "mmh?" (205 → 300 Hz, low-passed). Robot wav <code>mmh_a.wav</code>. Rémi's pick from the closed-beak page; the grumbles are dropped.</p></div>
 </div>
 
-<h2>Emotion table (all shipped in the same build)</h2>
+<h2>Emotion table (all in the same build)</h2>
 <table><tr><th>button (emotion mode)</th><th>emotion</th><th>kind</th><th>length</th><th>status</th></tr>
 <tr><td>A</td><td>sad</td><td>program</td><td>7.5 s</td><td>decided, on the robot (v7 half depth)</td></tr>
 <tr><td>B</td><td>devastated</td><td>combination (sit + program)</td><td>8.5 s</td><td>decided, "perfect" on the robot</td></tr>
-<tr><td>Y</td><td>curious</td><td>program</td><td>3.0 s</td><td>decided (roll only)</td></tr>
-<tr><td>X</td><td>angry</td><td>program (pose pulses + head)</td><td>2.6 s</td><td>sim pick, to test</td></tr>
-<tr><td>LB</td><td>yes</td><td>program</td><td>1.5 s</td><td>sim pick, to test</td></tr>
-<tr><td>RB</td><td>no</td><td>program</td><td>1.8 s</td><td>sim pick, to test</td></tr>
-<tr><td>DPad-Down</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>sim pick, to test</td></tr>
-<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + soften)</td><td>7.5 s</td><td>sim pick, to test on a mat</td></tr>
-<tr><td>(cue only)</td><td>closed_quack</td><td>program (sound, beak shut)</td><td>2.2 s</td><td>sim pick</td></tr>
+<tr><td>X</td><td>angry</td><td>program (pose pulses + head)</td><td>2.6 s</td><td>sim pick, Rémi: "let's try it on the robot"</td></tr>
+<tr><td>Y</td><td>mmh</td><td>program</td><td>2.0 s</td><td>Rémi's pick (curious moved off the pad: LB outside emotion mode, or a cue)</td></tr>
+<tr><td>LB</td><td>yes</td><td>program</td><td>1.5 s</td><td>Rémi: keep</td></tr>
+<tr><td>RB</td><td>no</td><td>program</td><td>1.8 s</td><td>sim pick</td></tr>
+<tr><td>L3</td><td>yes, fast</td><td>program</td><td>1.5 s</td><td>Rémi: the second yes</td></tr>
+<tr><td>R3</td><td>laugh</td><td>program (pose pulses + head)</td><td>2.6 s</td><td>new, sim pick</td></tr>
+<tr><td>DPad-Down</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>Rémi: motion kept, sound X1</td></tr>
+<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + relax + init)</td><td>~8 s</td><td>v2 in progress (Rémi's feedback)</td></tr>
+<tr><td>(cue)</td><td>pick</td><td>combination (ground pick + beak)</td><td>3.0 s</td><td>the beak opens on the way down, shuts at the floor</td></tr>
+<tr><td>(cue)</td><td>curious</td><td>program</td><td>3.0 s</td><td>decided (roll only)</td></tr>
 </table>
 <p>Install: <code>/Users/remi/microduck/notes/emotions/install-on-duck.sh</code> (build staged on the Mac; needs the robot's sudo password). Scene: <code>robot/run_on_robot.sh scenes/episode3 --start-delay 5</code> in the theater repo.</p>
