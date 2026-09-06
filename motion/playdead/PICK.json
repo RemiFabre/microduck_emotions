@@ -1,14 +1,82 @@
 {
- "motion": "pd_v2_faint",
+ "motion": "pd_v3_dead",
  "sound": "D1_alarm_glide_wobble",
- "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v2_faint__D1_alarm_glide_wobble.wav",
- "duration": 7.6,
- "keyframes_json": "/Users/remi/microduck/notes/emotions/motion/playdead/pd_v2_faint__D1_alarm_glide_wobble.json",
- "relax_at": 1.4,
- "init_at": 3.0,
- "death_at": 5.5,
+ "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v3_dead__D1_alarm_glide_wobble.wav",
+ "duration": 7.5,
+ "keyframes_json": "/Users/remi/microduck/notes/emotions/motion/playdead/pd_v3_dead__D1_alarm_glide_wobble.json",
+ "joints_order": [
+  "left_hip_yaw",
+  "left_hip_roll",
+  "left_hip_pitch",
+  "left_knee",
+  "left_ankle",
+  "neck_pitch",
+  "head_pitch",
+  "head_yaw",
+  "head_roll",
+  "right_hip_yaw",
+  "right_hip_roll",
+  "right_hip_pitch",
+  "right_knee",
+  "right_ankle"
+ ],
+ "pose_joints": [
+  {
+   "at": 1.4,
+   "targets": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "off": [
+    "neck_pitch",
+    "head_pitch",
+    "head_yaw"
+   ],
+   "gain": 160,
+   "ramp_s": 1.5
+  },
+  {
+   "at": 3.6,
+   "targets": [
+    0.0,
+    0.0,
+    -1.0,
+    1.5,
+    0.0,
+    null,
+    null,
+    null,
+    null,
+    0.0,
+    0.0,
+    1.0,
+    -1.5,
+    0.0
+   ],
+   "off": [
+    "neck_pitch",
+    "head_pitch",
+    "head_yaw"
+   ],
+   "gain": 160,
+   "ramp_s": 1.0
+  }
+ ],
+ "death_at": 5.0,
  "death_len": 1.8,
- "rest_at": 2.4,
+ "rest_at": 3.0,
  "skill_at_start": "sit_toggle",
  "robot_wav": "/Users/remi/microduck/notes/emotions/sounds/robot/play_dead_a.wav"
 }

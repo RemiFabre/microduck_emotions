@@ -60,12 +60,12 @@ Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> 
 <p><b>sound:</b> the first laugh's staccato run (seven short quacks stepping down). Robot wav <code>mock_a.wav</code>. Rémi: "a great move for a mockery, after someone scolds the duck".</p>
 <p class="q">No free button left: cue only (<code>{"express":"mock"}</code>). Say which emotion it should replace on the pad, if any.</p></div>
 
-<div class="card"><h3>PLAY DEAD (DPad-Left), 7.6 s, v2</h3>
-<video src="pd_v2_faint__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
-<p><b>motion:</b> sit + alarm on the press while the head snaps up and turns hard to the side (yaw 1.0 over 0.5 s, "like devastated"); 0.4–1.0 s the head goes back (beak to the sky, still to the side); <b>1.4 s: robot.relax</b> (torque off at once); the duck keels over backwards (tips at 2.0 s, flat on its back at 2.4 s, head on the side); <b>3.0 s: robot.init</b> (torque on, the 2 s ramp home: the last twitch, the head straightens, then it holds); 5.5–7.3 s the death quack, beak 0.3.</p>
+<div class="card"><h3>PLAY DEAD (DPad-Left), 7.5 s, v3 "the dead animal"</h3>
+<video src="pd_v3_dead__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> sit + alarm on the press while the head snaps up and turns hard to the side (yaw 1.0 over 0.5 s); 0.4–1.0 s the head goes back; <b>1.4 s: the three head servos hang free and every leg joint is driven to zero over 1.5 s</b> (a new runtime call, <code>robot.poseJoints</code>): the seated duck rolls flat onto its back (tips at 2.0 s, still at 3.0 s), the limp head on the side; <b>3.6 s: the legs come up</b> (hips ±1.0, knees ±1.5 over 1 s), the body unmoved; 5.0–6.8 s the death quack, beak 0.3 (the jaw stays powered). No relax, no re-init: the robot holds the dead pose until your Start.</p>
 <p><b>sound:</b> alarm, silence, the falling synth glide with a dying wobble. Robot wav <code>play_dead_a.wav</code>.</p>
-<p><b>probe:</b> yaw 1.0 gives 27 mm of head-shell / trunk clearance in the model (23 mm with 0.6); relax at 1.4 s is the softest cut that still falls (7.0 rad/s, head 0.9 m/s; relax at 0.8 s does not fall); the init ramp on the lying duck is gentle (0.4 rad/s, no roll).</p>
-<p class="q">Mat first. The runtime now lets the beak move while the robot holds at home with torque on (the death quack). Alternatives: <code>pd_v2_faint_late</code> (relax 1.7, a beat of suspense), <code>pd_v2_soft</code> (head back −0.8: gentler on the head, ends propped at 76°). <a href="../playdead/index.html">probe table + videos</a></p></div>
+<p><b>probe (27 recipes):</b> every "legs to zero" recipe rolls the duck onto its back; the slower the leg ramp the softer (1.5 s: 7.5 rad/s, 0.5 s: 9.6); gain 100/160/200 make no difference; straight to legs-up is marginal (rocks or ends propped); two stages is the softest and lands flat. The unpowered head ends folded back on the shoulder shell (own weight only). Head roll servo kept on (off: the head hangs crooked).</p>
+<p class="q">Mat first (7.45 rad/s, head 1.0 m/s; a 2 s leg ramp would be softer). Options: legs flat instead of up (<code>pd_v3_flat</code>), four head servos off (<code>pd_v3_dead_off4</code>). Check the head cable where the limp head rests on the shoulder. <a href="../playdead/index.html">probe table + videos (v3, v2, v1)</a></p></div>
 
 <div class="card"><h3>MMH, "what do you mean?" (Y), 2.0 s</h3>
 <video src="mmh__C3_mmh.mp4" controls playsinline preload="metadata"></video>
@@ -85,7 +85,7 @@ Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> 
 <tr><td>R3</td><td>laugh</td><td>program (pose pulses + head)</td><td>3.0 s</td><td>v2: head up more, dying-of-laughter sound</td></tr>
 <tr><td>(cue)</td><td>mock</td><td>program (pose pulses + head roll)</td><td>2.6 s</td><td>Rémi's find on the laugh page</td></tr>
 <tr><td>DPad-Down</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>Rémi: motion kept, sound X1</td></tr>
-<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + relax + init)</td><td>7.6 s</td><td>v2 per Rémi's feedback, to test on a mat</td></tr>
+<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + scripted joint pose)</td><td>7.5 s</td><td>v3 (head servos free, legs to a dead pose, held until Start), to test on a mat</td></tr>
 <tr><td>(cue)</td><td>pick</td><td>combination (ground pick + beak)</td><td>3.0 s</td><td>the beak opens on the way down, shuts at the floor</td></tr>
 <tr><td>(cue)</td><td>curious</td><td>program</td><td>3.0 s</td><td>decided (roll only)</td></tr>
 </table>

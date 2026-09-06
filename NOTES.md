@@ -335,3 +335,33 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Theater: `scenes/episode3/scene.json` v2 (28 beats; 7 lines re-rendered), `duck_cues` (timed cues inside a beat),
   `duck_sound` + `repeat` / `every`, `duck_init` / `duck_policy`; the preview follows (relative pick paths, init
   mid-play-dead, hold-home after init).
+
+### Same evening: Rémi's third pass (play dead) and the simulator source
+
+- Rémi on play dead v2: the re-init changes the whole pose on the ground ("no"). New design: as soon as the head is to
+  the side and thrown back, cut the torque of the HEAD servos only (three: neck_pitch, head_pitch, head_yaw; the roll,
+  the jaw and the legs stay powered), drive the legs to a "dead animal" pose (zero angles, then legs up), hold it until
+  Start does the full init. Also: `laugh_roll` + L1 is a **mock** ("gnagnagnagna"); the laugh keeps `laugh_wag` with the
+  head aimed up more and a "dying of laughter" sound (a long "haaa" then short ones).
+- Runtime (commits 776f1c0, ed0d460 on `pad-expressions`): **`robot.poseJoints {targets, off, gain, ramp_s}`** (proto
+  `PoseJointsParams`; `duck-control` gained per-servo torque `set_torque_ids`; robotd: a `Scripted` state that ramps the
+  posed joints and holds them at the given gain with the policy off, ended by init (torque back on everywhere, ramp
+  home) / relax / soften / reboot; the mouth intent stays live; a loop test). padd: `Expression::pose_joints(kind)` =
+  a list of (time, params) sent once each; play dead v3 = stage 1 at 1.4 s (head servos off, legs to zero over 1.5 s
+  at gain 160), stage 2 at 3.6 s (hips +-1.0, knees +-1.5 over 1 s), death quack 5.0-6.8 s, 7.5 s, then the robot holds
+  the dead pose (`up = false` on the pad: Start = init). `relax_at` / `init_at` are kept but unused.
+- Play dead v3 sim (`motion/playdead/REPORT.md` v3 section, `pdduck3.py`, `probe3.py`, 27 recipes): every legs-to-zero
+  recipe rolls the seated duck flat onto its back; the slower the leg ramp the softer (1.5 s: 7.5 rad/s; 0.5 s: 9.6);
+  gain makes no difference; straight to legs-up is marginal; two stages is the softest and lands flat; the unpowered
+  head ends folded back on the shoulder shell (check the cable on the real robot); the head roll servo is kept on.
+  Pick `pd_v3_dead` + D1: 7.45 rad/s, head 0.98 m/s, mat first.
+- Laugh v2 (`motion/laugh/laugh_v2.py`): `laugh_wag_v2` (beak -0.7; a 0.38 s "haaa" at 0.35 s then seven short ha's
+  0.90..2.30 s getting shorter, softer, further apart) + L4; `mock` = `laugh_roll` + L1 (cue only). Runtime 024fd81.
+- **Browser simulator**: Laureen published the source (15:33-15:36 UTC). Fork synced (merge 9380a73) and ported by a
+  fork agent (commit eff9514 pushed to `RemiFabre/microduck-reachy-simulator`): `src/game/microduck/expressions.js`
+  mirrors `expressions.rs` (sad, devastated, curious, peck, yes, yes_fast, no, mmh, angry, excited, play_dead v1 with
+  hooks for the dead pose), the sim's duck gained a pose slot, a mouth, the stand net for expressions, relax / soften /
+  wake / holdPose (gains scaled), the wavs in `public/assets/voices/emotions/`, `public/scripts/episode3.json` (73
+  actions), the README frontmatter builds from source (`app_build_command`). `EMOTIONS-PORT.md` in the fork documents
+  it. Gaps: no BAM servo model, no leash, browser TTS for Reachy, only four Reachy moves. Local: `npm ci && npm run
+  dev`; clone at `/Users/remi/microduck/forks/microduck-reachy-simulator`.

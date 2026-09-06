@@ -20,25 +20,38 @@ import lib  # noqa: E402
 import duckfilm as F  # noqa: E402
 sys.path.insert(0, str(HERE))
 from pdduck import PDDuck  # noqa: E402
+from pdduck3 import PDDuck3, JOINTS  # noqa: E402
 
 ROOT = HERE.parent.parent
 SPEC = json.load(open(HERE / "spec.json"))
 PAGE = ROOT / "combined" / "playdead"
-PICK = ("pd_v2_faint", "D1_alarm_glide_wobble")
+PICK = ("pd_v3_dead", "D1_alarm_glide_wobble")
+PICK_V2 = ("pd_v2_faint", "D1_alarm_glide_wobble")
 PICK_V1 = ("pd_faint", "D1_alarm_glide_wobble")
 CURRENT_INIT_AT = None      # set before each render: the v2 duck's robot.init time (motion clock)
+CURRENT_V3 = None           # set before each render: the v3 motion's beats (robot.pose_joints parameters)
+
+
+def targets_of(legs):
+    """14 joint targets in duckfilm.JOINTS order from a {joint: angle} dict; None = hold where it is (the head)."""
+    return [legs.get(n) for n in JOINTS]
 
 
 def fresh_pd(camera="side", reachy_at=None):
     """lib.fresh with the play-dead duck (relax, then robot.init = 2 s ramp to home, then hold)."""
     m, d = F.build_scene(lib.SIZE, reachy_at=reachy_at)
-    du = PDDuck(m, d, "duck_")
+    du = (PDDuck3 if CURRENT_V3 else PDDuck)(m, d, "duck_")
     du.make_bam()
     du.spawn(0.0, 0.0, 0.0)
     import mujoco
     mujoco.mj_forward(m, d)
     du.bam.last_ts = d.time
     du.init_at = CURRENT_INIT_AT
+    if CURRENT_V3:
+        b = CURRENT_V3
+        du.set_pose_joints(b["cut"], targets_of(b["legs"]), b["off"], b["gain"], b["ramp"])
+        if b.get("legs2"):
+            du.stage2 = (b["cut2"], targets_of(b["legs2"]), b["ramp2"])
     cam = mujoco.MjvCamera()
     cam.type = mujoco.mjtCamera.mjCAMERA_FREE
     c = lib.CAMERAS[camera]
@@ -59,6 +72,8 @@ def make_motion(name):
     y0, y1 = b["yaw"]
     if b["recipe"] == "v2":
         return make_motion_v2(name, b)
+    if b["recipe"] == "v3":
+        return make_motion_v3(name, b)
 
     def fn(t):
         h = dict(skill="sit" if t < b["soften"] else None, soften=t >= b["soften"], twist=(0.0, 0.0, 0.0))
@@ -113,6 +128,28 @@ def make_motion_v2(name, b):
     return lib.Motion(name, b["desc"], b["total"], fn, beats=beats, camera="side", quacks=[0.15, b["death"] + 0.3]), b
 
 
+def make_motion_v3(name, b):
+    """v3: the same head choreography as v2; at `cut` robot.pose_joints (head servos off, legs to zero, ramp) and at `cut2`
+    a second one (legs up); no relax, no init; the death quack once it lies still; the pose is held to the end."""
+    y0, y1 = b["yaw"]
+    h0, h1 = b["headback"]
+
+    def fn(t):
+        h = dict(skill="sit" if t < b["cut"] else None, twist=(0.0, 0.0, 0.0))
+        s0, s1 = b["shock"]
+        h["head_pitch"] = SHOCK_UP * pulse(t, s0, 0.12, s1 - s0 - 0.12 - 0.3, 0.3) + HEADBACK * ramp(t - h0, h1 - h0)
+        h["head_yaw"] = b["yaw_amp"] * ramp(t - y0, y1 - y0)
+        if t >= b["death"] - 0.1:
+            h["mouth"] = DEATH_MOUTH * pulse(t, b["death"], 0.15, b["death_len"] - 0.15 - 0.6, 0.6)
+        return h
+
+    beats = [(y1, "head to the side"), (h1, "head back"), (b["cut"], "head servos off, legs straighten"), (b["cut"] + 0.7, "rolling over"),
+             (b["rest"], "at rest, flat"), (b["death"] + 0.4, "death quack"), (b["death"] + b["death_len"], "quack ends")]
+    if b.get("legs2"):
+        beats.insert(5, (b["cut2"] + b["ramp2"], "legs up (the last twitch)"))
+    return lib.Motion(name, b["desc"], b["total"], fn, beats=beats, camera="side", quacks=[0.15, b["death"] + 0.3]), b
+
+
 MOTIONS = {n: make_motion(n)[0] for n in SPEC["motions"]}
 
 
@@ -122,11 +159,32 @@ def pick():
     return MOTIONS[PICK[0]], Path(r["wav"]), PICK[1]
 
 
+def probe_table3():
+    p = HERE / "probe3.json"
+    if not p.exists():
+        return ""
+    rows = json.load(open(p))["rows"]
+    tr = "".join(f"<tr><td>{r['recipe']}</td><td><b>{r['end']}</b> {r['trunk_pitch_end_deg']:+.0f}&deg;</td><td>{r['left_upright_at']}</td><td>{r['rest_at']}</td>"
+                 f"<td>{r['peak_trunk_w_rad_s']}</td><td>{r['peak_head_speed_m_s']}</td><td>{r['gap_before_cut_mm']} / {r['gap_after_cut_mm']}</td>"
+                 f"<td>{r['head_end']}</td><td>{r['feet_z_end_cm']} (trunk {r['trunk_z_end_cm']})</td></tr>" for r in rows)
+    return f"""<h2>Fall probe v3 (probe3.py, no video): head servos off + legs driven to a pose (robot.pose_joints)</h2>
+<p>Every recipe: sit at t = 0, yaw 1.0 over 0-0.5 s, head back (-1.0) over 0.4-1.0 s; at <code>cut</code> the head servos (neck_pitch, head_pitch, head_yaw; <code>off4</code> = the roll too)
+lose their torque and the legs are ramped to the pose over <code>ramp</code> s at gain <code>g</code>: <code>zero</code> = every leg joint at 0 (straight), <code>seated</code> = the seat's own angles
+(hold), <code>home</code> = the standing pose, <code>legsupA</code> = hips -1.0 / knees 1.5, <code>E</code> = hips -0.8 / knees 1.2 / ankles 0.3, <code>F</code> = hips -1.3 / knees 1.5 / ankles -0.3,
+<code>two_</code> = zero first, then legs up once it lies there (a second call). "gap" = closest head-shell / trunk approach before / after the cut (0 after = the unpowered head rests on the trunk).
+"feet z" = the ankles' height at the end (the legs up = 7-8 cm; flat = 1.9 cm).</p>
+<table><tr><th>recipe</th><th>ends</th><th>leaves upright (s)</th><th>at rest (s)</th><th>peak trunk rot (rad/s)</th><th>peak head speed (m/s)</th><th>gap before / after (mm)</th><th>head joints at the end</th><th>feet z at the end (cm)</th></tr>{tr}</table>
+<p>Verdict: every zero-legs recipe rolls the duck flat onto its back (+90&deg;) by 2.1-3.3 s; the slower the leg ramp the softer (1.5 s: 7.5 rad/s, vs 9.6 with 0.5 s), the gain hardly matters
+(100 / 160 / 200 alike); straight to the legs-up pose is possible but the duck rocks for seconds (rest 4.4-6.1 s) and a 1.4 s cut ends propped at +69&deg;; the seated hold tips slowly and ends propped
+at +72&deg;. Best: zero legs at 1.4 s over 1.5 s (7.45 rad/s, flat by 3.0 s), then the legs up at 3.6 s (feet 7.8 cm): the two-stage pick. The unpowered head ends folded back (pitch -1.55, yaw 1.3)
+resting on the trunk; with the roll servo off too it hangs at roll 0.43.</p>"""
+
+
 def probe_table():
     p = HERE / "probe.json"
     if not p.exists():
         return ""
-    rows = json.load(open(p))
+    rows = [r for r in json.load(open(p)) if not r["recipe"].startswith("v3_")]
     tr = "".join(f"<tr><td>{r['recipe']}</td><td><b>{r['end']}</b></td><td>{r['left_upright_at']}</td><td>{r['rest_at']}</td>"
                  f"<td>{r['peak_trunk_w_rad_s']}</td><td>{r['peak_head_speed_m_s']}</td><td>{r.get('gap_before_cut_mm', '')}</td>"
                  f"<td>{r.get('joints_at_cut', '')}</td><td>{r.get('init_peak_trunk_w', '')}</td><td>{r.get('joints_end', '')}</td></tr>" for r in rows)
@@ -149,9 +207,12 @@ def page(open_it):
         is_v1 = (r["motion"], r["sound"]) == PICK_V1
         note = ""
         if is_pick:
-            note = ("v2 pick (Rémi's feedback): the head turns hard to the side (yaw 1.0) from the press, with the sit, then goes back at once; "
-                    "robot.relax at 1.4 s (torque off at once, no soften); robot.init 0.6 s after the duck is at rest (2 s ramp to home: the head "
-                    "straightens, the legs fold); then the death quack with the beak open 0.3")
+            note = ("v3 pick (Rémi's second feedback): no relax, no re-init. At 1.4 s robot.pose_joints: the three head servos lose their torque (the head "
+                    "flops back and to the side, resting on the shoulders), the legs are driven straight (zero angles, gain 160, 1.5 s ramp): the duck rolls "
+                    "onto its back (flat and still by 3.0 s); at 3.6 s a second pose_joints raises the legs (hips -1.0, knees 1.5: the last twitch); "
+                    "the death quack at 5.0 s with the beak open 0.3 (the jaw is powered); the pose is held until Start")
+        elif (r["motion"], r["sound"]) == PICK_V2:
+            note = "v2 pick, for comparison (relax at 1.4 s, robot.init at 3.0 s: rejected, the init re-poses the whole duck)"
         elif is_v1:
             note = "v1 pick, for comparison (yaw 0.6 only, late; soften; no torque afterwards)"
         c = lib.card(HERE, PAGE, stem, f"{r['motion']} + {r['sound']}", note=note)
@@ -159,19 +220,27 @@ def page(open_it):
             c = c.replace('class="card"', 'class="card pick"', 1)
         cards_by.setdefault(r["motion"], []).append(c)
     pick_cards = cards_by.pop(PICK[0])
-    sections = [("The v2 pick: " + PICK[0], SPEC["motions"][PICK[0]]["desc"], pick_cards)]
+    sections = [("The v3 pick: " + PICK[0], SPEC["motions"][PICK[0]]["desc"], pick_cards)]
+    for n in [n for n in cards_by if n.startswith("pd_v3")]:
+        sections.append((n + " (v3 alternative)", SPEC["motions"][n]["desc"], cards_by.pop(n)))
+    sections.append(("v2 pick, for comparison: " + PICK_V2[0] + " (relax, then init: rejected, the init re-poses the whole duck)", SPEC["motions"][PICK_V2[0]]["desc"], cards_by.pop(PICK_V2[0])))
     for n in [n for n in cards_by if n.startswith("pd_v2")]:
         sections.append((n + " (v2 alternative)", SPEC["motions"][n]["desc"], cards_by.pop(n)))
     v1_cards = cards_by.pop(PICK_V1[0])
     sections.append(("v1 pick, for comparison: " + PICK_V1[0], SPEC["motions"][PICK_V1[0]]["desc"], v1_cards))
     for n, cs in cards_by.items():
         sections.append((n + " (v1 alternative)", SPEC["motions"][n]["desc"], cs))
-    intro = ("<b>v2 (2026-09-06, Rémi's feedback)</b>: combination emotion = sit_toggle + a head program + <code>robot.relax</code> (torque off at once) + "
+    intro = ("<b>v3 (2026-09-06 evening, Rémi's second feedback)</b>: combination emotion = sit_toggle + a head program + <code>robot.pose_joints</code> "
+             "(a new runtime call: the three head servos torque OFF, every other joint driven to given angles at a given gain over a ramp; no policy) twice: "
+             "the legs straightened so the duck rolls onto its back, then the legs raised like a dead animal's; the jaw stays powered for the death quack; "
+             "the robot HOLDS the dead pose until Rémi's Start (the full init). No relax, no re-init inside the emotion (v2's init re-posed the whole duck). "
+             "Probe table (v3 rows) below, then the v2 and v1 picks for comparison.<br><b>v2 (earlier the same day)</b>: combination emotion = sit_toggle + a head program + <code>robot.relax</code> (torque off at once) + "
              "<code>robot.init</code> once the fall is over (torque on, 2 s ramp to the home pose: the head straightens, the last twitch) + the death quack "
              "with the beak open 0.3 (the runtime is being changed so the mouth works while the robot holds after an init). The head turns hard to the side "
              "(yaw 1.0) from the press, with the sit, and goes back at once, so the back of the head clears the shoulders (sim: 27 mm gap vs 23 mm with yaw 0.6). "
              "Simulation, side camera, 640x480, 30 fps. v1 (soften, head yaw 0.6 late, no torque afterwards) is kept below for comparison. "
              "Files: <code>/Users/remi/microduck/notes/emotions/motion/playdead/</code> (spec.json, playdead.py, pdduck.py, probe.py, REPORT.md), sounds in <code>sounds/playdead/</code>.") + probe_table()
+    intro = intro.replace(probe_table(), probe_table3() + probe_table())
     lib.write_page(PAGE, "play dead (episode 3): shock, sit, keel over backwards, death quack", intro, sections, open_it=open_it)
 
 
@@ -199,13 +268,17 @@ if __name__ == "__main__":
             continue
         b = SPEC["motions"][r["motion"]]
         CURRENT_INIT_AT = b.get("init") if b["recipe"] == "v2" else None
+        CURRENT_V3 = b if b["recipe"] == "v3" else None
         lib.render(MOTIONS[r["motion"]], Path(r["wav"]), HERE, PAGE, sound=r["sound"], sound_desc=r["desc"])
         page(open_it=False)
     page(open_it=not a.no_open)
     m, wav, s = pick()
     b = SPEC["motions"][PICK[0]]
+    pj = [dict(at=b["cut"], targets=targets_of(b["legs"]), off=b["off"], gain=b["gain"], ramp_s=b["ramp"])]
+    if b.get("legs2"):
+        pj.append(dict(at=b["cut2"], targets=targets_of(b["legs2"]), off=b["off"], gain=b["gain"], ramp_s=b["ramp2"]))
     json.dump(dict(motion=PICK[0], sound=s, wav=str(wav), duration=b["total"], keyframes_json=str(HERE / f"{PICK[0]}__{s}.json"),
-                   relax_at=b["relax"], init_at=b["init"], death_at=b["death"], death_len=b["death_len"], rest_at=b["rest"],
+                   joints_order=JOINTS, pose_joints=pj, death_at=b["death"], death_len=b["death_len"], rest_at=b["rest"],
                    skill_at_start="sit_toggle", robot_wav=str(ROOT / "sounds" / "robot" / "play_dead_a.wav")),
               open(HERE / "PICK.json", "w"), indent=1)
     robot_wav()

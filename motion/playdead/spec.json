@@ -1,5 +1,204 @@
 {
  "motions": {
+  "pd_v3_dead": {
+   "recipe": "v3",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.0
+   ],
+   "cut": 1.4,
+   "ramp": 1.5,
+   "gain": 160,
+   "off": [
+    "neck_pitch",
+    "head_pitch",
+    "head_yaw"
+   ],
+   "legs": {
+    "left_hip_yaw": 0.0,
+    "left_hip_roll": 0.0,
+    "left_hip_pitch": 0.0,
+    "left_knee": 0.0,
+    "left_ankle": 0.0,
+    "right_hip_yaw": 0.0,
+    "right_hip_roll": 0.0,
+    "right_hip_pitch": 0.0,
+    "right_knee": 0.0,
+    "right_ankle": 0.0
+   },
+   "legs2": {
+    "left_hip_yaw": 0.0,
+    "left_hip_roll": 0.0,
+    "left_hip_pitch": -1.0,
+    "left_knee": 1.5,
+    "left_ankle": 0.0,
+    "right_hip_yaw": 0.0,
+    "right_hip_roll": 0.0,
+    "right_hip_pitch": 1.0,
+    "right_knee": -1.5,
+    "right_ankle": 0.0
+   },
+   "cut2": 3.6,
+   "ramp2": 1.0,
+   "rest": 3.0,
+   "death": 5.0,
+   "death_len": 1.8,
+   "total": 7.5,
+   "desc": "v3: alarm + sit at the press while the head turns hard to the side and goes back; 1.4 s: head servos off + legs straightened over 1.5 s (gain 160): the duck rolls onto its back (tips 2.0 s, flat and still by 3.0 s, legs flat); 3.6 s: the legs come up over 1 s (hips -1.0, knees 1.5: the last twitch); death quack at 5.0 s, beak 0.3; holds the dead pose"
+  },
+  "pd_v3_flat": {
+   "recipe": "v3",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.0
+   ],
+   "cut": 1.4,
+   "ramp": 1.5,
+   "gain": 160,
+   "off": [
+    "neck_pitch",
+    "head_pitch",
+    "head_yaw"
+   ],
+   "legs": {
+    "left_hip_yaw": 0.0,
+    "left_hip_roll": 0.0,
+    "left_hip_pitch": 0.0,
+    "left_knee": 0.0,
+    "left_ankle": 0.0,
+    "right_hip_yaw": 0.0,
+    "right_hip_roll": 0.0,
+    "right_hip_pitch": 0.0,
+    "right_knee": 0.0,
+    "right_ankle": 0.0
+   },
+   "legs2": null,
+   "cut2": null,
+   "ramp2": null,
+   "rest": 3.0,
+   "death": 3.8,
+   "death_len": 1.8,
+   "total": 6.2,
+   "desc": "v3, one stage: head servos off + legs to zero at 1.4 s (1.5 s ramp), the duck rolls onto its back with the legs flat; death quack at 3.8 s; no leg raise"
+  },
+  "pd_v3_legsup": {
+   "recipe": "v3",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.0
+   ],
+   "cut": 1.7,
+   "ramp": 1.5,
+   "gain": 160,
+   "off": [
+    "neck_pitch",
+    "head_pitch",
+    "head_yaw"
+   ],
+   "legs": {
+    "left_hip_yaw": 0.0,
+    "left_hip_roll": 0.0,
+    "left_hip_pitch": -1.0,
+    "left_knee": 1.5,
+    "left_ankle": 0.0,
+    "right_hip_yaw": 0.0,
+    "right_hip_roll": 0.0,
+    "right_hip_pitch": 1.0,
+    "right_knee": -1.5,
+    "right_ankle": 0.0
+   },
+   "legs2": null,
+   "cut2": null,
+   "ramp2": null,
+   "rest": 4.4,
+   "death": 5.1,
+   "death_len": 1.8,
+   "total": 7.6,
+   "desc": "v3, legs straight to the dead pose: at 1.7 s the head servos go off and the legs go to hips -1.0 / knees 1.5 over 1.5 s; the duck rolls over and rocks for a while (still by 4.4 s); death quack at 5.1 s"
+  },
+  "pd_v3_dead_off4": {
+   "recipe": "v3",
+   "shock": [
+    0.0,
+    0.55
+   ],
+   "yaw": [
+    0.0,
+    0.5
+   ],
+   "yaw_amp": 1.0,
+   "headback": [
+    0.4,
+    1.0
+   ],
+   "cut": 1.4,
+   "ramp": 1.5,
+   "gain": 160,
+   "off": [
+    "neck_pitch",
+    "head_pitch",
+    "head_yaw",
+    "head_roll"
+   ],
+   "legs": {
+    "left_hip_yaw": 0.0,
+    "left_hip_roll": 0.0,
+    "left_hip_pitch": 0.0,
+    "left_knee": 0.0,
+    "left_ankle": 0.0,
+    "right_hip_yaw": 0.0,
+    "right_hip_roll": 0.0,
+    "right_hip_pitch": 0.0,
+    "right_knee": 0.0,
+    "right_ankle": 0.0
+   },
+   "legs2": {
+    "left_hip_yaw": 0.0,
+    "left_hip_roll": 0.0,
+    "left_hip_pitch": -1.0,
+    "left_knee": 1.5,
+    "left_ankle": 0.0,
+    "right_hip_yaw": 0.0,
+    "right_hip_roll": 0.0,
+    "right_hip_pitch": 1.0,
+    "right_knee": -1.5,
+    "right_ankle": 0.0
+   },
+   "cut2": 3.6,
+   "ramp2": 1.0,
+   "rest": 3.0,
+   "death": 5.0,
+   "death_len": 1.8,
+   "total": 7.5,
+   "desc": "v3 pick with all FOUR head servos off (the roll too): the head hangs a little more crooked (roll joint 0.43)"
+  },
   "pd_v2_faint": {
    "recipe": "v2",
    "shock": [
@@ -181,6 +380,36 @@
   }
  },
  "renders": [
+  {
+   "motion": "pd_v3_dead",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v3_dead__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_v3_dead",
+   "sound": "D2_inquire_coo_fall",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v3_dead__D2_inquire_coo_fall.wav",
+   "desc": "the bank's inquire shock (as devastated), silence, then the robot's coo voice falling 230 -> 110 Hz with a dying wobble: a breathy last sigh"
+  },
+  {
+   "motion": "pd_v3_flat",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v3_flat__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_v3_legsup",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v3_legsup__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
+  {
+   "motion": "pd_v3_dead_off4",
+   "sound": "D1_alarm_glide_wobble",
+   "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_v3_dead_off4__D1_alarm_glide_wobble.wav",
+   "desc": "the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)"
+  },
   {
    "motion": "pd_v2_faint",
    "sound": "D1_alarm_glide_wobble",

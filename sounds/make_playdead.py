@@ -29,7 +29,35 @@ ST = 2 ** (1 / 12)
 # Every motion: sit_toggle at 0 (the seat lands ~1 s later), the head choreography, `soften` = robot.soften sent
 # (gain 50 at once, to 0 over 1 s, torque off), the duck tips over as the torque dies and is still by `rest`;
 # `death` = the death quack starts, `death_len` its length; `total` = the emotion's length.
+# v3 pose_joints: legs to zero angles = straight (the duck rolls over onto its back and the legs lie flat), then the legs
+# come UP (hips -1.0, knees +1.5, mirrored on the right) as a dead animal's: the last twitch. The head servos have no torque.
+LEGS_ZERO = dict(left_hip_yaw=0.0, left_hip_roll=0.0, left_hip_pitch=0.0, left_knee=0.0, left_ankle=0.0,
+                 right_hip_yaw=0.0, right_hip_roll=0.0, right_hip_pitch=0.0, right_knee=0.0, right_ankle=0.0)
+LEGS_UP = dict(left_hip_yaw=0.0, left_hip_roll=0.0, left_hip_pitch=-1.0, left_knee=1.5, left_ankle=0.0,
+               right_hip_yaw=0.0, right_hip_roll=0.0, right_hip_pitch=1.0, right_knee=-1.5, right_ankle=0.0)
+HEAD_OFF3 = ["neck_pitch", "head_pitch", "head_yaw"]
 MOTIONS = {
+    # ---- v3 (Rémi's second feedback, 2026-09-06 evening): NO relax, NO re-init. Once the head is to the side and back,
+    # `robot.pose_joints`: the three head servos lose their torque (the head flops), the legs are driven to ZERO angles
+    # (straight) at gain 160 over `ramp_s`: the duck rolls over onto its back on the weight of its head; once it lies
+    # there a second pose_joints raises the legs (dead animal); the jaw stays powered for the death quack; the robot holds
+    # that pose until Rémi's Start. Times from probe3.py.
+    "pd_v3_dead": dict(recipe="v3", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.0],
+                       cut=1.4, ramp=1.5, gain=160, off=HEAD_OFF3, legs=LEGS_ZERO, legs2=LEGS_UP, cut2=3.6, ramp2=1.0,
+                       rest=3.0, death=5.0, death_len=1.8, total=7.5,
+                       desc="v3: alarm + sit at the press while the head turns hard to the side and goes back; 1.4 s: head servos off + legs straightened over 1.5 s (gain 160): the duck rolls onto its back (tips 2.0 s, flat and still by 3.0 s, legs flat); 3.6 s: the legs come up over 1 s (hips -1.0, knees 1.5: the last twitch); death quack at 5.0 s, beak 0.3; holds the dead pose"),
+    "pd_v3_flat": dict(recipe="v3", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.0],
+                       cut=1.4, ramp=1.5, gain=160, off=HEAD_OFF3, legs=LEGS_ZERO, legs2=None, cut2=None, ramp2=None,
+                       rest=3.0, death=3.8, death_len=1.8, total=6.2,
+                       desc="v3, one stage: head servos off + legs to zero at 1.4 s (1.5 s ramp), the duck rolls onto its back with the legs flat; death quack at 3.8 s; no leg raise"),
+    "pd_v3_legsup": dict(recipe="v3", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.0],
+                         cut=1.7, ramp=1.5, gain=160, off=HEAD_OFF3, legs=LEGS_UP, legs2=None, cut2=None, ramp2=None,
+                         rest=4.4, death=5.1, death_len=1.8, total=7.6,
+                         desc="v3, legs straight to the dead pose: at 1.7 s the head servos go off and the legs go to hips -1.0 / knees 1.5 over 1.5 s; the duck rolls over and rocks for a while (still by 4.4 s); death quack at 5.1 s"),
+    "pd_v3_dead_off4": dict(recipe="v3", shock=[0.0, 0.55], yaw=[0.0, 0.5], yaw_amp=1.0, headback=[0.4, 1.0],
+                            cut=1.4, ramp=1.5, gain=160, off=HEAD_OFF3 + ["head_roll"], legs=LEGS_ZERO, legs2=LEGS_UP, cut2=3.6, ramp2=1.0,
+                            rest=3.0, death=5.0, death_len=1.8, total=7.5,
+                            desc="v3 pick with all FOUR head servos off (the roll too): the head hangs a little more crooked (roll joint 0.43)"),
     # ---- v2 (Rémi's feedback, 2026-09-06): the head yaws hard to the side FROM THE PRESS, with the sit ("like devastated,
     # he just turns his head"), then tilts back at once (beak to the sky); the torque is cut with robot.relax (at once);
     # the duck keels over backwards; 0.6 s after it is at rest, robot.init (torque on + a 2 s ramp to the home pose:
@@ -126,11 +154,13 @@ def main():
         variants = sounds_for(b)
         # every motion gets D1; the two faint motions get all three
         for sname, parts, desc in variants:
+            if mname.startswith("pd_v3") and sname != "D1_alarm_glide_wobble" and not (mname == "pd_v3_dead" and sname == "D2_inquire_coo_fall"):
+                continue
             if mname == "pd_v2_faint" and sname == "D3_alarm_wheee_tape":
                 continue
             if mname.startswith("pd_v2") and mname != "pd_v2_faint" and sname != "D1_alarm_glide_wobble":
                 continue
-            if not mname.startswith(("pd_faint", "pd_v2")) and sname != "D1_alarm_glide_wobble":
+            if not mname.startswith(("pd_faint", "pd_v2", "pd_v3")) and sname != "D1_alarm_glide_wobble":
                 continue
             if mname == "pd_faint_slow" and sname == "D3_alarm_wheee_tape":
                 continue

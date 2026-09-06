@@ -1,3 +1,112 @@
+# Play dead, v3 (Rémi's second feedback, 2026-09-06 evening): head servos off, legs to a dead pose, no re-init
+
+Rémi on v2: "when you re-enable the torque you call a function that also sets all the motors to their default positions;
+the pose of the robot on the ground completely changes." His design: once the head is to the side and thrown back, cut the
+torque of the HEAD servos only (three: neck_pitch, head_pitch, head_yaw; the roll, the jaw and the legs stay powered); the
+legs go to a "dead animal" pose (zero angles = straight, then up); the beak stays powered for the death quack; the robot
+holds that pose until his Start (the full init) gets it out. Page: `/Users/remi/microduck/notes/emotions/combined/playdead/index.html`
+(v3 pick first, v3 alternatives, then the v2 and v1 picks). Code: `pdduck3.py` (the coming `robot.pose_joints` in
+simulation: per-joint torque off = the actuator control zeroed after BAM computes it; the other joints ramped to targets
+at one gain, no policy; a second call = `stage2`), `probe3.py` (the v3 probe, `probe3.json`), `playdead.py` (`pd_v3_*`,
+`pick()`), `../../sounds/make_playdead.py` (v3 beats -> wavs).
+
+## v3 probe (probe3.py, no video)
+
+Every recipe: sit at 0, head yaw 1.0 over 0-0.5 s, head back -1.0 over 0.4-1.0 s; at `cut` the head servos (the three;
+`off4` = the roll too) lose their torque and the legs are ramped over `ramp` s at gain `g` to: `zero` = every leg joint
+at 0 (straight), `seated` = the seat's own angles (measured just before the cut: hips -0.51 / +0.54, knees +1.30 / -1.27,
+ankles +0.15 / -0.12), `home` = the standing pose, `legsupA` = hips -1.0 / knees +1.5 (mirrored on the right), `E` = hips
+-0.8 / knees 1.2 / ankles 0.3, `F` = hips -1.3 / knees 1.5 / ankles -0.3, `B` / `D` = the hips the other way (the legs
+fold under: the duck ends tilted past vertical), `two_` = zero first, then legs up once it lies there (a second call).
+"gap" = closest head-shell / trunk approach before / after the cut (0 after = the unpowered head rests on the trunk).
+"feet z" = the ankles' height at the end (legs up = 7-8 cm; flat on the floor = 1.9 cm).
+
+| recipe | ends (trunk pitch) | leaves upright | at rest | peak trunk rot (rad/s) | peak head v (m/s) | gap before / after cut (mm) | head joints at end (yaw / pitch / neck / roll) | feet z at end (cm) |
+|---|---|---|---|---|---|---|---|---|
+| v3_zero_cut1.2_ramp0.5_g160 | ON BACK (+91) | 1.64 | 2.1 | 9.64 | 1.11 | 33.0 / 0.0 | 1.12 / -1.65 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.2_ramp1.0_g160 | ON BACK (+91) | 1.76 | 2.36 | 9.03 | 1.01 | 33.0 / 0.0 | 1.23 / -1.6 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.2_ramp1.5_g160 | ON BACK (+91) | 1.88 | 2.72 | 8.54 | 0.95 | 33.0 / 0.0 | 1.27 / -1.55 / -0.31 / 0.05 | [1.9, 1.9] |
+| v3_zero_cut1.4_ramp0.5_g160 | ON BACK (+91) | 1.82 | 2.36 | 9.38 | 1.18 | 29.4 / 0.0 | 1.11 / -1.65 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.4_ramp1.0_g160 | ON BACK (+91) | 1.96 | 2.56 | 8.82 | 0.98 | 29.4 / 0.0 | 1.23 / -1.6 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.4_ramp1.5_g160 | ON BACK (+91) | 2.04 | 2.96 | 7.45 | 0.98 | 29.4 / 0.0 | 1.27 / -1.55 / -0.31 / 0.05 | [1.9, 1.9] |
+| v3_zero_cut1.7_ramp0.5_g160 | ON BACK (+91) | 2.14 | 2.68 | 9.33 | 1.17 | 29.2 / 0.0 | 1.12 / -1.65 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.7_ramp1.0_g160 | ON BACK (+91) | 2.28 | 2.92 | 7.56 | 1.0 | 29.2 / 0.0 | 1.19 / -1.6 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.7_ramp1.5_g160 | ON BACK (+91) | 2.36 | 3.28 | 7.96 | 0.91 | 29.2 / 0.0 | 1.28 / -1.55 / -0.31 / 0.05 | [1.9, 1.9] |
+| v3_zero_cut1.4_ramp1.0_g100 | ON BACK (+91) | 2.0 | 2.66 | 8.71 | 0.96 | 29.4 / 0.0 | 1.22 / -1.59 / -0.31 / 0.05 | [1.9, 1.8] |
+| v3_zero_cut1.4_ramp1.0_g200 | ON BACK (+91) | 1.94 | 2.54 | 8.86 | 0.99 | 29.4 / 0.0 | 1.23 / -1.6 / -0.31 / 0.04 | [1.9, 1.9] |
+| v3_zero_cut1.4_ramp1.0_g160_off4 | ON BACK (+91) | 1.96 | 2.54 | 8.8 | 0.98 | 29.4 / 0.0 | 1.37 / -1.31 / -0.23 / 0.43 | [1.9, 1.9] |
+| v3_seated_cut1.4_ramp1.0_g160 | ON BACK (+72) | 2.5 | 4.18 | 8.44 | 0.83 | 29.4 / 0.0 | 1.42 / -0.56 / 0.54 / 0.03 | [6.6, 6.2] |
+| v3_home_cut1.4_ramp1.0_g160 | ON BACK (+81) | 2.0 | 2.74 | 8.0 | 1.01 | 29.4 / 0.0 | 1.38 / -1.05 / 0.11 / 0.04 | [2.8, 2.7] |
+| v3_legsupA_cut1.4_ramp1.0_g160 | ON BACK (+90) | 2.5 | 6.06 | 8.35 | 0.91 | 29.4 / 0.0 | 1.35 / -1.54 / -0.31 / 0.05 | [7.8, 7.7] |
+| v3_legsupB_cut1.4_ramp1.0_g160 | tilted (+162) | 1.86 | 2.52 | 8.97 | 1.07 | 29.4 / 0.0 | 1.33 / -1.39 / -1.92 / 0.03 | [2.7, 2.9] |
+| v3_legsupC_cut1.4_ramp1.0_g160 | ON BACK (+81) | 2.04 | 2.48 | 8.01 | 0.91 | 29.4 / 0.0 | 0.93 / -0.9 / 0.18 / 0.03 | [5.9, 9.8] |
+| v3_legsupD_cut1.4_ramp1.0_g160 | tilted (+136) | 1.88 | 2.6 | 8.11 | 1.01 | 29.4 / 0.0 | 1.15 / -1.92 / -1.52 / 0.09 | [2.2, 2.2] |
+| v3_zero_cut1.4_ramp1.0_g160_headrollhold | ON BACK (+91) | 1.96 | 2.56 | 8.82 | 0.98 | 29.4 / 0.0 | 1.23 / -1.6 / -0.31 / 0.03 | [1.9, 1.9] |
+| v3_legsupA_cut1.4_ramp1.5_g160 | ON BACK (+69) | 2.62 | 5.4 | 8.85 | 0.84 | 29.4 / 0.0 | 1.41 / -0.52 / 0.63 / 0.01 | [7.3, 7.3] |
+| v3_legsupA_cut1.7_ramp1.5_g160 | ON BACK (+90) | 2.68 | 4.4 | 8.22 | 0.91 | 29.2 / 0.0 | 1.34 / -1.54 / -0.31 / 0.05 | [7.8, 7.7] |
+| v3_legsupE_cut1.4_ramp1.0_g160 | ON BACK (+69) | 2.58 | 3.66 | 8.24 | 0.86 | 29.4 / 0.0 | 1.39 / -0.53 / 0.62 / 0.01 | [6.8, 6.8] |
+| v3_legsupF_cut1.4_ramp1.0_g160 | ON BACK (+85) | 2.44 | 2.7 | 7.91 | 1.0 | 29.4 / 0.0 | 0.88 / -0.85 / 0.06 / 0.05 | [5.7, 11.0] |
+| v3_two_zero1.4_then_legsupA3.2 | ON BACK (+90) | 1.96 | 2.56 | 8.82 | 0.98 | 29.4 / 0.0 | 1.22 / -1.6 / -0.3 / 0.05 | [7.8, 7.8] |
+| v3_two_zero1.4r1.5_then_legsupA3.6 | ON BACK (+90) | 2.04 | 2.96 | 7.45 | 0.98 | 29.4 / 0.0 | 1.28 / -1.55 / -0.3 / 0.07 | [7.8, 7.7] |
+| v3_two_zero1.4_then_legsupE3.2 | ON BACK (+90) | 1.96 | 2.56 | 8.82 | 0.98 | 29.4 / 0.0 | 1.22 / -1.6 / -0.3 / 0.05 | [7.5, 7.4] |
+
+Verdict:
+- **Every zero-legs recipe rolls the duck flat onto its back (+90 deg)** by 2.1-3.3 s: the straightening legs push the seated
+  duck over, the loose head pulls it. The slower the leg ramp the softer: 1.5 s = 7.5 rad/s (the v2 relax gave 7.0, v1's
+  soften 6.6), 0.5 s = 9.6. The gain hardly matters (100 / 160 / 200 alike); a later cut (1.7 s) buys nothing.
+- **Straight to the legs-up pose** works from a 1.7 s cut (+90 deg) but the duck rocks on its round back for seconds (at rest
+  4.4-6.1 s), and from a 1.4 s cut it ends propped at +69 deg; in the rendered candidate (`pd_v3_legsup`, the jaw moving on
+  the alarm) it did not even go over: **marginal, rejected**. The seated hold tips slowly and ends propped at +72 deg.
+- **Two stages** (zero legs at 1.4 s over 1.5 s, then legs up at 3.6 s over 1 s): the softest fall of the family (7.45 rad/s,
+  head 0.98 m/s), flat and still by 3.0 s, then the legs rise to 7.8 cm without moving the body: the pick.
+- The unpowered head ends folded back (pitch -1.55, yaw +1.3) resting on the trunk / shoulder (gap 0 after the cut: it is
+  the head's own weight, no servo force). With the roll servo off too the head hangs at roll 0.43 (crooked); with it on
+  (the pick) roll stays ~0.05.
+- Gap BEFORE the cut 29-33 mm (the servos are driving the head then), as in v2.
+
+## The v3 pick: `pd_v3_dead` + `D1_alarm_glide_wobble` (7.5 s from the press)
+
+| t (s) | what | how |
+|---|---|---|
+| 0.00 | press: sit_toggle fired, alarm played; the head snaps up (shock) AND turns hard to the side | `skill_at_start = SitToggle`, `sound_at_start = PlayDead`; head_pitch -0.5 over 0.12 s; head_yaw 0 -> +1.0 over 0-0.5 s |
+| 0.40 -> 1.00 | the head goes back: beak to the sky, still to the side (joint yaw 0.80, pitch -0.73 at 1.4 s) | head_pitch += -1.0 * ramp(t - 0.4, 0.6) |
+| **1.40** | **robot.pose_joints #1**: neck_pitch / head_pitch / head_yaw torque OFF; every leg joint ramped to 0 over 1.5 s at gain 160 (head_roll: hold) | `pose_joints(at=1.4, targets=legs 0, off=[neck_pitch, head_pitch, head_yaw], gain=160, ramp_s=1.5)` |
+| 2.04 | the duck leaves upright, rolls over backwards (trunk +36 deg at 2.0, +80 at 2.5) | nothing sent |
+| 3.00 | flat on the back (+91 deg), still; the head folded back and to the side (yaw 1.33, pitch -1.52), legs flat | |
+| **3.60** | **robot.pose_joints #2**: the legs come up over 1 s (hips -1.0 / +1.0, knees +1.5 / -1.5, ankles 0), same off list and gain | `pose_joints(at=3.6, targets=legs up, off=same, gain=160, ramp_s=1.0)`; feet at 7.8 cm by 4.6 s |
+| 5.00 -> 6.80 | the death quack; the beak opens to 0.3 (the jaw is powered) | mouth = 0.3 x pulse(t, 5.0, 0.15, 1.05, 0.6) |
+| 7.50 | end of the expression: the robot HOLDS the dead pose (no policy) until Rémi's Start (robot.init, all torque on, home) | |
+
+Formulas (padd/src/expressions.rs, `t` from the press; `ramp` = half cosine, `pulse(t, t0, up, hold, down)`):
+- `head_pitch(t) = -0.5 * pulse(t, 0.0, 0.12, 0.13, 0.30) - 1.0 * ramp(t - 0.4, 0.6)`; `head_yaw(t) = 1.0 * ramp(t, 0.5)`;
+  `neck_pitch = head_roll = 0`; no pose slot; twist forced to zero (sticks locked); the sit skill is over at 1.4 s (the head
+  intents after 1.4 s are irrelevant: those servos are off).
+- events: sit_toggle + sound at 0.0; **pose_joints at 1.4 s** and **at 3.6 s** with the parameters above (`PICK.json`
+  `pose_joints`, targets in `joints_order` = duckfilm.JOINTS: left_hip_yaw, left_hip_roll, left_hip_pitch, left_knee,
+  left_ankle, neck_pitch, head_pitch, head_yaw, head_roll, right_hip_yaw, right_hip_roll, right_hip_pitch, right_knee,
+  right_ankle; null = hold). No relax, no init.
+- mouth table, 0..1 every 0.1 s from the press (69 samples, zero after): `0.000, 0.000, 1.000, 1.000, 0.611, 0.208, 0 x 45 (0.6-5.0 s), 0.225, 0.300 x 11, 0.280, 0.225, 0.150, 0.075, 0.020, 0.000` (exact list: `pd_v3_dead__D1_alarm_glide_wobble.json`
+  `mouth` channel, or `../episode3/mouth_table.py` on it).
+
+Measured (sim): tips at 2.04 s, flat at 3.0 s, 16 cm backward travel, peak trunk rotation 7.45 rad/s, head 0.98 m/s, head z
+min 2.7 cm; trunk z 4.6 cm at the end (flat), feet 7.8 cm up after stage 2, the body does not move during the leg raise
+(trunk pitch 91 -> 90 deg); jaw 1.0 on the alarm, 0.30 on the death quack, shut in between. Robot wav
+`sounds/robot/play_dead_a.wav` (6.90 s, -3 dBFS): alarm at 0, death quack 5.0-6.8 s.
+
+Alternatives on the page: `pd_v3_flat` (one stage, legs stay flat, death quack at 3.8 s, 6.2 s: quicker, less of a corpse),
+`pd_v3_dead_off4` (the roll servo off too: the head hangs crooked, roll 0.43), `pd_v3_legsup` (straight to the legs-up
+pose: did not go over in the render), the pick with D2 (inquire shock + coo sigh).
+
+## Questions for Rémi (v3)
+
+1. The legs-up "twitch" at 3.6 s (two `pose_joints` calls) or the legs left flat (`pd_v3_flat`)? The raise is the "dead
+   animal" you described; flat is the quieter corpse.
+2. Three head servos off (roll held: the head hangs straight-ish) or all four (crooked, roll 0.43)?
+3. On the real robot the unpowered head rests on the shoulder shell (gap 0 in the model): no force, but check the cable.
+4. Softness: 7.45 rad/s, head 0.98 m/s onto the back shell, a little harder than v2's relax (7.0). A slower leg ramp
+   (2 s) would be softer still; mat first.
+5. Gain 160 for the legs while lying (they push against nothing): fine in the model; 100 works the same.
+
 # Play dead, v2 (Rémi's feedback, 2026-09-06 evening)
 
 Rémi on the v1 pick (`pd_faint`): the idea (the head as the lever) is right, but on the real robot the back of the head
