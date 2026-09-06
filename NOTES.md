@@ -456,3 +456,5 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Rémi filmed Laureen's script himself (`combined/episode3/laureen_manual_223231.mp4`, "good"). Final cut with the
   episode 1/2 caption recipe + a 2 s title card from her home photo and a 0.5 s crossfade:
   `combined/episode3/final/laureen_conversation_final.mp4` (23.8 s) + srt; recipe in `motion/episode3/laureen-film/README.md`.
+- The social-media version is Rémi's OBS recording of a hand-driven session (buttons visible): cut, cropped to the
+  simulator, captioned from whisper word times (the browser's own voice) -> `combined/episode3/final/laureen_simulator_obs_final.mp4`.

@@ -54,3 +54,15 @@ black 150-alpha rounded box, 90 px from the bottom). Montage: the simulator's la
 Rémi's correction) for 2 s, a 0.5 s crossfade, then the captioned film (its clock shifts by 1.5 s).
 Output: `combined/episode3/final/laureen_conversation_final.mp4` + `.srt`. Source take: `laureen_manual_223231.mp4`
 (Rémi's hand camera).
+
+## The OBS take (the one for social media, 2026-09-06 23:00)
+
+Rémi recorded a hand-driven session of Laureen's Space in Firefox with OBS (`~/Videos/2026-09-06 22-59-39.mp4`,
+1920x1080 60 fps, 87.7 s; copy in `combined/episode3/final/obs_source_2026-09-06_22-59-39.mp4`). Edit ->
+`combined/episode3/final/laureen_simulator_obs_final.mp4` (83.6 s, 1780x872, 30 fps) + `.srt`:
+- cut 2.0 s (OBS leaves the frame) to 85.6 s (OBS comes back at 85.8), found by probing frame regions;
+- crop `1780:872:120:190`: only the simulator (no macOS menu bar, browser tabs, HF Space header, Firefox sidebar);
+- captions: the browser's own voice (Firefox's TTS, not our rendered Arthur lines, which do not correlate with it), so
+  the word times came from faster-whisper medium (`~/agentic_video_montage/microduck_lake_video/work/.venv-whisper`,
+  episode 2's env) on the last 33 s: lines at 61.70, 66.50 and 76.28 s of the source. Same look as the episodes, bottom
+  margin 130 px (90 would sit on the sim's "Script (9 actions)" popup).
