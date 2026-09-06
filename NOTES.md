@@ -392,3 +392,11 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Laureen pushed upstream again ("consistent Reachy voice and wobbler", "fix static entrypoint"): the fork agent merges
   it, adds the v3 beat keys to the script builder, the new emotions, the wobble check, a `--watch` interactive mode
   (Rémi's wish: keep the browser alive and replay when scene.json changes) and re-records.
+- Round 3 results: local preview v3 (~121 s) and the browser recording v3 (144 s, fork commits 94a15f1 / 71f6e23 /
+  5daff21) on the summary page. Reachy's turn: the daemon's automatic body yaw (and the browser IK) keep the head
+  where it was while the body turns, so `robot/skit.py` now turns the whole robot (head target rotated with the
+  body) and plays the recorded moves in the turned frame while an offset is active; the fork does the same.
+  Browser-sim finding: its sit-stand net does not sit while the head is thrown back, so play dead's clock now
+  waits for the seat there (real robot: expected to sit like the BAM pipeline; to check). `are_you_ok`: the two
+  questions swapped and re-rendered. Interactive mode: `node tools/watch-episode3.mjs` in the fork replays the
+  script whenever the theater `scene.json` is saved.
