@@ -288,3 +288,50 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Summary page `combined/episode3/index.html` (the six picks + the scene preview + the emotion table).
 - Theater: `scenes/episode3/README.md` beat table (about 130 s + the pause at `duck_rises`), `microduck/EMOTIONS.md`
   updated; `microduck/sim/episode3_preview.py` renders the whole scene with the picks.
+
+### Same evening: Rémi's review (voice) and round 2
+
+- Rémi's decisions: **yes** = the pick, plus **yes_fast** = `yes_single` + Y3 "wak" (a second, quicker yes for a yes /
+  no / yes exchange); **no**: no closed-beak variant, the grumbles are dropped, but `closed_mmh` + C3 becomes its own
+  emotion **mmh** ("what do you mean?", the beak opens normally; the scene uses it as the duck's answers); **angry**: keep,
+  test on the robot ("maybe too dynamic"); **excited**: motion kept, sound = X1 synth climb; **play dead**: the head must
+  turn much more and much earlier (from the sit, like devastated) then tilt back, cut with `robot.relax`, torque back
+  on 0.5-1 s after the fall so the beak and later emotions work; a **laugh** emotion (beak up, head left-right, body
+  moving) for the scene; a **bindings file** kept up to date (`BINDINGS.md`); more emotions than buttons is fine.
+  Scene: the pick must open the beak on the way down; "not a dog. You are a Microduck." (no extra Microduck); the
+  duck's answers = mmh after the lake line and after the sunscreen line, a double quack after the water-resistance
+  line; the sun line stops at "our circuits?" and ends "We shouldn't go."; then yes / "No." / fast yes / "No!" / fast
+  yes / "Oh, Asimov, give me the strength for this one" (references for the adults); the offended line gets a hurt
+  little scream; at "Oh my dear friend" Reachy looks away and 0.5 s later the script sends the duck's first Start,
+  1 s after the ramp the second Start (the sensitive moment: he may have to rotate the duck); a quack right after
+  "your first quacks"; the duck laughs after "I still hear you in my mind"; the relieved line shortened, ending "Can
+  you promise me that?"; one second later the roulade (he handles Select). Later: `laugh_roll` + L1 = a **mock**
+  ("gnagnagnagna", after a scolding); the laugh's head aimed up more and its sound = a long "haaa" then a dying run.
+- Rémi heard "dog" where the text says "duck": whisper (faster-whisper medium) transcribes the rendered lines as
+  written ("But you are not a dog, Microduck. You are a Microduck." / "you are a bad dog"), so the TTS says what the
+  text says; the joke line stays "not a dog", the insult "bad dog". To confirm with him.
+- Laureen published the simulator's full source (Space commits 15:33-15:36 UTC): `src/` (React, game.js, the duck
+  runtime, `src/game/microduck/microduckEmotions.js` = three hard-coded loops), `public/`, vite. The fork was synced
+  (`RemiFabre/microduck-reachy-simulator` main = FormaLau's source, merge commit 9380a73) and cloned at
+  `/Users/remi/microduck/forks/microduck-reachy-simulator` (remotes: origin = the fork, upstream = FormaLau's).
+  A fork agent is porting the real emotions into it (`src/game/microduck/expressions.js`, `EMOTIONS-PORT.md`).
+- Play dead v2 (`motion/playdead/REPORT.md` top section, `pdduck.py`): every v2 recipe lands on the back sooner than v1
+  (at rest 2.4 s vs 4.3 s); relax at 1.4 s (as the head arrives back) is the softest cut that falls (7.0 rad/s, head
+  0.9 m/s; relax at 0.8 s = no fall); yaw 1.0 gives 27 mm head-shell / trunk clearance in the model (23 with 0.6);
+  `robot.init` on the lying duck is gentle (0.4 rad/s, no roll) and straightens the head. Pick `pd_v2_faint`: sit +
+  alarm + head hard to the side (yaw 1.0 over 0.5 s) + head back 0.4-1.0 s, relax 1.4, init 3.0, death quack 5.5-7.3,
+  7.6 s. robotd change: the mouth intent is applied while the robot holds at home with torque on (not only while
+  driving), so the death quack has a beak.
+- Laugh (`motion/laugh/`, 9 pairs): pick `laugh_wag` + L1 (beak up, yaw wag on every other ha, a bow pulse on every
+  ha). Rémi: fine but the head up more and the sound as a dying laughter -> `laugh_v2.py`: `laugh_wag_v2` (beak -0.7,
+  8 ha's: a 0.38 s "haaa" at 0.35 s then seven short ones at 0.90..2.30 s getting shorter, softer, further apart) + L4.
+  `mock` = `laugh_roll` + L1 (cue only: no free button).
+- Runtime (commits 24f508f, 85d3ae8, 024fd81 on `pad-expressions`, 18 tests): kinds Mmh (Y), YesFast (L3), Laugh
+  (R3), Mock (cue), Pick (cue: ground pick + beak open 0.1-0.75 s, shut at the floor), PlayDead v2 (`relax_at` 1.4,
+  `init_at` 3.0; padd sends `robot.relax` then `robot.init` at those times), the laugh / mock mouth tables at 0.05 s;
+  cues `{"init":true}` / `{"policy":true|false}` = the two Start presses; SoundTags mmh, yes_fast, laugh, mock (the
+  closed one removed). Bindings: A sad, B devastated, X angry, Y mmh (curious left the pad: LB outside emotion mode is
+  the silent one, `curious` is a cue), LB yes, RB no, L3 yes_fast, R3 laugh, DPad-Down excited, DPad-Left play dead.
+- Theater: `scenes/episode3/scene.json` v2 (28 beats; 7 lines re-rendered), `duck_cues` (timed cues inside a beat),
+  `duck_sound` + `repeat` / `every`, `duck_init` / `duck_policy`; the preview follows (relative pick paths, init
+  mid-play-dead, hold-home after init).

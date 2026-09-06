@@ -43,11 +43,11 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | LB | yes (one nod, one quack) | 1.5 s |
 | RB | no (one head shake, "no-ah") | 1.8 s |
 | L3 (left stick click) | yes, fast ("wak": the same nod, a curt quack) | 1.5 s |
-| R3 (right stick click) | laugh | ~2.5 s |
+| R3 (right stick click) | laugh (a long "haaa" then a dying run) | 3.0 s |
 | DPad-Down | excited | 3.4 s |
-| DPad-Left | play dead (sits, keels over backwards, torque off, torque back on, death quack) | ~8 s |
+| DPad-Left | play dead (sits, head hard to the side and back, torque off at 1.4 s, keels over backwards, torque back on at 3.0 s, death quack) | 7.6 s |
 
-Not on a button (cue port only, `{"express": ...}`): `curious` (Y's former job: tilt right / left on two chirps, 3.0 s),
+Not on a button (cue port only, `{"express": ...}`): `mock` ("gnagnagnagna": the laugh's staccato run with the head rolling, after a scolding), `curious` (Y's former job: tilt right / left on two chirps, 3.0 s),
 `pick` (the ground pick with the beak opening on the way down), `peck`, `startled`, `curious_silent`.
 More emotions than buttons: curious lost its button to mmh (Rémi, 2026-09-06: mmh is the "what do you mean"
 answer the scene needs; curious stays as LB outside emotion mode, silent, and as a cue).

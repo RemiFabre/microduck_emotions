@@ -16,9 +16,13 @@ synchronized beat by beat, and the beak opens with the sound.
 | **angry** (X) | `motion/angry/` pick `bow_snaps`: standing, beak-up glare, four snaps (yaw +0.7/-0.7/+0.7/centre, a short head jab, a small fast bow pulse on the pose slot), beak forced wide 0.3-0.7 s so a held leash drops; 2.6 s. `REPORT.md` there | `sounds/robot/angry_a.wav` four hard barks on the snaps (`angry_b.wav` = a growl into the same barks) | **sim pick (2026-09-06), shipped in the build, not yet tested on the robot** |
 | **yes** (LB) | `motion/yes/` pick `yes_single`: one nod, head_pitch +0.7 for 0.25 s, back over 0.35 s; 1.5 s | `sounds/robot/yes_a.wav` one quack falling 3 semitones at 0.45 s | sim pick, shipped, to test |
 | **no** (RB) | `motion/no/` pick `no_one`: one yaw shake +0.55 / -0.55 at 0.35 / 0.85 s; 1.8 s | `no_a.wav` "no-ah" (second note a fourth lower), `no_b` nasal, `no_c` drawn-out; the robot picks one | sim pick, shipped, to test |
-| **excited** (DPad-Down) | `motion/excited/` pick `excited_wag_pump`: six accelerating yaw swings +-0.6 with a body bob (bow pulse +0.12) on each, beak climbing to -0.7, a flourish; 3.4 s | `excited_a.wav` six bank chirps in rising pitch order | sim pick, shipped, to test |
-| **play dead** (DPad-Left) | `motion/playdead/` pick `pd_faint`: sit on the press, head back (beak to the sky) and to the side, `robot.soften` at 2.2 s, the duck keels over backwards, flat on its back by 4.8 s, death quack 4.8-6.6 s; 7.5 s, ends limp (Start = the way up) | `play_dead_a.wav` bank alarm, silence, a falling synth glide with a dying wobble | sim pick, shipped, to test on a mat |
-| **closed quack** (scene cue only) | `motion/closed/` pick `closed_grumble`: small yaw shake, beak shut (the leash stays in); 2.2 s | `closed_a.wav` two muffled nasal buzzes | sim pick, shipped |
+| **excited** (DPad-Down) | `motion/excited/` pick `excited_wag_pump`: six accelerating yaw swings +-0.6 with a body bob (bow pulse +0.12) on each, beak climbing to -0.7, a flourish; 3.4 s | `excited_a.wav` X1 synth climb: each quack higher, shorter, rising more (Rémi's pick) | shipped, to test |
+| **play dead** (DPad-Left) | `motion/playdead/` pick `pd_v2_faint` (Rémi's feedback): sit + alarm on the press while the head turns hard to the side (yaw 1.0) and goes back; `robot.relax` at 1.4 s, the duck keels over backwards (flat on its back at 2.4 s, head on the side); `robot.init` at 3.0 s (torque on, the ramp home = the last twitch, the head straightens, then it holds); death quack 5.5-7.3 s; 7.6 s | `play_dead_a.wav` bank alarm, silence, a falling synth glide with a dying wobble | v2 shipped, to test on a mat |
+| **mmh** (Y), "what do you mean?" | `motion/mmh/`: roll tilt +0.22 from 0.45 s, held, back by 1.6 s; 2.0 s. Rémi's pick from the closed-beak page (the grumbles are dropped) | `mmh_a.wav` a muffled rising "mmh?" | Rémi's pick, shipped |
+| **yes, fast** (L3) | the yes nod | `yes_fast_a.wav` a curt "wak" (Y3) | Rémi's pick, shipped |
+| **laugh** (R3) | `motion/laugh/` pick `laugh_wag_v2`: beak aimed up (-0.7), yaw swings +-0.45, a body dip on every ha; 3.0 s | `laugh_a.wav` one longer "haaa" then seven short ha's dying out (Rémi's "dying of laughter") | v2 shipped |
+| **mock** (cue only) | `laugh_roll`: beak up, the head rolling +-0.35 on every other ha, body dips; 2.6 s | `mock_a.wav` the staccato run "gnagnagnagna" | Rémi's find, shipped as a cue |
+| **pick** (cue only) | the ground pick with the beak opening on the way down and shutting at the floor (sim: floor at 0.7 s); 3.0 s | none | shipped |
 | angry stomp (RL) | three small stomps (`Mjlab-Stomp*-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`), r3 small-stomp redesign was in progress | barks on the foot contacts | parked (`motion/anger-rl/REPORT.md`) |
 
 Later: excited, scared (see `HANDOFF.md`). Real-robot lessons: anything that moves the head's mass forward makes the walking policy step forward (sad went to half depth, curious lost its head-forward); the simulation does not show it. The Reachy Mini side (scenes, voice, captions) is https://github.com/RemiFabre/agentic_robot_theater (`microduck/EMOTIONS.md` there is the bridge back here).
@@ -31,7 +35,8 @@ An emotion = a motion + a sound designed together, on one pad button in emotion 
 3. a **combination**: a skill plus a program on top while the skill's policy holds the pose (devastated = sit, then a head program; the head slots track while seated).
 
 Episode 3 (2026-09-06, brief `EPISODE3-HANDOFF.md`): the six emotions above, the pad's emotion mode extended (A sad, B devastated,
-X angry, Y curious, LB yes, RB no, DPad-Down excited, DPad-Left play dead; Start / Select / sticks / triggers untouched), a
+X angry, Y mmh, LB yes, RB no, L3 fast yes, R3 laugh, DPad-Down excited, DPad-Left play dead; Start / Select / sticks /
+triggers untouched; the full map in `BINDINGS.md`), a
 **cue port** on the pad daemon (TCP 7777, `{"express":"yes"}` etc., see `NOTES.md`) so one script plays both robots, and the
 scene `scenes/episode3` in the theater repo with a simulated preview. Summary page with the six picks and the scene preview:
 `combined/episode3/index.html`. Simulator Space fork: https://huggingface.co/spaces/RemiFabre/microduck-reachy-simulator (bundle only).

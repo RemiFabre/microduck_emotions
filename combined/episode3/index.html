@@ -49,18 +49,23 @@ Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> 
 <p><b>sound:</b> X1 synth climb (Rémi's pick): each quack higher, shorter and rising more. Robot wav <code>excited_a.wav</code>.</p>
 <p><a href="../excited/index.html">all 14 pairs</a></p></div>
 
-<div class="card"><h3>LAUGH (R3), 2.6 s</h3>
-<video src="laugh_wag__L1_synth_haha.mp4" controls playsinline preload="metadata"></video>
-<p><b>motion:</b> beak up (−0.55), the head wagging ±0.45 on every other "ha", a body dip (+0.10 bow pulse) on every "ha": the body shakes as two dips (ha-ha-ha-ha, breath, ha-ha-ha).</p>
-<p><b>sound:</b> seven staccato synth quacks stepping down from 300 Hz. Robot wav <code>laugh_a.wav</code>.</p>
-<p class="q">Alternatives: <code>laugh_roll</code> (head rolls instead of yawing: softer), sounds L2 (chopped chirps, "wek-wek") and L3 (giggle glide in, falling "haaa" out). <a href="../laugh/index.html">9 pairs</a></p></div>
+<div class="card"><h3>LAUGH (R3), 3.0 s</h3>
+<video src="laugh_wag_v2__L4_dying.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> beak aimed up (−0.7), the head wagging ±0.45 on the long "haaa" and every other short "ha", a body dip on every "ha".</p>
+<p><b>sound:</b> Rémi's "dying of laughter": one longer falling "haaa", then seven short ha's getting shorter, softer and further apart. Robot wav <code>laugh_a.wav</code>. <a href="../laugh/index.html">the laugh page</a></p></div>
 
-<div class="card"><h3>PLAY DEAD (DPad-Left), 7.5 s</h3>
-<video src="pd_faint__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
-<p><b>motion:</b> sit + alarm on the press (head snaps up); 1.0–2.0 s the head goes back (beak to the sky) and to the side (yaw +0.6); <b>2.2 s: robot.soften</b> (gain dies over 1 s, torque off); the duck keels over backwards on the weight of its head (tips at 3.0 s, flat on its back at 4.8 s, head on the side); 4.8–6.6 s the death quack with the beak open 0.3.</p>
-<p><b>sound:</b> bank alarm, silence, a synth glide 260 → 120 Hz with a 5 Hz wobble that dies. Robot wav <code>play_dead_a.wav</code>.</p>
-<p><b>probe:</b> sit + soften does NOT fall (the seat is stable limp); the head thrown back is the lever (6.5 rad/s); cutting the rise short falls harder (9–11 rad/s); a seated lean lands propped at 65°.</p>
-<p class="q">Questions: may it end limp (Start = the way up)? the head cannot straighten after the cut (it goes to the side before); on the real robot the jaw is gated on "driving", so the death quack will play with a shut beak; test the fall on a mat. <a href="../playdead/index.html">probe table + 7 videos</a></p></div>
+<div class="card"><h3>MOCK (cue only, "gnagnagnagna"), 2.6 s</h3>
+<video src="mock__L1_synth_haha.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> <code>laugh_roll</code>: beak up (−0.55), the head ROLLING ±0.35 on every other "ha", a body dip on every "ha".</p>
+<p><b>sound:</b> the first laugh's staccato run (seven short quacks stepping down). Robot wav <code>mock_a.wav</code>. Rémi: "a great move for a mockery, after someone scolds the duck".</p>
+<p class="q">No free button left: cue only (<code>{"express":"mock"}</code>). Say which emotion it should replace on the pad, if any.</p></div>
+
+<div class="card"><h3>PLAY DEAD (DPad-Left), 7.6 s, v2</h3>
+<video src="pd_v2_faint__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> sit + alarm on the press while the head snaps up and turns hard to the side (yaw 1.0 over 0.5 s, "like devastated"); 0.4–1.0 s the head goes back (beak to the sky, still to the side); <b>1.4 s: robot.relax</b> (torque off at once); the duck keels over backwards (tips at 2.0 s, flat on its back at 2.4 s, head on the side); <b>3.0 s: robot.init</b> (torque on, the 2 s ramp home: the last twitch, the head straightens, then it holds); 5.5–7.3 s the death quack, beak 0.3.</p>
+<p><b>sound:</b> alarm, silence, the falling synth glide with a dying wobble. Robot wav <code>play_dead_a.wav</code>.</p>
+<p><b>probe:</b> yaw 1.0 gives 27 mm of head-shell / trunk clearance in the model (23 mm with 0.6); relax at 1.4 s is the softest cut that still falls (7.0 rad/s, head 0.9 m/s; relax at 0.8 s does not fall); the init ramp on the lying duck is gentle (0.4 rad/s, no roll).</p>
+<p class="q">Mat first. The runtime now lets the beak move while the robot holds at home with torque on (the death quack). Alternatives: <code>pd_v2_faint_late</code> (relax 1.7, a beat of suspense), <code>pd_v2_soft</code> (head back −0.8: gentler on the head, ends propped at 76°). <a href="../playdead/index.html">probe table + videos</a></p></div>
 
 <div class="card"><h3>MMH, "what do you mean?" (Y), 2.0 s</h3>
 <video src="mmh__C3_mmh.mp4" controls playsinline preload="metadata"></video>
@@ -77,9 +82,10 @@ Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> 
 <tr><td>LB</td><td>yes</td><td>program</td><td>1.5 s</td><td>Rémi: keep</td></tr>
 <tr><td>RB</td><td>no</td><td>program</td><td>1.8 s</td><td>sim pick</td></tr>
 <tr><td>L3</td><td>yes, fast</td><td>program</td><td>1.5 s</td><td>Rémi: the second yes</td></tr>
-<tr><td>R3</td><td>laugh</td><td>program (pose pulses + head)</td><td>2.6 s</td><td>new, sim pick</td></tr>
+<tr><td>R3</td><td>laugh</td><td>program (pose pulses + head)</td><td>3.0 s</td><td>v2: head up more, dying-of-laughter sound</td></tr>
+<tr><td>(cue)</td><td>mock</td><td>program (pose pulses + head roll)</td><td>2.6 s</td><td>Rémi's find on the laugh page</td></tr>
 <tr><td>DPad-Down</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>Rémi: motion kept, sound X1</td></tr>
-<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + relax + init)</td><td>~8 s</td><td>v2 in progress (Rémi's feedback)</td></tr>
+<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + relax + init)</td><td>7.6 s</td><td>v2 per Rémi's feedback, to test on a mat</td></tr>
 <tr><td>(cue)</td><td>pick</td><td>combination (ground pick + beak)</td><td>3.0 s</td><td>the beak opens on the way down, shuts at the floor</td></tr>
 <tr><td>(cue)</td><td>curious</td><td>program</td><td>3.0 s</td><td>decided (roll only)</td></tr>
 </table>
