@@ -417,3 +417,28 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 
 - Last change of the session (Rémi): `robot.init` forgets the seat state (controller `forget_seat`), so Start after
   devastated / play dead resumes standing instead of sitting. Commit on `pad-expressions`, installed on the duck.
+
+### 2026-09-06, late night: Laureen's film on her own tree (PR 2) and the first Reachy-only run of episode 3
+
+- **Reachy Mini only, the whole scene** (Rémi: "run it on the Reachy Mini wireless"): `skit.py scenes/episode3 --no-duck
+  --start-delay 3` on `pollen@reachy-mini.local`, driven over ssh by
+  `/private/tmp/claude-501/.../scratchpad/drive_reachy.py` (pexpect answers the two ENTER prompts; the log is
+  `reachy_run.log` there). Result: **all 28 beats in order, no error**, setup 5.2 s, beat 0 → "end" 129 s (the
+  README table says 124 s + the `duck_rises` pause; I waited 2 s there), robot asleep at the end. Beat clocks matched
+  the table (lake 10.0 s, bad_duck 12.0 s, are_you_ok 12.8 s, lament 9.6 s then the quack beat 1.2 s). Every library
+  move of the scene is in the robot's HF cache (offline). Not observed: the body-yaw turn direction, the sound level
+  (nobody in the loop; Rémi to judge by ear on the next run).
+- **Laureen's video, take 3, on HER tree**: her script is unchanged (`source/public/scripts/reachy-microduck-conversation.json`
+  = the copy we filmed, delays 0.5 / 0.5 / 2). She had MERGED PR 1 (the wobbler) into her main (36f3737) and her
+  newest commits keep the Reachy meshes in Git LFS (`git lfs pull upstream` in the worktree, else the sim halts at
+  "REACHY MINI FAILED ... Git LFS pointer"). The follow cam + the recorder's URL flags + `say` with `audio` were ported
+  into her `source/src` (CRLF kept): **PR 2**
+  https://huggingface.co/spaces/FormaLau/microduck-reachy-simulator/discussions/2 (branch `pr/follow-cam`, worktree
+  `/Users/remi/microduck/forks/mrs-pr`, pushed with the cached HF token: the git credential's OAuth token has expired).
+  Film: `combined/episode3/laureen_conversation_v3_wobbler_followcam.mp4` (22 s, pts monotonic, picture verified
+  moving, follow cam visible), on the summary page with `?v=` cache busting.
+- **Finding: the browser voice was never in the films.** Speech synthesis bypasses Web Audio, so the recorder only
+  hears the duck (the v1 / v2 films: silence during Reachy's lines). Fix used: the three lines rendered through the
+  same macOS engine Chrome uses (AVSpeechSynthesizer, voice **Arthur** = Chrome's pick by her regex on this Mac,
+  pitchMultiplier 1.28, rate 1.02 mapped as Chromium's `tts_mac.mm`) with `motion/episode3/laureen-film/avsay.m`,
+  fed as `audio` lines (`laureen-film.json`, film-only, untracked in the PR worktree). README there.

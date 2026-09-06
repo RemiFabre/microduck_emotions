@@ -74,3 +74,15 @@ Not yet reported: whether angry / excited / laugh (bow pulses) make the duck ste
 - The local MuJoCo preview's Reachy is a puppet (gestures by move name, body turn as a head yaw).
 - Rémi's "impatient" move from Laureen's simulator was never found in her source; ours is `motion/impatient/`.
 - Devastated stays seated; DPad-Down is the way up (that is why the D-pad is free again).
+
+## Addendum (2026-09-06, late night)
+
+- Item 2 is DONE: Laureen merged PR 1 (wobbler) into her main; the follow cam + audio lines + URL-driven runs are
+  **PR 2** (https://huggingface.co/spaces/FormaLau/microduck-reachy-simulator/discussions/2, branch `pr/follow-cam`
+  in `/Users/remi/microduck/forks/mrs-pr`, on her `source/src`, CRLF). Her meshes are Git LFS now: `git lfs pull
+  upstream` in the worktree before building. Film: `combined/episode3/laureen_conversation_v3_wobbler_followcam.mp4`;
+  how to refilm + why Reachy's voice is rendered (the browser voice cannot be recorded): `motion/episode3/laureen-film/README.md`.
+- Item 1, Reachy half: the whole episode 3 scene ran on the Reachy Mini alone (`--no-duck`), 28 beats, no error,
+  129 s (NOTES, "late night"). The two-robot run is still to do (Rémi with the pad).
+- The HF git credential's OAuth token is expired: push with the cached token
+  (`huggingface_hub.get_token()` in the URL), see NOTES.
