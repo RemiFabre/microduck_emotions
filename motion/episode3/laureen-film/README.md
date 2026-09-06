@@ -50,7 +50,7 @@ start key; Space would reset the duck, C toggles the chase cam, so keep to the m
 Same recipe as episodes 1 and 2 (`agentic_robot_theater/video/`): the three rendered lines cross-correlated onto the
 film's soundtrack (300-3400 Hz band, normalised), one caption per line (start = line start, end = line end + 0.45 s,
 no overlap), PIL overlays in the episode look (Arial Bold 58, white + 3 px black stroke, amber "REACHY MINI" tag 30 px,
-black 150-alpha rounded box, 90 px from the bottom). Montage: Laureen's home photo (`source/public/reachy-mini-home.jpg`,
-centre-cropped to the film's size) for 2 s, a 0.5 s crossfade, then the captioned film (its clock shifts by 1.5 s).
+black 150-alpha rounded box, 90 px from the bottom). Montage: the simulator's landing page (a live screenshot at the film's size, `landing_1846x968.png` here; not the Reachy photo,
+Rémi's correction) for 2 s, a 0.5 s crossfade, then the captioned film (its clock shifts by 1.5 s).
 Output: `combined/episode3/final/laureen_conversation_final.mp4` + `.srt`. Source take: `laureen_manual_223231.mp4`
 (Rémi's hand camera).
