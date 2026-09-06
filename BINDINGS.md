@@ -1,6 +1,6 @@
 # Microduck gamepad bindings (film build, branch `pad-expressions`)
 
-Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06 (episode 3, second round).
+Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06 evening (episode 3: the D-pad keeps its jobs in emotion mode, the triggers host excited / play dead).
 
 ## Always, in both modes
 
@@ -12,8 +12,8 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | **Select** held 3 s | sit down and power off |
 | left stick | walk / strafe (drive mode); head mode (Y outside emotion mode): head pitch / yaw; body mode (B outside emotion mode): height / lean |
 | right stick | turn (drive mode); head mode: neck / roll; body mode: pitch / roll |
-| **RT** | mouth open + chirp on the press ("quack") |
-| **LT** | mouth open + "wheee" while held |
+| **RT** | mouth open + chirp on the press ("quack"); in emotion mode: **excited** |
+| **LT** | mouth open + "wheee" while held; in emotion mode: **play dead** |
 | **DPad-Right** | reboot the servos (after an overload trip), torque off, then Start |
 | **DPad-Up** held 3 s | drive mode walk / roller |
 | **DPad-Up** tap | **emotion mode on / off** (chirp going in, low tock going out) |
@@ -32,7 +32,7 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | DPad-Left | left kick |
 | DPad-Down | sit / stand toggle |
 
-## Emotion mode ON (every emotion = motion + sound; the sticks are locked while one plays)
+## Emotion mode ON (every emotion = motion + sound; the sticks are locked while one plays; the D-pad keeps its jobs: DPad-Down sit / stand, DPad-Left kick, DPad-Right reboot)
 
 | control | emotion | length |
 |---|---|---|
@@ -44,8 +44,8 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | RB | no (one head shake, "no-ah") | 1.8 s |
 | L3 (left stick click) | yes, fast ("wak": the same nod, a curt quack) | 1.5 s |
 | R3 (right stick click) | laugh (a long "haaa" then a dying run) | 3.0 s |
-| DPad-Down | excited | 3.4 s |
-| DPad-Left | play dead (sits, head hard to the side and back; at 1.4 s the head servos hang free and the legs straighten: it rolls onto its back; legs up at 3.6 s; death quack; holds the dead pose until Start) | 7.5 s |
+| RT | excited | 3.4 s |
+| LT | play dead (sits, head hard to the side and back; at 1.8 s the head servos hang free and the legs straighten: it rolls onto its back; legs up at 4.0 s; death quack; holds the dead pose until Start) | 7.5 s |
 
 Not on a button (cue port only, `{"express": ...}`): `defiant` (beak up-left quack, up-right quack), `impatient` (quick shakes, grumbles, a huff), `mock` ("gnagnagnagna": the laugh's staccato run with the head rolling, after a scolding), `curious` (Y's former job: tilt right / left on two chirps, 3.0 s),
 `pick` (the ground pick with the beak opening on the way down), `peck`, `startled`, `curious_silent`.

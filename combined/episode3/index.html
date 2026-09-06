@@ -9,7 +9,7 @@ code{background:#eee;padding:1px 4px;border-radius:3px} table{border-collapse:co
 </style>
 <h1>Episode 3: the duck's new emotions and the scene</h1>
 <p class="sub">2026-09-06, round 2 after Rémi's review. Every pick below is in the runtime (branch <code>pad-expressions</code>, keyframe tests against the simulation JSONs).
-Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> angry, <b>Y</b> mmh, <b>LB</b> yes, <b>RB</b> no, <b>L3</b> fast yes, <b>R3</b> laugh, <b>DPad-Down</b> excited, <b>DPad-Left</b> play dead
+Pad, in emotion mode (DPad-Up tap): <b>A</b> sad, <b>B</b> devastated, <b>X</b> angry, <b>Y</b> mmh, <b>LB</b> yes, <b>RB</b> no, <b>L3</b> fast yes, <b>R3</b> laugh, <b>RT</b> excited, <b>LT</b> play dead (the D-pad keeps its jobs: DPad-Down stands a seated duck up)
 (the full list: <code>BINDINGS.md</code>). Open questions in orange.</p>
 
 <h2>The scene, in simulation</h2>
@@ -52,7 +52,7 @@ The follow cam is <code>?camera=follow</code> on the URL. The head wobble is now
 <p><b>finding:</b> a body-pose "bow" above ~0.2 folds the whole duck forward (trunk −20..−37°, 5–14 cm drift) = the head-forward mass that makes the real robot walk. Only small fast pulses are clean; body z does nothing on the stand net.</p>
 <p class="q">Choices: is 0.4 s of wide beak enough for the leash? scold (this) or menace (<code>crouch_shake_lunge</code>, growl)? <a href="../angry/index.html">all 12 pairs</a></p></div>
 
-<div class="card"><h3>EXCITED (DPad-Down), 3.4 s</h3>
+<div class="card"><h3>EXCITED (RT), 3.4 s</h3>
 <video src="excited_wag_pump__X1_synth_rise_climb.mp4" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> six accelerating head swings ±0.6 (extremes at 0.40 / 0.95 / 1.45 / 1.90 / 2.30 / 2.65 s), the beak climbing from −0.15 to −0.70, a body bob (+0.12 bow pulse, 12–16 mm dip) on each swing, a bow flourish at the end. Neck 0.</p>
 <p><b>sound:</b> X1 synth climb (Rémi's pick): each quack higher, shorter and rising more. Robot wav <code>excited_a.wav</code>.</p>
@@ -69,7 +69,7 @@ The follow cam is <code>?camera=follow</code> on the URL. The head wobble is now
 <p><b>sound:</b> the first laugh's staccato run (seven short quacks stepping down). Robot wav <code>mock_a.wav</code>. Rémi: "a great move for a mockery, after someone scolds the duck".</p>
 <p class="q">No free button left: cue only (<code>{"express":"mock"}</code>). Say which emotion it should replace on the pad, if any.</p></div>
 
-<div class="card"><h3>PLAY DEAD (DPad-Left), 7.5 s, v3 "the dead animal"</h3>
+<div class="card"><h3>PLAY DEAD (LT), 7.5 s, v3 "the dead animal"</h3>
 <video src="pd_v3_dead__D1_alarm_glide_wobble.mp4" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> sit + alarm on the press while the head snaps up and turns hard to the side (yaw 1.0 over 0.5 s); 0.4–1.0 s the head goes back; <b>1.4 s: the three head servos hang free and every leg joint is driven to zero over 1.5 s</b> (a new runtime call, <code>robot.poseJoints</code>): the seated duck rolls flat onto its back (tips at 2.0 s, still at 3.0 s), the limp head on the side; <b>3.6 s: the legs come up</b> (hips ±1.0, knees ±1.5 over 1 s), the body unmoved; 5.0–6.8 s the death quack, beak 0.3 (the jaw stays powered). No relax, no re-init: the robot holds the dead pose until your Start.</p>
 <p><b>sound:</b> alarm, silence, the falling synth glide with a dying wobble. Robot wav <code>play_dead_a.wav</code>.</p>
@@ -106,8 +106,8 @@ The follow cam is <code>?camera=follow</code> on the URL. The head wobble is now
 <tr><td>(cue)</td><td>defiant</td><td>program</td><td>2.2 s</td><td>Rémi's one-shot request (after the water-resistance line)</td></tr>
 <tr><td>(cue)</td><td>impatient</td><td>program (pose pulses + head)</td><td>2.6 s</td><td>our take (after "We shouldn't go")</td></tr>
 <tr><td>(cue)</td><td>mock</td><td>program (pose pulses + head roll)</td><td>2.6 s</td><td>Rémi's find on the laugh page</td></tr>
-<tr><td>DPad-Down</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>Rémi: motion kept, sound X1</td></tr>
-<tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + scripted joint pose)</td><td>7.5 s</td><td>v3 (head servos free, legs to a dead pose, held until Start), to test on a mat</td></tr>
+<tr><td>RT</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>Rémi: motion kept, sound X1</td></tr>
+<tr><td>LT</td><td>play dead</td><td>combination (sit + program + scripted joint pose)</td><td>7.5 s</td><td>v3 (head servos free, legs to a dead pose, held until Start), to test on a mat</td></tr>
 <tr><td>(cue)</td><td>pick</td><td>combination (ground pick + beak)</td><td>3.0 s</td><td>the beak opens on the way down, shuts at the floor</td></tr>
 <tr><td>(cue)</td><td>curious</td><td>program</td><td>3.0 s</td><td>decided (roll only)</td></tr>
 </table>
