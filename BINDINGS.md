@@ -47,7 +47,7 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | DPad-Down | excited | 3.4 s |
 | DPad-Left | play dead (sits, head hard to the side and back; at 1.4 s the head servos hang free and the legs straighten: it rolls onto its back; legs up at 3.6 s; death quack; holds the dead pose until Start) | 7.5 s |
 
-Not on a button (cue port only, `{"express": ...}`): `mock` ("gnagnagnagna": the laugh's staccato run with the head rolling, after a scolding), `curious` (Y's former job: tilt right / left on two chirps, 3.0 s),
+Not on a button (cue port only, `{"express": ...}`): `defiant` (beak up-left quack, up-right quack), `impatient` (quick shakes, grumbles, a huff), `mock` ("gnagnagnagna": the laugh's staccato run with the head rolling, after a scolding), `curious` (Y's former job: tilt right / left on two chirps, 3.0 s),
 `pick` (the ground pick with the beak opening on the way down), `peck`, `startled`, `curious_silent`.
 More emotions than buttons: curious lost its button to mmh (Rémi, 2026-09-06: mmh is the "what do you mean"
 answer the scene needs; curious stays as LB outside emotion mode, silent, and as a cue).
@@ -55,7 +55,7 @@ answer the scene needs; curious stays as LB outside emotion mode, silent, and as
 ## Scripted cues (TCP 7777 on the duck, `robot/duck_cue.py` in the theater repo)
 
 `{"express":"yes"}` (any name above, plus `pick`), `{"skill":"ground_pick"|"sit_toggle"|"kick_left"|"kick_right"|"roulade"}`,
-`{"sound":"chirp"|"inquire"|"alarm"|"coo"|"greet"|"peck"}`, `{"move":[vx,vy,wz],"for":1.5}`, `{"init":true}` (= the first
+`{"sound":"chirp"|"inquire"|"alarm"|"coo"|"greet"|"peck"}` (a cued sound opens the beak for 0.25 s), `{"move":[vx,vy,wz],"for":1.5}`, `{"init":true}` (= the first
 Start), `{"policy":true|false}` (= the second Start, on / off), `{"stop":true}`, `{"ping":true}`. A pad must be connected.
 
 Runtime call behind play dead (robotd, film build): `robot.poseJoints {targets: [15 rad or null, JOINT_NAMES order], off: [joint

@@ -73,6 +73,17 @@ Recording (with sound): <a href="preview_browser.mp4">preview_browser.mp4</a>. N
 <p><b>probe (27 recipes):</b> every "legs to zero" recipe rolls the duck onto its back; the slower the leg ramp the softer (1.5 s: 7.5 rad/s, 0.5 s: 9.6); gain 100/160/200 make no difference; straight to legs-up is marginal (rocks or ends propped); two stages is the softest and lands flat. The unpowered head ends folded back on the shoulder shell (own weight only). Head roll servo kept on (off: the head hangs crooked).</p>
 <p class="q">Mat first (7.45 rad/s, head 1.0 m/s; a 2 s leg ramp would be softer). Options: legs flat instead of up (<code>pd_v3_flat</code>), four head servos off (<code>pd_v3_dead_off4</code>). Check the head cable where the limp head rests on the shoulder. <a href="../playdead/index.html">probe table + videos (v3, v2, v1)</a></p></div>
 
+<div class="card"><h3>DEFIANT, "says who?" (cue only), 2.2 s</h3>
+<video src="defiant__D1_two_waks.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> the beak up (−0.6) and to the left (yaw +0.6) with a quack, then over to the right (yaw −0.6) with a second quack; level by 2.0 s. Rémi's one-shot request for the answer after the water-resistance line.</p>
+<p><b>sound:</b> two curt "wak"s falling a third. Robot wav <code>defiant_a.wav</code>.</p></div>
+
+<div class="card"><h3>IMPATIENT, "come on!" (cue only), 2.6 s</h3>
+<video src="impatient__I1_grumbles_huff.mp4" controls playsinline preload="metadata"></video>
+<p><b>motion:</b> four quick yaw shakes ±0.4 (0.4 s apart) with a body bob on each, then the beak flicks up (−0.7) on a huff. The answer after "We shouldn't go."</p>
+<p><b>sound:</b> four short nasal grumbles stepping down, then a rising-falling huff. Robot wav <code>impatient_a.wav</code>.</p>
+<p class="q">Rémi mentioned an "impatient" duck move in Laureen's simulator; it is not in her published source (nor in her latest commits), so this is our own take. Point me to hers if it exists.</p></div>
+
 <div class="card"><h3>MMH, "what do you mean?" (Y), 2.0 s</h3>
 <video src="mmh__C3_mmh.mp4" controls playsinline preload="metadata"></video>
 <p><b>motion:</b> a roll tilt +0.22 from 0.45 s, held, back by 1.6 s; the beak opens normally (in the scene the leash falls here).</p>
@@ -89,6 +100,8 @@ Recording (with sound): <a href="preview_browser.mp4">preview_browser.mp4</a>. N
 <tr><td>RB</td><td>no</td><td>program</td><td>1.8 s</td><td>sim pick</td></tr>
 <tr><td>L3</td><td>yes, fast</td><td>program</td><td>1.5 s</td><td>Rémi: the second yes</td></tr>
 <tr><td>R3</td><td>laugh</td><td>program (pose pulses + head)</td><td>3.0 s</td><td>v2: head up more, dying-of-laughter sound</td></tr>
+<tr><td>(cue)</td><td>defiant</td><td>program</td><td>2.2 s</td><td>Rémi's one-shot request (after the water-resistance line)</td></tr>
+<tr><td>(cue)</td><td>impatient</td><td>program (pose pulses + head)</td><td>2.6 s</td><td>our take (after "We shouldn't go")</td></tr>
 <tr><td>(cue)</td><td>mock</td><td>program (pose pulses + head roll)</td><td>2.6 s</td><td>Rémi's find on the laugh page</td></tr>
 <tr><td>DPad-Down</td><td>excited</td><td>program (pose pulses + head)</td><td>3.4 s</td><td>Rémi: motion kept, sound X1</td></tr>
 <tr><td>DPad-Left</td><td>play dead</td><td>combination (sit + program + scripted joint pose)</td><td>7.5 s</td><td>v3 (head servos free, legs to a dead pose, held until Start), to test on a mat</td></tr>

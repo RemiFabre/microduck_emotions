@@ -22,6 +22,8 @@ synchronized beat by beat, and the beak opens with the sound.
 | **yes, fast** (L3) | the yes nod | `yes_fast_a.wav` a curt "wak" (Y3) | Rémi's pick, shipped |
 | **laugh** (R3) | `motion/laugh/` pick `laugh_wag_v2`: beak aimed up (-0.7), yaw swings +-0.45, a body dip on every ha; 3.0 s | `laugh_a.wav` one longer "haaa" then seven short ha's dying out (Rémi's "dying of laughter") | v2 shipped |
 | **mock** (cue only) | `laugh_roll`: beak up, the head rolling +-0.35 on every other ha, body dips; 2.6 s | `mock_a.wav` the staccato run "gnagnagnagna" | Rémi's find, shipped as a cue |
+| **defiant** (cue only) | `motion/defiant/`: beak up (-0.6) and to the left (yaw +0.6) with a quack, then to the right with a second; 2.2 s | `defiant_a.wav` two curt "wak"s | Rémi's one-shot request, shipped as a cue |
+| **impatient** (cue only) | `motion/impatient/`: four quick yaw shakes +-0.4 with a body bob each, then the beak flicks up on a huff; 2.6 s | `impatient_a.wav` four grumbles and a huff | our take (Laureen's is not in her source), shipped as a cue |
 | **pick** (cue only) | the ground pick with the beak opening on the way down and shutting at the floor (sim: floor at 0.7 s); 3.0 s | none | shipped |
 | angry stomp (RL) | three small stomps (`Mjlab-Stomp*-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`), r3 small-stomp redesign was in progress | barks on the foot contacts | parked (`motion/anger-rl/REPORT.md`) |
 
