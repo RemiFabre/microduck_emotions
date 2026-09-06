@@ -1,6 +1,6 @@
 # Microduck gamepad bindings (film build, branch `pad-expressions`)
 
-Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06 evening (episode 3: the D-pad keeps its jobs in emotion mode, the triggers host excited / play dead).
+Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06 night (episode 3: short / long presses in emotion mode; the triggers and the D-pad keep their jobs).
 
 ## Always, in both modes
 
@@ -12,8 +12,8 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | **Select** held 3 s | sit down and power off |
 | left stick | walk / strafe (drive mode); head mode (Y outside emotion mode): head pitch / yaw; body mode (B outside emotion mode): height / lean |
 | right stick | turn (drive mode); head mode: neck / roll; body mode: pitch / roll |
-| **RT** | mouth open + chirp on the press ("quack"); in emotion mode: **excited** |
-| **LT** | mouth open + "wheee" while held; in emotion mode: **play dead** |
+| **RT** | mouth open + chirp on the press ("quack"), in both modes |
+| **LT** | mouth open + "wheee" while held, in both modes |
 | **DPad-Right** | reboot the servos (after an overload trip), torque off, then Start |
 | **DPad-Up** held 3 s | drive mode walk / roller |
 | **DPad-Up** tap | **emotion mode on / off** (chirp going in, low tock going out) |
@@ -32,25 +32,24 @@ Kept up to date with every change of `padd/src/main.rs`. Last change: 2026-09-06
 | DPad-Left | left kick |
 | DPad-Down | sit / stand toggle |
 
-## Emotion mode ON (every emotion = motion + sound; the sticks are locked while one plays; the D-pad keeps its jobs: DPad-Down sit / stand, DPad-Left kick, DPad-Right reboot)
+## Emotion mode ON (every emotion = motion + sound; the sticks are locked while one plays)
 
-| control | emotion | length |
+Each button carries two emotions: a **short press** (released under 0.6 s) and a **long press** (held 0.6 s: it fires at
+the threshold, no need to release). RT / LT keep their quack / wheee, the D-pad its jobs (DPad-Down sit / stand: the way
+up after devastated), Start / Select / sticks unchanged.
+
+| button | short | long |
 |---|---|---|
-| A | sad | 7.5 s |
-| B | devastated (sits, stays seated) | 8.5 s |
-| X | angry (the beak opens wide: a held leash drops) | 2.6 s |
-| Y | mmh, "what do you mean?" (roll tilt, muffled rising mmh) | 2.0 s |
-| LB | yes (one nod, one quack) | 1.5 s |
-| RB | no (one head shake, "no-ah") | 1.8 s |
-| L3 (left stick click) | yes, fast ("wak": the same nod, a curt quack) | 1.5 s |
-| R3 (right stick click) | laugh (a long "haaa" then a dying run) | 3.0 s |
-| RT | excited | 3.4 s |
-| LT | play dead (sits, head hard to the side and back; at 1.8 s the head servos hang free and the legs straighten: it rolls onto its back; legs up at 4.0 s; death quack; holds the dead pose until Start) | 7.5 s |
+| A | sad (7.5 s) | devastated (sits, stays seated; 8.5 s) |
+| B | excited (3.4 s) | impatient (2.6 s) |
+| X | angry (the beak opens wide: a held leash drops; 2.6 s) | mock, "gnagnagnagna" (2.6 s) |
+| Y | mmh, "what do you mean?" (2.0 s) | curious (two chirps, tilts; 3.0 s) |
+| LB | yes (1.5 s) | yes, fast (1.5 s) |
+| RB | no (1.8 s) | defiant (beak up-left quack, up-right quack; 2.2 s) |
+| L3 (left stick click) | laugh (3.0 s) | play dead (mat! sits, rolls onto its back, head servos free, legs up; holds until Start; 7.5 s) |
+| R3 (right stick click) | free | free |
 
-Not on a button (cue port only, `{"express": ...}`): `defiant` (beak up-left quack, up-right quack), `impatient` (quick shakes, grumbles, a huff), `mock` ("gnagnagnagna": the laugh's staccato run with the head rolling, after a scolding), `curious` (Y's former job: tilt right / left on two chirps, 3.0 s),
-`pick` (the ground pick with the beak opening on the way down), `peck`, `startled`, `curious_silent`.
-More emotions than buttons: curious lost its button to mmh (Rémi, 2026-09-06: mmh is the "what do you mean"
-answer the scene needs; curious stays as LB outside emotion mode, silent, and as a cue).
+Not on a button: `pick` (the ground pick with the beak opening on the way down; cue port only).
 
 ## Scripted cues (TCP 7777 on the duck, `robot/duck_cue.py` in the theater repo)
 
