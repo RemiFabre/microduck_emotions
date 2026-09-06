@@ -44,3 +44,13 @@ scroll to zoom while the script plays (about 22 s). The film (canvas + sound, at
 `combined/episode3/<name>.mp4` (default `laureen_manual_<time>`) and opened. The driver is the fork's
 `tools/film-manual.mjs` (`AUTO_ENTER=1` presses Enter itself, for a test). Keyboard while filming: Enter is only the
 start key; Space would reset the duck, C toggles the chase cam, so keep to the mouse.
+
+## Captions + title card (the final cut, 2026-09-06 night)
+
+Same recipe as episodes 1 and 2 (`agentic_robot_theater/video/`): the three rendered lines cross-correlated onto the
+film's soundtrack (300-3400 Hz band, normalised), one caption per line (start = line start, end = line end + 0.45 s,
+no overlap), PIL overlays in the episode look (Arial Bold 58, white + 3 px black stroke, amber "REACHY MINI" tag 30 px,
+black 150-alpha rounded box, 90 px from the bottom). Montage: Laureen's home photo (`source/public/reachy-mini-home.jpg`,
+centre-cropped to the film's size) for 2 s, a 0.5 s crossfade, then the captioned film (its clock shifts by 1.5 s).
+Output: `combined/episode3/final/laureen_conversation_final.mp4` + `.srt`. Source take: `laureen_manual_223231.mp4`
+(Rémi's hand camera).
