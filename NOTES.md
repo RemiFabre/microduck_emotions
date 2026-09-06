@@ -449,3 +449,7 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   scene.json `lament` body_yaw = -1.4 (README staging fixed; the sim builder no longer negates). Launcher for the
   two-robot scene: `robot/run_episode3.sh` in the theater repo (checks both robots, syncs, ENTER = start at once;
   START_DELAY=5 for a delay; ENTER again at duck_rises).
+- Rémi: the video is "a great success". Next: film Laureen's script in her sim with HIS hand on the camera. Done:
+  `autoplay=key` in the sim (a banner, Enter or click starts the run + the recording; pushed to PR 2), the fork's
+  `tools/film-manual.mjs`, and the one-command `motion/episode3/laureen-film/film-manual.sh` (build, serve, Chrome
+  maximised, film saved with sound to `combined/episode3/<name>.mp4` and opened). Tested end to end with AUTO_ENTER.

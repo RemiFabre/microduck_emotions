@@ -31,3 +31,16 @@ cd /Users/remi/microduck/forks/microduck-reachy-simulator && node tools/record-e
 
 Always a NEW file name + `?v=<epoch>` on the page (his browser shows a stale first frame otherwise); the recorder
 checks the mp4's timestamps are monotonic.
+
+## Filming with a hand-driven camera (Rémi behind the mouse)
+
+```bash
+/Users/remi/microduck/notes/emotions/motion/episode3/laureen-film/film-manual.sh [name]
+```
+
+Builds the PR tree (skip with `SKIP_BUILD=1`), serves it, opens Chrome maximised on her script with
+`autoplay=key`: after the entrance a banner asks for **Enter** (or a click on it). Press it, then drag to orbit and
+scroll to zoom while the script plays (about 22 s). The film (canvas + sound, at the window's size) is saved as
+`combined/episode3/<name>.mp4` (default `laureen_manual_<time>`) and opened. The driver is the fork's
+`tools/film-manual.mjs` (`AUTO_ENTER=1` presses Enter itself, for a test). Keyboard while filming: Enter is only the
+start key; Space would reset the duck, C toggles the chase cam, so keep to the mouse.
