@@ -414,3 +414,6 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
 - Short / long presses in emotion mode (Rémi: RT/LT must stay quack/wheee; the D-pad free): A sad/devastated,
   B excited/impatient, X angry/mock, Y mmh/curious, LB yes/fast yes, RB no/defiant, L3 laugh/play dead; commit
   fc685a3, installed and verified on the duck. Handoff for the next agent: `EPISODE3-HANDOFF-2.md`.
+
+- Last change of the session (Rémi): `robot.init` forgets the seat state (controller `forget_seat`), so Start after
+  devastated / play dead resumes standing instead of sitting. Commit on `pad-expressions`, installed on the duck.

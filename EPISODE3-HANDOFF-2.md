@@ -17,7 +17,7 @@ with videos on his screen. Rémi's speech-to-text writes "dog" for "duck" and "R
   dead sim duck `motion/playdead/pdduck3.py` adds the scripted joint pose). `motion/playdead/SIM-DIFF.md` = why the
   browser sim fell forward (its sit hands over 0.8 s late). `runtime-pad-expressions.patch` = the runtime branch (28
   commits on top of upstream 2c61dcc).
-- **Runtime** `/Users/remi/microduck/microduck`, branch `pad-expressions`, HEAD **fc685a3**, all tests green
+- **Runtime** `/Users/remi/microduck/microduck`, branch `pad-expressions`, HEAD **the commit after fc685a3: "robotd: robot.init forgets the seat"**, all tests green
   (`cargo test -p padd -p robotd -p duck-ipc-proto -p duck-control -p updater`). Installed on the duck (rev fc685a3,
   verified read-only: version, padd's mapping line, sound folders). Contents: 18 expression kinds in
   `padd/src/expressions.rs` (each with a keyframe test against its simulation JSON), the cue port `padd/src/cue.rs`
