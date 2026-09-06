@@ -400,3 +400,13 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   waits for the seat there (real robot: expected to sit like the BAM pipeline; to check). `are_you_ok`: the two
   questions swapped and re-rendered. Interactive mode: `node tools/watch-episode3.mjs` in the fork replays the
   script whenever the theater `scene.json` is saved.
+
+- Browser sim round 6 (fork 160f07b / d6f7646): the official daemon wobbler ported line for line (speech tapper +
+  head wobbler, offline hops per wav line; synthetic ~4 Hz syllables for browser-TTS lines); the lament turn verified
+  by FK (body joint and head world yaw both 80 deg, Stewart joints at home); the pick opens the beak; Reachy moves
+  silent; follow cam. PR to Laureen: https://huggingface.co/spaces/FormaLau/microduck-reachy-simulator/discussions/1
+  (wobbler port + silent moves, on her `source/src` tree). The turn direction depends on which side the duck stands:
+  +1.4 = left = away from a duck on Reachy right (our staging); the sim builder negates it for its own staging.
+- Rémi on the robot: DPad-Down must stay the sit/stand toggle (to get up after devastated): the D-pad keeps its
+  jobs in emotion mode; RT = excited and LT = play dead instead (the triggers quack / wheee only outside emotion
+  mode). The quack after "first quacks" must come ~1 s after the line, then "Yes. Like that." right after it.
