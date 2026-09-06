@@ -9,7 +9,7 @@
     2.35
    ],
    "total": 3.2,
-   "desc": "body bobs at 2 Hz (bow pulses 0 -> +0.10, the z slot is dead on the stand net), beak up, head wags left-right at 1 Hz; a quack on every top"
+   "desc": "body bobs at 2 Hz (bow pulses 0 -> +0.16, the z slot is dead on the stand net), beak up, head wags left-right at 1 Hz; a quack on every top"
   },
   "excited_hops": {
    "quacks": [
@@ -31,7 +31,7 @@
     2.65
    ],
    "total": 3.6,
-   "desc": "two crouch-then-pop jumps (bow +0.22 released fast) with the head thrown up (beak -0.8) and a quack on each pop, then a fast wag with three chirps"
+   "desc": "two crouch-then-pop jumps (bow +0.14 released fast) with the head thrown up (beak -0.8) and a quack on each pop, then a fast wag with three chirps"
   },
   "excited_wag_pump": {
    "quacks": [

@@ -245,3 +245,46 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   phase encoding, Reachy puppet with talking bob and crude gestures per move name, lines mixed in).
 - Four design forks launched in parallel on the shared renderer: yes + no + closed-beak quack, angry
   (programmatic, X), excited, play dead (with a probe of fall recipes from the seat).
+
+### Same day, results of the four design forks (all in simulation, nothing on the robot)
+
+- **yes** (`motion/yes/`, page `combined/yes/index.html`, 12 pairs): pick `yes_single` + `Y2_synth_fall`: one nod,
+  head_pitch 0 -> +0.7 over 0.25 s from 0.05 s, hold 0.1, back over 0.35 s; the joint bottoms out at ~0.45 s (38 deg)
+  where the one quack lands (250 Hz falling 3 semitones). 1.5 s, no fall, drift 0.1 cm. Lesson: a 0.2 s / -0.3 lift
+  did not register at all in the joint; pulses under ~0.3 s do nothing. Options: `yes_double`, `yes_lift`, four sounds.
+- **no** (`motion/no/`, 18 pairs): pick `no_one` + `N2_synth_m5`: yaw `swings([0.35, 0.85], 0.55, fade 0.25)`, "no"
+  at 0.60 s (250 Hz flat), "ah" at 1.10 s a fourth lower (falling), on the joint's extremes (it lags 0.25 s). 1.8 s.
+  Robot wavs `no_a` / `no_b` (nasal) / `no_c` (drawn-out), the robot picks one. -3 semitones barely reads as a second
+  syllable, -7 is near a growl.
+- **closed quack** (`motion/closed/`, 4 cards): pick `closed_grumble`: yaw -0.25 / +0.25 at 0.6 / 1.05 s, mouth 0, two
+  low nasal buzzes low-passed at 900 Hz (the muffling is baked into the wav; the robot cannot filter live). 2.2 s.
+- **angry** (`motion/angry/`, 12 pairs): pick `bow_snaps` + `S1_hard_barks`: beak-up glare -0.35, four snaps at 0.30 /
+  0.90 / 1.50 / 2.00 s (yaw +0.7/-0.7/+0.7/0 with 0.12 s ramps led 0.15 s before the bark, head jab +0.45, bow pulse
+  +0.14 on the pose slot for the first three), beak forced wide 0.30-0.70 s (leash release). 2.6 s, drift 1.5 cm,
+  trunk within -4..+1 deg. **Finding**: a body-pose bow above ~0.2 on the stand net folds the whole duck forward
+  (trunk -20..-37 deg, neck -1.9, 5-14 cm drift) = the head-forward mass that makes the real robot walk; body z does
+  nothing visible; head jabs arrive ~0.3 s late and overshoot (cmd +0.7 -> joint +0.88), so jabs <= +0.5 led by 0.15 s;
+  3-4 Hz shivers do not move the head. `angry_b.wav` = a growl swelling into the same barks.
+- **excited** (`motion/excited/`, 14 pairs): pick `excited_wag_pump` + `X2_bank_chirps_up`: six accelerating yaw swings
+  +-0.6 (extremes 0.40 / 0.95 / 1.45 / 1.90 / 2.30 / 2.65 s), beak climbing -0.15 -> -0.70, a +0.12 bow pulse (body bob,
+  12-16 mm dip) on each swing, a flourish at the end; bank chirps in rising pitch order. 3.4 s, drift 0.6 cm. **Finding**:
+  the pose z slot does nothing on the stand net (0.2 mm); "bounces" must be bow pulses. The pose pitch pulls the neck
+  down (stand-net coupling), so "jumps" read as wind-ups. Runner-ups: `excited_hops` (30 mm dips, 2.1 cm drift), X1 synth.
+- **play dead** (`motion/playdead/`, probe of 13 fall recipes + 7 videos): sit + soften or relax does NOT fall (the seat
+  is stable limp); the head thrown back (beak to the sky, head_pitch -1.0) + soften keels the duck over backwards on
+  its own weight (6.6 rad/s, head 0.82 m/s); a seated body-pose lean + soften is softer (5.7 rad/s) but ends propped
+  at +65 deg by accident; cutting the sit-stand RISE short (the brief's "legs straighten") lands on the back every
+  time but hardest (9-11 rad/s); standing recipes fall face down. Pick `pd_faint` + `D1_alarm_glide_wobble`: sit +
+  alarm at 0 with a head snap up; head back over 1.0-2.0 s and to the side (yaw +0.6, 1.2-2.0 s); **robot.soften at
+  2.2 s**; tips at 3.0 s, flat on the back with the head on the side at 4.8 s; death quack 4.8-6.6 s with the beak 0.3.
+  7.5 s. Not achievable: "then the head straightens" (no torque after the cut). On the real robot `robot.mouth` is
+  gated on `driving`, so the death quack will play with a shut beak. Questions for Rémi in the REPORT.
+- Runtime: all six ported into `padd/src/expressions.rs` (commit 93ab422 on `pad-expressions`; a keyframe test per kind
+  against the simulation JSON, 14 tests green, `cargo check` clean). `SoundTag::Closed` added (folder `closed`).
+  arm64 build done: `target/docker/aarch64-unknown-linux-gnu/release/{robotd,padd,robotctl,btd}` (rev 93ab422-local),
+  robot wavs `sounds/robot/{yes_a,no_a,no_b,no_c,angry_a,angry_b,excited_a,play_dead_a,closed_a}.wav` (peak -3 dBFS).
+  `install-on-duck.sh` now copies every `sounds/robot/<tag>_<x>.wav` into `/var/lib/robot/sounds/<tag>/`.
+  Patch snapshot `runtime-pad-expressions.patch` regenerated (15 commits since upstream 2c61dcc).
+- Summary page `combined/episode3/index.html` (the six picks + the scene preview + the emotion table).
+- Theater: `scenes/episode3/README.md` beat table (about 130 s + the pause at `duck_rises`), `microduck/EMOTIONS.md`
+  updated; `microduck/sim/episode3_preview.py` renders the whole scene with the picks.

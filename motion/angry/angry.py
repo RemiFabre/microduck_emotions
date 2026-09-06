@@ -109,7 +109,7 @@ def page(open_it):
     pick_stem = f"{mo}__{so}"
     sections = []
     first = lib.card(HERE, PAGE, pick_stem, f"PICK: {mo} + {so}",
-                     note="recommended: the clearest 'angry' read, every bark on a snap, beak wide on all four, no fall")
+                     note="recommended: four scolding snaps (yaw +-0.7, head jab, small bow) with a hard bark on each, beak wide, stable (1.5 cm drift, trunk +-4 deg). Robot wavs: angry_a = S1, angry_b = S3 growl + barks (same beats)")
     first = first.replace('class="card"', 'class="card pick"', 1)
     sections.append(("Recommended", "The one to ship on X (see REPORT.md for the formulas).", [first]))
     for n in SPEC["motions"]:

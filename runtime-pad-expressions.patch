@@ -1,7 +1,7 @@
 From 013c0c7f93206e819d5c1791c3f8d6112b38a259 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:43:22 +0200
-Subject: [PATCH 01/13] robot.rebootMotors: reboot servos in place, `robotctl
+Subject: [PATCH 01/15] robot.rebootMotors: reboot servos in place, `robotctl
  robot reboot-motors`, D-pad-up on the pad
 
 A servo that trips its shutdown mask (overload, overheating, electrical shock) latches with
@@ -580,7 +580,7 @@ index 1f04de3..3dc5c9f 100644
 From 9660d73c0f66750d87da02861c03ce88a14fbd8b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:16:16 +0200
-Subject: [PATCH 02/13] padd: reboot the servos on any D-pad-up press
+Subject: [PATCH 02/15] padd: reboot the servos on any D-pad-up press
 
 ---
  docs/robot/cheatsheet.md |  2 +-
@@ -645,7 +645,7 @@ index 10aea72..307d817 100644
 From a56532541ac05a2e1edeb5903581090feca32030 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 17:18:42 +0200
-Subject: [PATCH 03/13] padd: the servo reboot is D-pad right, D-pad up already
+Subject: [PATCH 03/15] padd: the servo reboot is D-pad right, D-pad up already
  has the mode-switch hold
 
 ---
@@ -707,7 +707,7 @@ index 307d817..56798b1 100644
 From e0f4b5489142d7911fcf54f59e21e22a2541c515 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 14:42:40 +0200
-Subject: [PATCH 04/13] padd: LB curious / RB peck head expressions, Select =
+Subject: [PATCH 04/15] padd: LB curious / RB peck head expressions, Select =
  robot.soften (gentle release), kicks on the D-pad
 
 - padd/src/expressions.rs: timed head-intent sequences played through the policy's command
@@ -1543,7 +1543,7 @@ index 3dc5c9f..c906860 100644
 From db2c70efe43c0562aec1fd2f614b0df706169aad Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 16:16:34 +0200
-Subject: [PATCH 05/13] padd: Start once stands the robot up (robot.init),
+Subject: [PATCH 05/15] padd: Start once stands the robot up (robot.init),
  Start again drives
 
 The first Start on a booted duck used to run the gait straight out of the home ramp. The pad
@@ -1656,7 +1656,7 @@ index 07489b5..2301850 100644
 From 5492ea602e3aef59b2a19d702977aab2da2cd88e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?R=C3=A9mi=20Fabre?= <remi.fabre@pollen-robotics.com>
 Date: Wed, 2 Sep 2026 20:25:46 +0200
-Subject: [PATCH 06/13] padd: R3 = startled (head up, a step back); expressions
+Subject: [PATCH 06/15] padd: R3 = startled (head up, a step back); expressions
  can drive the twist
 
 ---
@@ -1829,7 +1829,7 @@ index 2301850..c523949 100644
 From fdc09eef5c62abe6ead89edca323a4985a7d5d51 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 11:43:36 +0200
-Subject: [PATCH 07/13] padd: emotion mode on a DPad-Up tap, B = devastated
+Subject: [PATCH 07/15] padd: emotion mode on a DPad-Up tap, B = devastated
  (sit, droop, three sobs); robotd: a devastated sound tag
 
 ---
@@ -2276,7 +2276,7 @@ index c84d08d..fb4e027 100644
 From 67a6e37f03b70b83f122a79f2c67bc2eac217874 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:05:28 +0200
-Subject: [PATCH 08/13] robotd: load the policies from
+Subject: [PATCH 08/15] robotd: load the policies from
  /opt/robot/policies/current when that hub exists (newer releases ship none in
  the release dir)
 
@@ -2324,7 +2324,7 @@ index 5aa8ba0..109543a 100644
 From c9d0fedfbdd2c4bde3fec13c0d78d833044fe0d4 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:17:09 +0200
-Subject: [PATCH 09/13] padd: emotion mode A = sad (standing droop with a small
+Subject: [PATCH 09/15] padd: emotion mode A = sad (standing droop with a small
  bow, two shakes, coo); robotd: a sad sound tag
 
 ---
@@ -2714,7 +2714,7 @@ index fb4e027..bf429f1 100644
 From 4bd8cc4df2db60641dc13ae1bae5834b5aa59c83 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 12:51:30 +0200
-Subject: [PATCH 10/13] padd: emotion mode Y = curious with quacks (head
+Subject: [PATCH 10/15] padd: emotion mode Y = curious with quacks (head
  forward, tilt right then left on two chirps); robotd: a curious sound tag
 
 ---
@@ -2965,7 +2965,7 @@ index bf429f1..0be480e 100644
 From 262a739ae903abbc8b1267e092e47325918dd252 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 13:02:43 +0200
-Subject: [PATCH 11/13] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
+Subject: [PATCH 11/15] =?UTF-8?q?padd:=20sad=20v7=20=E2=80=94=20the=20head?=
  =?UTF-8?q?=20lifts=20first,=20then=20droops=20to=20half=20depth=20(the=20?=
  =?UTF-8?q?full=20droop=20was=20too=20heavy=20on=20the=20robot)?=
 MIME-Version: 1.0
@@ -3117,7 +3117,7 @@ index 71c8b01..3f15a3b 100644
 From bab9102a0e8f23f28d366af18096b0df7b95c5db Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 13:05:27 +0200
-Subject: [PATCH 12/13] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
+Subject: [PATCH 12/15] =?UTF-8?q?padd:=20sad=20v7=20as=20simulated=20?=
  =?UTF-8?q?=E2=80=94=20the=20neck=20and=20the=20bow=20follow=20the=20beak?=
  =?UTF-8?q?=20only=20below=20level?=
 MIME-Version: 1.0
@@ -3214,7 +3214,7 @@ index 3f15a3b..550422d 100644
 From 8922e49bfc7d1e8bedf04b0663c26e749cb76642 Mon Sep 17 00:00:00 2001
 From: RemiFabre <remifabre1800@gmail.com>
 Date: Fri, 4 Sep 2026 15:01:23 +0200
-Subject: [PATCH 13/13] =?UTF-8?q?padd:=20curious=20keeps=20the=20head=20ba?=
+Subject: [PATCH 13/15] =?UTF-8?q?padd:=20curious=20keeps=20the=20head=20ba?=
  =?UTF-8?q?ck=20=E2=80=94=20roll=20only=20(the=20forward=20phase=20made=20?=
  =?UTF-8?q?the=20robot=20step=20forward)?=
 MIME-Version: 1.0
@@ -3328,6 +3328,1341 @@ index 550422d..bfe23fa 100644
              assert!((-0.44 - 1e-9..=0.35 + 1e-9).contains(&h.head_roll));
              assert!((0.0..=1.0).contains(&mouth_at(Kind::CuriousQuacks, t)));
          }
+-- 
+2.53.0
+
+
+From e10529864d6c1773e3bca2bb2870127a89762c52 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 16:09:58 +0200
+Subject: [PATCH 14/15] =?UTF-8?q?padd:=20episode=203=20=E2=80=94=20cue=20p?=
+ =?UTF-8?q?ort=20(TCP=207777:=20express/skill/sound/move/stop),=20emotion-?=
+ =?UTF-8?q?mode=20bindings=20(X=20angry,=20LB=20yes,=20RB=20no,=20DPad-Dow?=
+ =?UTF-8?q?n=20excited,=20DPad-Left=20play=20dead),=20draft=20kinds,=20rob?=
+ =?UTF-8?q?ot.soften=20from=20an=20expression;=20SoundTags=20yes/no/angry/?=
+ =?UTF-8?q?excited/play=5Fdead?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ duck-ipc-proto/src/lib.rs |  15 +++
+ padd/src/cue.rs           | 169 +++++++++++++++++++++++++++++
+ padd/src/expressions.rs   | 217 +++++++++++++++++++++++++++++++++++++-
+ padd/src/main.rs          | 102 ++++++++++++++++--
+ robotd/src/intents.rs     |   5 +
+ 5 files changed, 496 insertions(+), 12 deletions(-)
+ create mode 100644 padd/src/cue.rs
+
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index d94c37b..e544716 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -1609,6 +1609,16 @@ pub enum SoundTag {
+     /// The "curious" emotion: two chirps, the second a little higher (a question). Also
+     /// hand-copied into `<bank>/curious/`.
+     Curious,
++    /// Episode 3 emotions, all hand-copied into `<bank>/<name>/`: one affirmative quack.
++    Yes,
++    /// Two notes, "no-ah".
++    No,
++    /// Hard repeated barks.
++    Angry,
++    /// A run of fast rising quacks.
++    Excited,
++    /// A shock quack, silence, a long dying quack.
++    PlayDead,
+ }
+ 
+ impl SoundTag {
+@@ -1625,6 +1635,11 @@ impl SoundTag {
+             SoundTag::Devastated => "devastated",
+             SoundTag::Sad => "sad",
+             SoundTag::Curious => "curious",
++            SoundTag::Yes => "yes",
++            SoundTag::No => "no",
++            SoundTag::Angry => "angry",
++            SoundTag::Excited => "excited",
++            SoundTag::PlayDead => "play_dead",
+         }
+     }
+ }
+diff --git a/padd/src/cue.rs b/padd/src/cue.rs
+new file mode 100644
+index 0000000..eea447f
+--- /dev/null
++++ b/padd/src/cue.rs
+@@ -0,0 +1,169 @@
++//! Scripted cues over TCP: a scene player on the LAN (the theater's `skit.py`, running on the
++//! Reachy Mini or a laptop) tells the pad daemon to play an emotion, a skill, a sound or a short
++//! walk, exactly as a button press would — so the sticks stay alive underneath and the pad's
++//! own rules (one expression at a time, Start / Select untouched) keep holding.
++//!
++//! Wire: one JSON object per line, one JSON answer per line, on `--cue-port` (7777 by default,
++//! all interfaces: the robot lives on a home LAN and the cues are what a button does).
++//!
++//! ```text
++//! {"express":"yes"}                -> {"ok":true,"duration":1.4}
++//! {"skill":"ground_pick"}          -> {"ok":true}
++//! {"sound":"chirp"}                -> {"ok":true}
++//! {"move":[0.3,0,0],"for":1.5}     -> {"ok":true,"duration":1.5}
++//! {"stop":true}                    -> {"ok":true}     (ends the expression and the scripted move)
++//! {"ping":true}                    -> {"ok":true,"kinds":[...]}
++//! ```
++//!
++//! The listener thread only parses and queues; the pad loop applies the cues on its next tick,
++//! which is where every robot intent of `padd` is sent from. A cue that cannot be applied
++//! there (no pad connected: the loop is idle) is answered `ok` here and dropped there, with a
++//! warning in the journal — the scene player cannot know better than the operator does.
++
++use std::io::{BufRead, BufReader, Write};
++use std::net::{TcpListener, TcpStream};
++use std::sync::mpsc::{self, Receiver, Sender};
++
++use duck_ipc_proto as proto;
++use serde::Deserialize;
++
++use crate::expressions::{Expression, Kind};
++
++/// One cue, as the pad loop sees it.
++#[derive(Debug, Clone, PartialEq)]
++pub enum Cue {
++    Express(Kind),
++    Skill(proto::Skill),
++    Sound(proto::SoundTag),
++    /// A twist held for this many seconds, overriding the sticks meanwhile.
++    Move(proto::MoveParams, f64),
++    Stop,
++}
++
++#[derive(Debug, Deserialize)]
++#[serde(deny_unknown_fields)]
++struct Wire {
++    express: Option<String>,
++    skill: Option<proto::Skill>,
++    sound: Option<proto::SoundTag>,
++    #[serde(rename = "move")]
++    move_: Option<[f64; 3]>,
++    #[serde(rename = "for")]
++    for_: Option<f64>,
++    stop: Option<bool>,
++    ping: Option<bool>,
++}
++
++/// Parse one line into a cue and its answer. `Ok(None)` is a ping: answered, nothing queued.
++fn parse(line: &str) -> Result<(Option<Cue>, String), String> {
++    let w: Wire = serde_json::from_str(line).map_err(|e| e.to_string())?;
++    if w.ping == Some(true) {
++        let kinds: Vec<&str> = Kind::NAMES.iter().map(|(n, _)| *n).collect();
++        return Ok((None, format!("{{\"ok\":true,\"kinds\":{}}}", serde_json::to_string(&kinds).unwrap_or_default())));
++    }
++    if w.stop == Some(true) {
++        return Ok((Some(Cue::Stop), "{\"ok\":true}".to_owned()));
++    }
++    if let Some(name) = w.express {
++        let kind = Kind::from_name(&name).ok_or_else(|| format!("unknown expression {name:?}"))?;
++        let d = Expression::duration(kind).as_secs_f64();
++        return Ok((Some(Cue::Express(kind)), format!("{{\"ok\":true,\"duration\":{d:.2}}}")));
++    }
++    if let Some(skill) = w.skill {
++        // Nominal lengths, so a scene can hold for them: the ground pick's phase runs 4 s, the
++        // sit lands in about 2.5 s, a kick is half a second, a roll about a second and a half.
++        let d = match skill {
++            proto::Skill::GroundPick => 4.0,
++            proto::Skill::SitToggle => 2.5,
++            proto::Skill::KickLeft | proto::Skill::KickRight => 0.6,
++            proto::Skill::Roulade => 1.5,
++        };
++        return Ok((Some(Cue::Skill(skill)), format!("{{\"ok\":true,\"duration\":{d:.2}}}")));
++    }
++    if let Some(tag) = w.sound {
++        return Ok((Some(Cue::Sound(tag)), "{\"ok\":true}".to_owned()));
++    }
++    if let Some([vx, vy, vyaw]) = w.move_ {
++        let secs = w.for_.unwrap_or(1.0).clamp(0.0, 10.0);
++        return Ok((Some(Cue::Move(proto::MoveParams { vx, vy, vyaw }, secs)), format!("{{\"ok\":true,\"duration\":{secs:.2}}}")));
++    }
++    Err("empty cue".to_owned())
++}
++
++fn serve_client(stream: TcpStream, tx: &Sender<Cue>) {
++    let peer = stream.peer_addr().map(|a| a.to_string()).unwrap_or_default();
++    let mut writer = match stream.try_clone() {
++        Ok(w) => w,
++        Err(_) => return,
++    };
++    let reader = BufReader::new(stream);
++    for line in reader.lines() {
++        let Ok(line) = line else { break };
++        if line.trim().is_empty() {
++            continue;
++        }
++        let answer = match parse(&line) {
++            Ok((cue, answer)) => {
++                if let Some(cue) = cue {
++                    tracing::warn!(%peer, ?cue, "cue");
++                    if tx.send(cue).is_err() {
++                        break;
++                    }
++                }
++                answer
++            }
++            Err(e) => {
++                tracing::warn!(%peer, line = %line.trim(), error = %e, "bad cue");
++                format!("{{\"ok\":false,\"error\":{}}}", serde_json::to_string(&e).unwrap_or_default())
++            }
++        };
++        if writer.write_all(format!("{answer}\n").as_bytes()).and_then(|_| writer.flush()).is_err() {
++            break;
++        }
++    }
++}
++
++/// Bind the cue port and serve it from a thread. The receiver is drained by the pad loop.
++pub fn serve(port: u16) -> std::io::Result<Receiver<Cue>> {
++    let listener = TcpListener::bind(("0.0.0.0", port))?;
++    let (tx, rx) = mpsc::channel();
++    std::thread::Builder::new().name("cues".into()).spawn(move || {
++        for stream in listener.incoming() {
++            match stream {
++                Ok(stream) => {
++                    let tx = tx.clone();
++                    std::thread::spawn(move || serve_client(stream, &tx));
++                }
++                Err(e) => tracing::warn!(error = %e, "cue accept failed"),
++            }
++        }
++    })?;
++    Ok(rx)
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn cues_parse_and_answer() {
++        let (c, a) = parse(r#"{"express":"sad"}"#).unwrap();
++        assert_eq!(c, Some(Cue::Express(Kind::Sad)));
++        assert!(a.starts_with("{\"ok\":true,\"duration\":7.50"), "{a}");
++        let (c, _) = parse(r#"{"skill":"ground_pick"}"#).unwrap();
++        assert_eq!(c, Some(Cue::Skill(proto::Skill::GroundPick)));
++        let (c, _) = parse(r#"{"sound":"chirp"}"#).unwrap();
++        assert_eq!(c, Some(Cue::Sound(proto::SoundTag::Chirp)));
++        let (c, a) = parse(r#"{"move":[0.3,0,0.1],"for":1.5}"#).unwrap();
++        assert_eq!(c, Some(Cue::Move(proto::MoveParams { vx: 0.3, vy: 0.0, vyaw: 0.1 }, 1.5)));
++        assert!(a.contains("1.50"));
++        let (c, _) = parse(r#"{"stop":true}"#).unwrap();
++        assert_eq!(c, Some(Cue::Stop));
++        let (c, a) = parse(r#"{"ping":true}"#).unwrap();
++        assert_eq!(c, None);
++        assert!(a.contains("\"sad\""));
++        assert!(parse(r#"{"express":"bogus"}"#).is_err());
++        assert!(parse(r#"{"nonsense":1}"#).is_err());
++        assert!(parse(r#"{}"#).is_err());
++    }
++}
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index bfe23fa..ca33ea4 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -34,6 +34,45 @@ pub enum Kind {
+     /// right on a chirp and left on a second, higher chirp ("hm?"), holds, and comes back.
+     /// LB's `Curious` is the silent cousin; this one is the emotion, quacks included.
+     CuriousQuacks,
++    /// Yes (emotion mode, LB): one clear nod with one affirmative quack. Episode 3.
++    Yes,
++    /// No (emotion mode, RB): a short head shake with a two-note "no-ah". Episode 3.
++    No,
++    /// Angry (emotion mode, X): bow pulses and yaw snaps with hard barks; the beak opens wide
++    /// on the first bark so a held leash drops. Body pose on the pose slot. Episode 3.
++    Angry,
++    /// Excited (emotion mode, DPad-Down): body bounces, beak up, head wagging, a run of fast
++    /// rising quacks. Body pose on the pose slot. Episode 3.
++    Excited,
++    /// Play dead (emotion mode, DPad-Left): a shock quack, the sit, then `robot.soften` so the
++    /// duck tips over backwards and lies there, a last dying quack. Episode 3.
++    PlayDead,
++    /// The curious chirps with the beak shut (the duck holds a leash): a small roll wobble,
++    /// the sound, no mouth. Scripted scenes only (`{"express":"closed_quack"}`).
++    ClosedQuack,
++}
++
++impl Kind {
++    /// Names on the cue wire (`padd/src/cue.rs`), one per kind.
++    pub const NAMES: [(&'static str, Kind); 12] = [
++        ("curious_silent", Kind::Curious),
++        ("peck", Kind::Peck),
++        ("startled", Kind::Startled),
++        ("devastated", Kind::Devastated),
++        ("sad", Kind::Sad),
++        ("curious", Kind::CuriousQuacks),
++        ("yes", Kind::Yes),
++        ("no", Kind::No),
++        ("angry", Kind::Angry),
++        ("excited", Kind::Excited),
++        ("play_dead", Kind::PlayDead),
++        ("closed_quack", Kind::ClosedQuack),
++    ];
++
++    pub fn from_name(name: &str) -> Option<Kind> {
++        let name = name.trim().to_ascii_lowercase().replace('-', "_");
++        Self::NAMES.iter().find(|(n, _)| *n == name).map(|(_, k)| *k)
++    }
+ }
+ 
+ #[derive(Debug, Clone, Copy)]
+@@ -132,6 +171,60 @@ const CQ_MOUTH: [f64; 17] = [
+     0.000, 1.000, 0.059, 0.000,
+ ];
+ 
++
++/// Episode 3 drafts. Every number below is a first guess from the brief and is replaced by the
++/// simulation picks (`notes/emotions/motion/<emotion>/REPORT.md`) before shipping.
++/// Yes: one nod, head pitch down to `YES_PITCH` and back, quack on the way down.
++const YES_LEN: f64 = 1.4;
++const YES_PITCH: f64 = 0.5;
++const YES_DOWN_AT: f64 = 0.1;
++const YES_DOWN_LEN: f64 = 0.3;
++const YES_HOLD: f64 = 0.1;
++const YES_UP_LEN: f64 = 0.4;
++const YES_MOUTH: [f64; 8] = [0.0, 0.0, 1.0, 1.0, 0.4, 0.0, 0.0, 0.0];
++/// No: yaw swings +A, -A with a fade, the two notes on the extremes.
++const NO_LEN: f64 = 1.6;
++const NO_YAW: f64 = 0.6;
++const NO_SWING_AT: [f64; 2] = [0.4, 0.9];
++const NO_FADE: f64 = 0.3;
++const NO_MOUTH: [f64; 13] = [0.0, 0.0, 0.0, 0.0, 1.0, 0.6, 0.0, 0.0, 0.0, 1.0, 0.7, 0.0, 0.0];
++/// Angry: three bow pulses on the pose slot with alternating yaw snaps and the beak up.
++const ANGRY_LEN: f64 = 3.0;
++const ANGRY_BOW: f64 = 0.2;
++const ANGRY_YAW: f64 = 0.6;
++const ANGRY_PULSE_AT: [f64; 3] = [0.3, 1.0, 1.7];
++const ANGRY_PULSE_UP: f64 = 0.15;
++const ANGRY_PULSE_HOLD: f64 = 0.1;
++const ANGRY_PULSE_DOWN: f64 = 0.3;
++const ANGRY_MOUTH: [f64; 25] = [
++    0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.3, 0.0, 0.0, 1.0, 1.0, 1.0, 0.3, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.3,
++    0.0, 0.0, 0.0, 0.0,
++];
++/// Excited: z bounces on the pose slot, beak up, yaw wag.
++const EXCITED_LEN: f64 = 3.0;
++const EXCITED_Z_DOWN: f64 = -0.02;
++const EXCITED_Z_UP: f64 = 0.01;
++const EXCITED_BOUNCE_HZ: f64 = 2.0;
++const EXCITED_BEAK_UP: f64 = -0.5;
++const EXCITED_YAW: f64 = 0.5;
++const EXCITED_WAG_HZ: f64 = 1.0;
++const EXCITED_MOUTH: [f64; 31] = [
++    0.0, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0,
++    0.2, 0.0, 1.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
++];
++/// Play dead: sit at 0, head to the side from `PD_TURN_AT`, `robot.soften` at `PD_SOFTEN_AT`,
++/// the death quack from `PD_DEATH_AT` with the beak barely open.
++const PD_LEN: f64 = 7.0;
++const PD_TURN_AT: f64 = 1.0;
++const PD_TURN_LEN: f64 = 0.5;
++const PD_YAW: f64 = 0.6;
++const PD_SOFTEN_AT: f64 = 1.8;
++const PD_DEATH_AT: f64 = 4.0;
++const PD_MOUTH_MAX: f64 = 0.3;
++/// Closed quack: the curious chirps (0.6 / 1.2 s) under a small roll wobble, beak shut.
++const CQZ_LEN: f64 = 2.4;
++const CQZ_ROLL: f64 = 0.2;
++
+ impl Expression {
+     pub fn start(kind: Kind, now: Instant) -> Self {
+         Self { kind, started: now }
+@@ -145,6 +238,12 @@ impl Expression {
+             Kind::Devastated => DEV_LEN,
+             Kind::Sad => SAD_LEN,
+             Kind::CuriousQuacks => CQ_LEN,
++            Kind::Yes => YES_LEN,
++            Kind::No => NO_LEN,
++            Kind::Angry => ANGRY_LEN,
++            Kind::Excited => EXCITED_LEN,
++            Kind::PlayDead => PD_LEN,
++            Kind::ClosedQuack => CQZ_LEN,
+         })
+     }
+ 
+@@ -152,9 +251,13 @@ impl Expression {
+         self.kind
+     }
+ 
++    pub fn started(&self) -> Instant {
++        self.started
++    }
++
+     /// Whether this expression drives the body-pose slot (and so must release it at the end).
+     pub fn has_pose(kind: Kind) -> bool {
+-        matches!(kind, Kind::Sad)
++        matches!(kind, Kind::Sad | Kind::Angry | Kind::Excited)
+     }
+ 
+     /// The body pose this expression wants at `now`, if it drives the pose slot at all.
+@@ -166,7 +269,16 @@ impl Expression {
+     /// The one-shot skill to fire as this expression starts, if any.
+     pub fn skill_at_start(kind: Kind) -> Option<proto::Skill> {
+         match kind {
+-            Kind::Devastated => Some(proto::Skill::SitToggle),
++            Kind::Devastated | Kind::PlayDead => Some(proto::Skill::SitToggle),
++            _ => None,
++        }
++    }
++
++    /// When this expression asks the robot to let go (`robot.soften`), seconds from its start:
++    /// play dead tips over backwards from the seat. `None` for everything else.
++    pub fn soften_at(kind: Kind) -> Option<f64> {
++        match kind {
++            Kind::PlayDead => Some(PD_SOFTEN_AT),
+             _ => None,
+         }
+     }
+@@ -176,7 +288,12 @@ impl Expression {
+         match kind {
+             Kind::Devastated => Some(proto::SoundTag::Devastated),
+             Kind::Sad => Some(proto::SoundTag::Sad),
+-            Kind::CuriousQuacks => Some(proto::SoundTag::Curious),
++            Kind::CuriousQuacks | Kind::ClosedQuack => Some(proto::SoundTag::Curious),
++            Kind::Yes => Some(proto::SoundTag::Yes),
++            Kind::No => Some(proto::SoundTag::No),
++            Kind::Angry => Some(proto::SoundTag::Angry),
++            Kind::Excited => Some(proto::SoundTag::Excited),
++            Kind::PlayDead => Some(proto::SoundTag::PlayDead),
+             _ => None,
+         }
+     }
+@@ -218,6 +335,12 @@ pub fn twist_at(kind: Kind, t: f64) -> Option<proto::MoveParams> {
+         Kind::Devastated if t < DEV_LEN => Some(proto::MoveParams::default()),
+         Kind::Sad if t < SAD_LEN => Some(proto::MoveParams::default()),
+         Kind::CuriousQuacks if t < CQ_LEN => Some(proto::MoveParams::default()),
++        Kind::Yes if t < YES_LEN => Some(proto::MoveParams::default()),
++        Kind::No if t < NO_LEN => Some(proto::MoveParams::default()),
++        Kind::Angry if t < ANGRY_LEN => Some(proto::MoveParams::default()),
++        Kind::Excited if t < EXCITED_LEN => Some(proto::MoveParams::default()),
++        Kind::PlayDead if t < PD_LEN => Some(proto::MoveParams::default()),
++        Kind::ClosedQuack if t < CQZ_LEN => Some(proto::MoveParams::default()),
+         _ => None,
+     }
+ }
+@@ -230,10 +353,36 @@ pub fn pose_at(kind: Kind, t: f64) -> Option<proto::PoseParams> {
+             active: true,
+             ..Default::default()
+         }),
++        Kind::Angry if (0.0..ANGRY_LEN).contains(&t) => Some(proto::PoseParams {
++            pitch: ANGRY_BOW * angry_pulses(t),
++            active: true,
++            ..Default::default()
++        }),
++        Kind::Excited if (0.0..EXCITED_LEN).contains(&t) => Some(proto::PoseParams {
++            z: excited_z(t),
++            active: true,
++            ..Default::default()
++        }),
+         _ => None,
+     }
+ }
+ 
++/// Angry's three bow pulses, 0..1: up over `ANGRY_PULSE_UP`, a hold, down over `ANGRY_PULSE_DOWN`.
++fn angry_pulses(t: f64) -> f64 {
++    ANGRY_PULSE_AT
++        .iter()
++        .map(|&t0| ramp(t - t0, ANGRY_PULSE_UP) * (1.0 - ramp(t - t0 - ANGRY_PULSE_UP - ANGRY_PULSE_HOLD, ANGRY_PULSE_DOWN)))
++        .fold(0.0, f64::max)
++}
++
++/// Excited's height bounces: a cosine between `EXCITED_Z_DOWN` and `EXCITED_Z_UP`, faded in and out.
++fn excited_z(t: f64) -> f64 {
++    let gate = ramp(t, 0.3) * (1.0 - ramp(t - (EXCITED_LEN - 0.5), 0.5));
++    let mid = 0.5 * (EXCITED_Z_DOWN + EXCITED_Z_UP);
++    let half = 0.5 * (EXCITED_Z_UP - EXCITED_Z_DOWN);
++    gate * (mid - half * (std::f64::consts::TAU * EXCITED_BOUNCE_HZ * t).cos())
++}
++
+ /// A 0..1 table sampled every `DEV_MOUTH_STEP`, linear in between; zero past its end (every
+ /// table ends on a zero).
+ fn table_at(table: &[f64], t: f64) -> f64 {
+@@ -253,6 +402,14 @@ pub fn mouth_at(kind: Kind, t: f64) -> f64 {
+         Kind::Devastated => table_at(&DEV_MOUTH, t),
+         Kind::Sad => table_at(&SAD_MOUTH, t),
+         Kind::CuriousQuacks => table_at(&CQ_MOUTH, t),
++        Kind::Yes => table_at(&YES_MOUTH, t),
++        Kind::No => table_at(&NO_MOUTH, t),
++        Kind::Angry => table_at(&ANGRY_MOUTH, t),
++        Kind::Excited => table_at(&EXCITED_MOUTH, t),
++        // The death quack: the beak barely open, dying with the sound.
++        Kind::PlayDead if (PD_DEATH_AT..PD_LEN).contains(&t) => {
++            PD_MOUTH_MAX * ramp(t - PD_DEATH_AT, 0.2) * (1.0 - ramp(t - PD_DEATH_AT - 0.4, PD_LEN - PD_DEATH_AT - 0.4))
++        }
+         _ => 0.0,
+     }
+ }
+@@ -337,6 +494,60 @@ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+                 head_roll: roll * back,
+             }
+         }
++        Kind::Yes => {
++            let down = ramp(t - YES_DOWN_AT, YES_DOWN_LEN)
++                * (1.0 - ramp(t - YES_DOWN_AT - YES_DOWN_LEN - YES_HOLD, YES_UP_LEN));
++            proto::HeadParams {
++                neck_pitch: 0.0,
++                head_pitch: YES_PITCH * down,
++                head_yaw: 0.0,
++                head_roll: 0.0,
++            }
++        }
++        Kind::No => proto::HeadParams {
++            neck_pitch: 0.0,
++            head_pitch: 0.0,
++            head_yaw: swings(t, &NO_SWING_AT, NO_YAW, NO_FADE),
++            head_roll: 0.0,
++        },
++        Kind::Angry => {
++            // Beak up throughout, a yaw snap alternating sides on each bow pulse.
++            let up = ramp(t, 0.3) * (1.0 - ramp(t - (ANGRY_LEN - 0.5), 0.5));
++            let mut yaw = 0.0;
++            for (i, &t0) in ANGRY_PULSE_AT.iter().enumerate() {
++                let sign = if i % 2 == 0 { 1.0 } else { -1.0 };
++                yaw += sign * ANGRY_YAW * ramp(t - t0, ANGRY_PULSE_UP)
++                    * (1.0 - ramp(t - t0 - ANGRY_PULSE_UP - ANGRY_PULSE_HOLD, ANGRY_PULSE_DOWN));
++            }
++            proto::HeadParams {
++                neck_pitch: 0.0,
++                head_pitch: -0.4 * up,
++                head_yaw: yaw,
++                head_roll: 0.0,
++            }
++        }
++        Kind::Excited => {
++            let gate = ramp(t, 0.3) * (1.0 - ramp(t - (EXCITED_LEN - 0.5), 0.5));
++            proto::HeadParams {
++                neck_pitch: 0.0,
++                head_pitch: EXCITED_BEAK_UP * gate,
++                head_yaw: EXCITED_YAW * gate * (std::f64::consts::TAU * EXCITED_WAG_HZ * t).sin(),
++                head_roll: 0.0,
++            }
++        }
++        Kind::PlayDead => proto::HeadParams {
++            neck_pitch: 0.0,
++            head_pitch: 0.0,
++            head_yaw: PD_YAW * ramp(t - PD_TURN_AT, PD_TURN_LEN),
++            head_roll: 0.0,
++        },
++        Kind::ClosedQuack => proto::HeadParams {
++            neck_pitch: 0.0,
++            head_pitch: 0.0,
++            head_yaw: 0.0,
++            head_roll: CQZ_ROLL * ramp(t - 0.4, 0.3) * (1.0 - ramp(t - 1.0, 0.3))
++                - CQZ_ROLL * ramp(t - 1.0, 0.3) * (1.0 - ramp(t - 1.7, 0.4)),
++        },
+         Kind::Startled => {
+             // Head pitch negative is beak up (measured on the shipped policies). Up fast, back
+             // to level over the last half second.
+diff --git a/padd/src/main.rs b/padd/src/main.rs
+index 83959a8..4a45f9f 100644
+--- a/padd/src/main.rs
++++ b/padd/src/main.rs
+@@ -75,6 +75,7 @@ use std::time::{Duration, Instant};
+ use clap::Parser;
+ use duck_ipc_proto as proto;
+ 
++mod cue;
+ mod expressions;
+ use expressions::{Expression, Kind};
+ use gilrs::{Axis, Button, Gilrs};
+@@ -146,6 +147,11 @@ struct Args {
+     /// `padd` says so once and drives anyway.
+     #[arg(long, default_value = proto::socket::PAD)]
+     tap_socket: PathBuf,
++
++    /// TCP port for scripted cues (`src/cue.rs`): a scene player asks for an emotion, a skill,
++    /// a sound or a short walk, as a button would. 0 disables it.
++    #[arg(long, default_value_t = 7777)]
++    cue_port: u16,
+ }
+ 
+ /// How long to wait between checks when there is no pad.
+@@ -252,6 +258,19 @@ fn main() -> std::process::ExitCode {
+ 
+     let mut next_id = 1u64;
+ 
++    // Scripted cues from the LAN. Like the tap: a failure is logged and stepped over.
++    let cues = if args.cue_port == 0 {
++        None
++    } else {
++        match cue::serve(args.cue_port) {
++            Ok(rx) => Some(rx),
++            Err(e) => {
++                tracing::warn!(error = %e, port = args.cue_port, "no cue port — scripted scenes cannot reach this pad");
++                None
++            }
++        }
++    };
++
+     // Which robot is this? A roller duck wants the roller stick shaping. Asked once at startup,
+     // then kept in step by the D-pad-up switch below — which is this process asking for the
+     // change, so it knows the answer without asking again.
+@@ -269,8 +288,8 @@ fn main() -> std::process::ExitCode {
+         "driving — Start once = stand up (init), Start again = policy on/off, Y head mode, \
+          B body pose, A ground pick, LB curious head, RB peck, R3 startled, DPad-Left kick left, \
+          DPad-Right reboot servos, DPad-Down sit, triggers mouth, DPad-Up (3s) walk/roller, \
+-         DPad-Up tap = emotion mode (A sad, B devastated, Y curious), Select = soft release, \
+-         Select (3s) shutdown"
++         DPad-Up tap = emotion mode (A sad, B devastated, X angry, Y curious, LB yes, RB no, \
++         DPad-Down excited, DPad-Left play dead), Select = soft release, Select (3s) shutdown"
+     );
+ 
+     let period = Duration::from_secs_f64(1.0 / args.hz as f64);
+@@ -304,6 +323,11 @@ fn main() -> std::process::ExitCode {
+     // Emotion mode: a D-pad-up tap toggles it. While on, the face buttons play emotions and
+     // nothing else; every other control keeps its meaning (Start and Select especially).
+     let mut emotion = false;
++    // A scripted walk (`{"move":..}` cue): the twist and when it ends. The sticks are back in
++    // charge the moment it expires.
++    let mut scripted_move: Option<(proto::MoveParams, Instant)> = None;
++    // Whether the playing expression's `robot.soften` has been sent (play dead lets go mid-way).
++    let mut soften_sent = false;
+ 
+     loop {
+         let tick = Instant::now();
+@@ -315,7 +339,8 @@ fn main() -> std::process::ExitCode {
+         let mut toggle_body = false;
+         let mut ground_pick = false;
+         let mut kick_left = false;
+-        let kick_right = false; // no button on this pad: D-pad right reboots the servos
++        let mut cue_kick_right = false; // no button on this pad: D-pad right reboots the servos
++        let mut cue_sounds: Vec<proto::SoundTag> = Vec::new();
+         let mut sit_toggle = false;
+         let mut roulade = false;
+         let mut reboot_motors = false;
+@@ -340,6 +365,12 @@ fn main() -> std::process::ExitCode {
+                     Button::East if emotion => face = Some(Face::B),
+                     Button::South if emotion => face = Some(Face::A),
+                     Button::West if emotion => face = Some(Face::X),
++                    // Emotion mode takes the bumpers and two D-pad directions too; Start,
++                    // Select, the sticks, the triggers and DPad-Right keep their jobs.
++                    Button::LeftTrigger if emotion => start_expression = Some(Kind::Yes),
++                    Button::RightTrigger if emotion => start_expression = Some(Kind::No),
++                    Button::DPadDown if emotion => start_expression = Some(Kind::Excited),
++                    Button::DPadLeft if emotion => start_expression = Some(Kind::PlayDead),
+                     Button::North => toggle_head = true,
+                     Button::East => toggle_body = true,
+                     Button::South => ground_pick = true,
+@@ -402,8 +433,8 @@ fn main() -> std::process::ExitCode {
+             emotion = !emotion;
+             tracing::warn!(
+                 emotion,
+-                "DPad-Up tap — emotion mode {} (A sad, B devastated, X angry, Y excited; \
+-                 tap again to leave)",
++                "DPad-Up tap — emotion mode {} (A sad, B devastated, X angry, Y curious, LB yes, \
++                 RB no, DPad-Down excited, DPad-Left play dead; tap again to leave)",
+                 if emotion { "ON" } else { "off" }
+             );
+             // A cue on the speaker: a chirp going in, the low "tock" coming out.
+@@ -441,15 +472,44 @@ fn main() -> std::process::ExitCode {
+                 tracing::info!(?mode, "mode");
+             }
+         }
+-        // Emotion mode's face buttons. A, B and Y are bound; X logs and does nothing yet.
++        // Emotion mode's face buttons.
+         match face {
+             Some(Face::A) => start_expression = Some(Kind::Sad),
+             Some(Face::B) => start_expression = Some(Kind::Devastated),
++            Some(Face::X) => start_expression = Some(Kind::Angry),
+             Some(Face::Y) => start_expression = Some(Kind::CuriousQuacks),
+-            Some(other) => tracing::warn!(button = ?other, "emotion mode: nothing bound here yet"),
+             None => {}
+         }
+ 
++        // Scripted cues, applied like the presses above: an expression starts (any mode, the
++        // scene decides), a skill or a sound is asked for, a walk overrides the sticks for a
++        // while. Drained every tick so a burst of cues lands in order.
++        if let Some(rx) = cues.as_ref() {
++            for c in rx.try_iter() {
++                match c {
++                    cue::Cue::Express(kind) => start_expression = Some(kind),
++                    cue::Cue::Skill(proto::Skill::GroundPick) => ground_pick = true,
++                    cue::Cue::Skill(proto::Skill::KickLeft) => kick_left = true,
++                    cue::Cue::Skill(proto::Skill::KickRight) => cue_kick_right = true,
++                    cue::Cue::Skill(proto::Skill::SitToggle) => sit_toggle = true,
++                    cue::Cue::Skill(proto::Skill::Roulade) => roulade = true,
++                    cue::Cue::Sound(tag) => cue_sounds.push(tag),
++                    cue::Cue::Move(twist, secs) => {
++                        scripted_move = Some((twist, tick + Duration::from_secs_f64(secs)));
++                    }
++                    cue::Cue::Stop => {
++                        scripted_move = None;
++                        if expression.take().is_some() {
++                            tracing::warn!("cue: stop — expression ended early");
++                        }
++                    }
++                }
++            }
++        }
++        if scripted_move.is_some_and(|(_, until)| tick >= until) {
++            scripted_move = None;
++        }
++
+         if toggle_head {
+             mode = if mode == Mode::Head {
+                 Mode::Drive
+@@ -521,7 +581,7 @@ fn main() -> std::process::ExitCode {
+         for (fired, skill) in [
+             (ground_pick, proto::Skill::GroundPick),
+             (kick_left, proto::Skill::KickLeft),
+-            (kick_right, proto::Skill::KickRight),
++            (cue_kick_right, proto::Skill::KickRight),
+             (sit_toggle, proto::Skill::SitToggle),
+             (roulade, proto::Skill::Roulade),
+         ] {
+@@ -651,6 +711,7 @@ fn main() -> std::process::ExitCode {
+         if let Some(kind) = start_expression {
+             tracing::info!(?kind, "expression");
+             expression = Some(Expression::start(kind, tick));
++            soften_sent = false;
+             // An expression with a move or a voice of its own fires them now, once. The skill
+             // is answered like the button skills above; the sound is fire-and-forget.
+             if let Some(skill) = Expression::skill_at_start(kind) {
+@@ -692,7 +753,10 @@ fn main() -> std::process::ExitCode {
+         // that decays, so a padd that dies mid-ride leaves a ride that lands. Release cuts
+         // it instantly, as the prototype does.
+         const SOUND_THRESHOLD: f64 = 0.3;
+-        let mut sound_calls: Vec<proto::SoundParams> = Vec::new();
++        let mut sound_calls: Vec<proto::SoundParams> = cue_sounds
++            .drain(..)
++            .map(|tag| proto::SoundParams { tag, hold: None })
++            .collect();
+         if prev_rt < SOUND_THRESHOLD && rt >= SOUND_THRESHOLD {
+             sound_calls.push(proto::SoundParams {
+                 tag: proto::SoundTag::Chirp,
+@@ -726,6 +790,22 @@ fn main() -> std::process::ExitCode {
+         // way: every tick while it plays, and one `active: false` when it ends, which is the
+         // prototype's B-button exit — the body snaps back to nominal. Not while the sticks
+         // are posing the body (mode B), which would fight it.
++        // An expression that lets go part-way (play dead tips over from the seat): one
++        // `robot.soften` when its time comes, answered like Select's.
++        if let Some(e) = expression
++            && !soften_sent
++            && let Some(at) = Expression::soften_at(e.kind())
++            && tick.duration_since(e.started()).as_secs_f64() >= at
++        {
++            soften_sent = true;
++            up = false;
++            tracing::warn!(kind = ?e.kind(), "expression lets go (robot.soften)");
++            if let Err(e) = request(&mut stream, &mut next_id, &proto::Call::RobotSoften) {
++                tracing::error!(error = %e, "soften request failed");
++                return std::process::ExitCode::FAILURE;
++            }
++        }
++
+         let mut expression_pose: Option<proto::PoseParams> = None;
+         let expression_head = match expression {
+             Some(e) => match e.head_at(tick) {
+@@ -779,6 +859,10 @@ fn main() -> std::process::ExitCode {
+             Mode::Drive if expression.and_then(|e| e.twist_at(tick)).is_some() => {
+                 proto::Call::RobotMove(expression.and_then(|e| e.twist_at(tick)).expect("checked"))
+             }
++            // A scripted walk from a cue, until it expires; then the sticks again.
++            Mode::Drive if scripted_move.is_some() => {
++                proto::Call::RobotMove(scripted_move.expect("checked").0)
++            }
+             Mode::Drive => proto::Call::RobotMove(proto::MoveParams {
+                 vx: left_y
+                     * if left_y >= 0.0 {
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index 0be480e..4f916ef 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -331,6 +331,11 @@ impl Intents {
+             SoundTag::Devastated,
+             SoundTag::Sad,
+             SoundTag::Curious,
++            SoundTag::Yes,
++            SoundTag::No,
++            SoundTag::Angry,
++            SoundTag::Excited,
++            SoundTag::PlayDead,
+         ]
+         .into_iter()
+         .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
+-- 
+2.53.0
+
+
+From 93ab422f0741d03b72f606da97b0e69e9a4d6772 Mon Sep 17 00:00:00 2001
+From: RemiFabre <remifabre1800@gmail.com>
+Date: Sun, 6 Sep 2026 16:31:53 +0200
+Subject: [PATCH 15/15] =?UTF-8?q?padd:=20episode=203=20picks=20from=20the?=
+ =?UTF-8?q?=20simulation=20=E2=80=94=20yes,=20no,=20angry,=20excited,=20pl?=
+ =?UTF-8?q?ay=20dead,=20closed=20quack=20(keyframe=20tests=20against=20the?=
+ =?UTF-8?q?=20sim=20JSON);=20SoundTag::Closed?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ duck-ipc-proto/src/lib.rs |   3 +
+ padd/src/expressions.rs   | 437 ++++++++++++++++++++++++++++++--------
+ robotd/src/intents.rs     |   1 +
+ 3 files changed, 354 insertions(+), 87 deletions(-)
+
+diff --git a/duck-ipc-proto/src/lib.rs b/duck-ipc-proto/src/lib.rs
+index e544716..7fcf883 100644
+--- a/duck-ipc-proto/src/lib.rs
++++ b/duck-ipc-proto/src/lib.rs
+@@ -1619,6 +1619,8 @@ pub enum SoundTag {
+     Excited,
+     /// A shock quack, silence, a long dying quack.
+     PlayDead,
++    /// Two low buzzes through a shut beak (the duck holds something).
++    Closed,
+ }
+ 
+ impl SoundTag {
+@@ -1640,6 +1642,7 @@ impl SoundTag {
+             SoundTag::Angry => "angry",
+             SoundTag::Excited => "excited",
+             SoundTag::PlayDead => "play_dead",
++            SoundTag::Closed => "closed",
+         }
+     }
+ }
+diff --git a/padd/src/expressions.rs b/padd/src/expressions.rs
+index ca33ea4..3621380 100644
+--- a/padd/src/expressions.rs
++++ b/padd/src/expressions.rs
+@@ -172,58 +172,96 @@ const CQ_MOUTH: [f64; 17] = [
+ ];
+ 
+ 
+-/// Episode 3 drafts. Every number below is a first guess from the brief and is replaced by the
+-/// simulation picks (`notes/emotions/motion/<emotion>/REPORT.md`) before shipping.
+-/// Yes: one nod, head pitch down to `YES_PITCH` and back, quack on the way down.
+-const YES_LEN: f64 = 1.4;
+-const YES_PITCH: f64 = 0.5;
+-const YES_DOWN_AT: f64 = 0.1;
+-const YES_DOWN_LEN: f64 = 0.3;
+-const YES_HOLD: f64 = 0.1;
+-const YES_UP_LEN: f64 = 0.4;
+-const YES_MOUTH: [f64; 8] = [0.0, 0.0, 1.0, 1.0, 0.4, 0.0, 0.0, 0.0];
+-/// No: yaw swings +A, -A with a fade, the two notes on the extremes.
+-const NO_LEN: f64 = 1.6;
+-const NO_YAW: f64 = 0.6;
+-const NO_SWING_AT: [f64; 2] = [0.4, 0.9];
+-const NO_FADE: f64 = 0.3;
+-const NO_MOUTH: [f64; 13] = [0.0, 0.0, 0.0, 0.0, 1.0, 0.6, 0.0, 0.0, 0.0, 1.0, 0.7, 0.0, 0.0];
+-/// Angry: three bow pulses on the pose slot with alternating yaw snaps and the beak up.
+-const ANGRY_LEN: f64 = 3.0;
+-const ANGRY_BOW: f64 = 0.2;
+-const ANGRY_YAW: f64 = 0.6;
+-const ANGRY_PULSE_AT: [f64; 3] = [0.3, 1.0, 1.7];
+-const ANGRY_PULSE_UP: f64 = 0.15;
+-const ANGRY_PULSE_HOLD: f64 = 0.1;
+-const ANGRY_PULSE_DOWN: f64 = 0.3;
+-const ANGRY_MOUTH: [f64; 25] = [
+-    0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.3, 0.0, 0.0, 1.0, 1.0, 1.0, 0.3, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.3,
+-    0.0, 0.0, 0.0, 0.0,
++/// Episode 3 (2026-09-06). Numbers from the simulation picks: `notes/emotions/motion/<emotion>/REPORT.md`.
++///
++/// Yes: one nod. Standing, only head_pitch moves: down to `YES_PITCH` (beak down) from `YES_DOWN_AT`
++/// over `YES_DOWN_LEN`, a short hold, back over `YES_UP_LEN`; the policies follow ~0.4 s late, so the
++/// joint bottoms out at ~0.45 s, where the one quack lands (250 Hz falling 3 semitones).
++const YES_LEN: f64 = 1.5;
++const YES_PITCH: f64 = 0.7;
++const YES_DOWN_AT: f64 = 0.05;
++const YES_DOWN_LEN: f64 = 0.25;
++const YES_HOLD: f64 = 0.10;
++const YES_UP_LEN: f64 = 0.35;
++/// The beak, 0..1 every 0.1 s (the simulation's mouth channel: the wav's envelope 0.15 s late).
++const YES_MOUTH: [f64; 11] = [
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.819, 1.000, 0.638, 0.214, 0.000,
+ ];
+-/// Excited: z bounces on the pose slot, beak up, yaw wag.
+-const EXCITED_LEN: f64 = 3.0;
+-const EXCITED_Z_DOWN: f64 = -0.02;
+-const EXCITED_Z_UP: f64 = 0.01;
+-const EXCITED_BOUNCE_HZ: f64 = 2.0;
+-const EXCITED_BEAK_UP: f64 = -0.5;
+-const EXCITED_YAW: f64 = 0.5;
+-const EXCITED_WAG_HZ: f64 = 1.0;
+-const EXCITED_MOUTH: [f64; 31] = [
+-    0.0, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0, 0.2, 0.0, 1.0,
+-    0.2, 0.0, 1.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
++/// No: a head shake, yaw only: `swings` through +`NO_YAW` at 0.35 s and -`NO_YAW` at 0.85 s with
++/// 0.25 s fades (0 until 0.10 s, centre at 1.10 s). The two notes ("no" 250 Hz flat at 0.60 s,
++/// "ah" a fourth lower at 1.10 s) land on the joint's extremes, which lag the command by 0.25 s.
++const NO_LEN: f64 = 1.8;
++const NO_YAW: f64 = 0.55;
++const NO_SWING_AT: [f64; 2] = [0.35, 0.85];
++const NO_FADE: f64 = 0.25;
++const NO_MOUTH: [f64; 17] = [
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 1.000, 0.580, 0.000, 0.000, 0.000, 1.000,
++    0.820, 0.421, 0.000,
+ ];
+-/// Play dead: sit at 0, head to the side from `PD_TURN_AT`, `robot.soften` at `PD_SOFTEN_AT`,
+-/// the death quack from `PD_DEATH_AT` with the beak barely open.
+-const PD_LEN: f64 = 7.0;
+-const PD_TURN_AT: f64 = 1.0;
+-const PD_TURN_LEN: f64 = 0.5;
++/// Angry: four snaps, one hard bark on each at `ANGRY_BARKS`. Standing, neck 0 throughout (the
++/// stand net folds the whole duck forward from a body pitch of ~0.2, which is the head-forward
++/// mass that makes the real robot walk: only small fast bow pulses are clean). A beak-up baseline
++/// (`ANGRY_UP`), and on each bark, led by `ANGRY_LEAD`: a head-yaw snap to `ANGRY_YAW_AT` (0.12 s
++/// ramps), a head jab (`ANGRY_JAB`: beak from up to just below level), and on the first three a
++/// small fast bow on the pose slot (`ANGRY_BOW`). The beak is forced wide 0.30-0.70 s so a held
++/// leash drops, then follows the wav.
++const ANGRY_LEN: f64 = 2.6;
++const ANGRY_BARKS: [f64; 4] = [0.30, 0.90, 1.50, 2.00];
++const ANGRY_LEAD: f64 = 0.15;
++const ANGRY_UP: f64 = -0.35;
++const ANGRY_JAB: f64 = 0.45;
++const ANGRY_YAW_AT: [f64; 4] = [0.7, -0.7, 0.7, 0.0];
++const ANGRY_SNAP_LEN: f64 = 0.12;
++const ANGRY_BOW: f64 = 0.14;
++const ANGRY_MOUTH: [f64; 27] = [
++    0.000, 0.000, 0.000, 1.000, 1.000, 1.000, 1.000, 0.000, 0.000, 0.000, 0.000, 1.000, 0.423, 0.000,
++    0.000, 0.000, 0.000, 1.000, 0.459, 0.000, 0.000, 0.000, 1.000, 1.000, 1.000, 0.000, 0.000,
++];
++/// Excited: six accelerating head swings of +-`EXCITED_YAW` with extremes at `EXCITED_Q` (a bank
++/// chirp on each, in rising pitch order), the beak climbing from `EXCITED_UP_FROM` to `EXCITED_UP_TO`,
++/// a body bob on each swing = a small fast bow pulse on the pose slot (the pose z slot does nothing
++/// on the stand net), and a bow flourish at the end. Neck 0.
++const EXCITED_LEN: f64 = 3.4;
++const EXCITED_Q: [f64; 6] = [0.40, 0.95, 1.45, 1.90, 2.30, 2.65];
++const EXCITED_YAW: f64 = 0.6;
++const EXCITED_FADE: f64 = 0.3;
++const EXCITED_UP_FROM: f64 = -0.15;
++const EXCITED_UP_TO: f64 = -0.70;
++const EXCITED_BOB: f64 = 0.12;
++const EXCITED_MOUTH: [f64; 32] = [
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 1.000, 0.030, 0.000, 0.000, 0.000, 1.000, 0.445, 0.000,
++    0.000, 0.000, 1.000, 0.613, 0.000, 0.000, 0.000, 1.000, 0.141, 0.000, 0.000, 1.000, 0.375, 0.000,
++    1.000, 0.993, 0.318, 0.000,
++];
++/// Play dead, seconds from the press: sit_toggle and the alarm at 0 while the head snaps up (the
++/// shock, `PD_SHOCK`, released by 0.55 s); the seat lands by ~1 s; the head goes back, beak to the
++/// sky (`PD_BACK` from `PD_BACK_AT` over `PD_BACK_LEN`) and to the side (`PD_YAW` from `PD_YAW_AT`
++/// over `PD_YAW_LEN`); then `robot.soften` at `PD_SOFTEN_AT`: the joints hold, the gain dies over
++/// a second and the duck keels over backwards on the weight of its head (on its back by ~4.8 s in
++/// simulation, head on the side). The death quack from `PD_DEATH_AT`, the beak barely open. The
++/// robot is limp at the end: Start (robot.init) is the way back up, Rémi's call.
++const PD_LEN: f64 = 7.5;
++const PD_SHOCK: f64 = -0.5;
++const PD_BACK: f64 = -1.0;
++const PD_BACK_AT: f64 = 1.0;
++const PD_BACK_LEN: f64 = 1.0;
+ const PD_YAW: f64 = 0.6;
+-const PD_SOFTEN_AT: f64 = 1.8;
+-const PD_DEATH_AT: f64 = 4.0;
+-const PD_MOUTH_MAX: f64 = 0.3;
+-/// Closed quack: the curious chirps (0.6 / 1.2 s) under a small roll wobble, beak shut.
+-const CQZ_LEN: f64 = 2.4;
+-const CQZ_ROLL: f64 = 0.2;
++const PD_YAW_AT: f64 = 1.2;
++const PD_YAW_LEN: f64 = 0.8;
++const PD_SOFTEN_AT: f64 = 2.2;
++const PD_MOUTH: [f64; 67] = [
++    0.000, 0.000, 1.000, 1.000, 0.611, 0.208, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
++    0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.225, 0.300, 0.300, 0.300, 0.300, 0.300, 0.300,
++    0.300, 0.300, 0.300, 0.300, 0.300, 0.280, 0.225, 0.150, 0.075, 0.020, 0.000,
++];
++/// Closed quack (the duck holds a leash): two low nasal buzzes at 0.50 / 0.95 s under a small yaw
++/// shake (-`CQZ_YAW` at 0.6 s, +`CQZ_YAW` at 1.05 s, 0.25 s fades), the beak shut throughout.
++const CQZ_LEN: f64 = 2.2;
++const CQZ_YAW: f64 = 0.25;
++const CQZ_SWING_AT: [f64; 2] = [0.6, 1.05];
++const CQZ_FADE: f64 = 0.25;
+ 
+ impl Expression {
+     pub fn start(kind: Kind, now: Instant) -> Self {
+@@ -288,7 +326,8 @@ impl Expression {
+         match kind {
+             Kind::Devastated => Some(proto::SoundTag::Devastated),
+             Kind::Sad => Some(proto::SoundTag::Sad),
+-            Kind::CuriousQuacks | Kind::ClosedQuack => Some(proto::SoundTag::Curious),
++            Kind::CuriousQuacks => Some(proto::SoundTag::Curious),
++            Kind::ClosedQuack => Some(proto::SoundTag::Closed),
+             Kind::Yes => Some(proto::SoundTag::Yes),
+             Kind::No => Some(proto::SoundTag::No),
+             Kind::Angry => Some(proto::SoundTag::Angry),
+@@ -354,12 +393,12 @@ pub fn pose_at(kind: Kind, t: f64) -> Option<proto::PoseParams> {
+             ..Default::default()
+         }),
+         Kind::Angry if (0.0..ANGRY_LEN).contains(&t) => Some(proto::PoseParams {
+-            pitch: ANGRY_BOW * angry_pulses(t),
++            pitch: ANGRY_BOW * angry_bows(t),
+             active: true,
+             ..Default::default()
+         }),
+         Kind::Excited if (0.0..EXCITED_LEN).contains(&t) => Some(proto::PoseParams {
+-            z: excited_z(t),
++            pitch: excited_bobs(t),
+             active: true,
+             ..Default::default()
+         }),
+@@ -367,20 +406,55 @@ pub fn pose_at(kind: Kind, t: f64) -> Option<proto::PoseParams> {
+     }
+ }
+ 
+-/// Angry's three bow pulses, 0..1: up over `ANGRY_PULSE_UP`, a hold, down over `ANGRY_PULSE_DOWN`.
+-fn angry_pulses(t: f64) -> f64 {
+-    ANGRY_PULSE_AT
++/// A pulse 0 -> 1 -> 0: up over `up` from `t0`, a `hold`, back down over `down`.
++fn pulse(t: f64, t0: f64, up: f64, hold: f64, down: f64) -> f64 {
++    ramp(t - t0, up) * (1.0 - ramp(t - t0 - up - hold, down))
++}
++
++/// Angry's bows, 0..1: a small fast pulse on the first three barks, led by `ANGRY_LEAD`.
++fn angry_bows(t: f64) -> f64 {
++    ANGRY_BARKS[..3]
+         .iter()
+-        .map(|&t0| ramp(t - t0, ANGRY_PULSE_UP) * (1.0 - ramp(t - t0 - ANGRY_PULSE_UP - ANGRY_PULSE_HOLD, ANGRY_PULSE_DOWN)))
+-        .fold(0.0, f64::max)
++        .map(|&b| pulse(t, b - ANGRY_LEAD, 0.15, 0.05, 0.25))
++        .sum()
+ }
+ 
+-/// Excited's height bounces: a cosine between `EXCITED_Z_DOWN` and `EXCITED_Z_UP`, faded in and out.
+-fn excited_z(t: f64) -> f64 {
+-    let gate = ramp(t, 0.3) * (1.0 - ramp(t - (EXCITED_LEN - 0.5), 0.5));
+-    let mid = 0.5 * (EXCITED_Z_DOWN + EXCITED_Z_UP);
+-    let half = 0.5 * (EXCITED_Z_UP - EXCITED_Z_DOWN);
+-    gate * (mid - half * (std::f64::consts::TAU * EXCITED_BOUNCE_HZ * t).cos())
++/// Angry's head jabs, in head-pitch units: a short pulse on each bark, led by `ANGRY_LEAD`.
++fn angry_jabs(t: f64) -> f64 {
++    ANGRY_BARKS
++        .iter()
++        .map(|&b| ANGRY_JAB * pulse(t, b - ANGRY_LEAD, 0.12, 0.05, 0.30))
++        .sum()
++}
++
++/// Angry's yaw: a half-cosine snap to each target in `ANGRY_YAW_AT` starting `ANGRY_LEAD` before
++/// its bark, over `ANGRY_SNAP_LEN`, holding until the next.
++fn angry_yaw(t: f64) -> f64 {
++    let mut yaw = 0.0;
++    for (i, &b) in ANGRY_BARKS.iter().enumerate() {
++        let prev = if i == 0 { 0.0 } else { ANGRY_YAW_AT[i - 1] };
++        let t0 = b - ANGRY_LEAD;
++        if t >= t0 {
++            yaw = prev + (ANGRY_YAW_AT[i] - prev) * ramp(t - t0, ANGRY_SNAP_LEN);
++        }
++    }
++    yaw
++}
++
++/// Excited's body bobs: a bow pulse on the pose slot led 0.15 s before each swing extreme, and
++/// the flourish after the last one; capped at the trained range.
++fn excited_bobs(t: f64) -> f64 {
++    let last = EXCITED_Q[EXCITED_Q.len() - 1];
++    let bobs: f64 = EXCITED_Q
++        .iter()
++        .map(|&q| EXCITED_BOB * pulse(t, q - 0.15, 0.15, 0.0, 0.2))
++        .sum();
++    (bobs + EXCITED_BOB * pulse(t, last + 0.15, 0.2, 0.05, 0.3)).min(0.26)
++}
++
++/// Excited's yaw: `swings` with the extremes at `EXCITED_Q` (unevenly spaced, accelerating).
++fn excited_yaw(t: f64) -> f64 {
++    swings(t, &EXCITED_Q, EXCITED_YAW, EXCITED_FADE)
+ }
+ 
+ /// A 0..1 table sampled every `DEV_MOUTH_STEP`, linear in between; zero past its end (every
+@@ -406,10 +480,8 @@ pub fn mouth_at(kind: Kind, t: f64) -> f64 {
+         Kind::No => table_at(&NO_MOUTH, t),
+         Kind::Angry => table_at(&ANGRY_MOUTH, t),
+         Kind::Excited => table_at(&EXCITED_MOUTH, t),
+-        // The death quack: the beak barely open, dying with the sound.
+-        Kind::PlayDead if (PD_DEATH_AT..PD_LEN).contains(&t) => {
+-            PD_MOUTH_MAX * ramp(t - PD_DEATH_AT, 0.2) * (1.0 - ramp(t - PD_DEATH_AT - 0.4, PD_LEN - PD_DEATH_AT - 0.4))
+-        }
++        // The shock on the press, shut through the fall, barely open for the death quack.
++        Kind::PlayDead => table_at(&PD_MOUTH, t),
+         _ => 0.0,
+     }
+ }
+@@ -495,8 +567,7 @@ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+             }
+         }
+         Kind::Yes => {
+-            let down = ramp(t - YES_DOWN_AT, YES_DOWN_LEN)
+-                * (1.0 - ramp(t - YES_DOWN_AT - YES_DOWN_LEN - YES_HOLD, YES_UP_LEN));
++            let down = pulse(t, YES_DOWN_AT, YES_DOWN_LEN, YES_HOLD, YES_UP_LEN);
+             proto::HeadParams {
+                 neck_pitch: 0.0,
+                 head_pitch: YES_PITCH * down,
+@@ -511,42 +582,39 @@ pub fn head_at(kind: Kind, t: f64) -> proto::HeadParams {
+             head_roll: 0.0,
+         },
+         Kind::Angry => {
+-            // Beak up throughout, a yaw snap alternating sides on each bow pulse.
+-            let up = ramp(t, 0.3) * (1.0 - ramp(t - (ANGRY_LEN - 0.5), 0.5));
+-            let mut yaw = 0.0;
+-            for (i, &t0) in ANGRY_PULSE_AT.iter().enumerate() {
+-                let sign = if i % 2 == 0 { 1.0 } else { -1.0 };
+-                yaw += sign * ANGRY_YAW * ramp(t - t0, ANGRY_PULSE_UP)
+-                    * (1.0 - ramp(t - t0 - ANGRY_PULSE_UP - ANGRY_PULSE_HOLD, ANGRY_PULSE_DOWN));
+-            }
++            // The beak-up glare fades in over 0.3 s and out from 2.1 s; the jabs ride on it.
++            let up = ANGRY_UP * ramp(t, 0.3) * (1.0 - ramp(t - 2.1, 0.4));
+             proto::HeadParams {
+                 neck_pitch: 0.0,
+-                head_pitch: -0.4 * up,
+-                head_yaw: yaw,
++                head_pitch: up + angry_jabs(t),
++                head_yaw: angry_yaw(t),
+                 head_roll: 0.0,
+             }
+         }
+         Kind::Excited => {
+-            let gate = ramp(t, 0.3) * (1.0 - ramp(t - (EXCITED_LEN - 0.5), 0.5));
++            let (q0, q5) = (EXCITED_Q[0], EXCITED_Q[EXCITED_Q.len() - 1]);
++            // The beak climbs over the swings, fades in over 0.25 s and back to level by 3.45 s.
++            let up = (EXCITED_UP_FROM + (EXCITED_UP_TO - EXCITED_UP_FROM) * ramp(t - q0, q5 - q0))
++                * ramp(t, 0.25)
++                * (1.0 - ramp(t - (q5 + 0.35), 0.45));
+             proto::HeadParams {
+                 neck_pitch: 0.0,
+-                head_pitch: EXCITED_BEAK_UP * gate,
+-                head_yaw: EXCITED_YAW * gate * (std::f64::consts::TAU * EXCITED_WAG_HZ * t).sin(),
++                head_pitch: up,
++                head_yaw: excited_yaw(t),
+                 head_roll: 0.0,
+             }
+         }
+         Kind::PlayDead => proto::HeadParams {
+             neck_pitch: 0.0,
+-            head_pitch: 0.0,
+-            head_yaw: PD_YAW * ramp(t - PD_TURN_AT, PD_TURN_LEN),
++            head_pitch: PD_SHOCK * pulse(t, 0.0, 0.12, 0.13, 0.30) + PD_BACK * ramp(t - PD_BACK_AT, PD_BACK_LEN),
++            head_yaw: PD_YAW * ramp(t - PD_YAW_AT, PD_YAW_LEN),
+             head_roll: 0.0,
+         },
+         Kind::ClosedQuack => proto::HeadParams {
+             neck_pitch: 0.0,
+             head_pitch: 0.0,
+-            head_yaw: 0.0,
+-            head_roll: CQZ_ROLL * ramp(t - 0.4, 0.3) * (1.0 - ramp(t - 1.0, 0.3))
+-                - CQZ_ROLL * ramp(t - 1.0, 0.3) * (1.0 - ramp(t - 1.7, 0.4)),
++            head_yaw: -swings(t, &CQZ_SWING_AT, CQZ_YAW, CQZ_FADE),
++            head_roll: 0.0,
+         },
+         Kind::Startled => {
+             // Head pitch negative is beak up (measured on the shipped policies). Up fast, back
+@@ -903,4 +971,199 @@ mod tests {
+                 .is_none()
+         );
+     }
++
++    /// Keyframes (t, neck, head_pitch, head_yaw, body_pitch) from the simulation JSON of each
++    /// episode 3 pick, every 0.2 s, to 0.003.
++    fn check_keyframes(kind: Kind, keys: &[(f64, f64, f64, f64, f64)], with_pose: bool) {
++        for &(t, neck, pitch, yaw, body) in keys {
++            let h = head_at(kind, t);
++            assert!((h.neck_pitch - neck).abs() < 0.003, "{kind:?} neck at {t}: {}", h.neck_pitch);
++            assert!((h.head_pitch - pitch).abs() < 0.003, "{kind:?} pitch at {t}: {}", h.head_pitch);
++            assert!((h.head_yaw - yaw).abs() < 0.003, "{kind:?} yaw at {t}: {}", h.head_yaw);
++            if with_pose {
++                let p = pose_at(kind, t).expect("posing");
++                assert!((p.pitch - body).abs() < 0.003, "{kind:?} body at {t}: {}", p.pitch);
++                assert!(p.active);
++            } else {
++                assert_eq!(pose_at(kind, t), None);
++            }
++        }
++        let e = Expression::start(kind, Instant::now());
++        assert!(e.head_at(e.started + Expression::duration(kind)).is_none());
++        assert_eq!(twist_at(kind, 0.5), Some(proto::MoveParams::default()));
++        assert_eq!(twist_at(kind, Expression::duration(kind).as_secs_f64()), None);
++        for i in 0..(Expression::duration(kind).as_secs_f64() * 100.0) as usize {
++            assert!((0.0..=1.0).contains(&mouth_at(kind, i as f64 / 100.0)));
++        }
++    }
++
++    #[test]
++    fn yes_nods_once_and_quacks_at_the_bottom() {
++        assert_eq!(Expression::sound_at_start(Kind::Yes), Some(proto::SoundTag::Yes));
++        assert_eq!(Expression::skill_at_start(Kind::Yes), None);
++        check_keyframes(Kind::Yes, &[
++            (0.0, 0.000, 0.000, 0.000, 0.000),
++            (0.2, 0.000, 0.458, 0.000, 0.000),
++            (0.4, 0.000, 0.700, 0.000, 0.000),
++            (0.6, 0.000, 0.272, 0.000, 0.000),
++            (0.8, 0.000, 0.000, 0.000, 0.000),
++            (1.0, 0.000, 0.000, 0.000, 0.000),
++            (1.2, 0.000, 0.000, 0.000, 0.000),
++            (1.4, 0.000, 0.000, 0.000, 0.000)
++        ], false);
++        assert!(mouth_at(Kind::Yes, 0.7) > 0.9);
++        assert_eq!(mouth_at(Kind::Yes, 0.3), 0.0);
++        assert_eq!(mouth_at(Kind::Yes, 1.2), 0.0);
++    }
++
++    #[test]
++    fn no_shakes_once_with_two_notes() {
++        assert_eq!(Expression::sound_at_start(Kind::No), Some(proto::SoundTag::No));
++        check_keyframes(Kind::No, &[
++            (0.0, 0.000, 0.000, 0.000, 0.000),
++            (0.2, 0.000, 0.000, 0.190, 0.000),
++            (0.4, 0.000, 0.000, 0.523, 0.000),
++            (0.6, 0.000, 0.000, 0.000, 0.000),
++            (0.8, 0.000, 0.000, -0.523, 0.000),
++            (1.0, 0.000, 0.000, -0.190, 0.000),
++            (1.2, 0.000, 0.000, -0.000, 0.000),
++            (1.4, 0.000, 0.000, -0.000, 0.000),
++            (1.6, 0.000, 0.000, -0.000, 0.000)
++        ], false);
++        assert!(mouth_at(Kind::No, 0.8) > 0.9 && mouth_at(Kind::No, 1.3) > 0.9);
++        assert_eq!(mouth_at(Kind::No, 1.1), 0.0);
++    }
++
++    #[test]
++    fn angry_snaps_four_times_bows_on_three_and_opens_wide_first() {
++        assert_eq!(Expression::sound_at_start(Kind::Angry), Some(proto::SoundTag::Angry));
++        assert!(Expression::has_pose(Kind::Angry));
++        check_keyframes(Kind::Angry, &[
++            (0.0, 0.000, 0.000, 0.000, 0.000),
++            (0.2, 0.000, -0.096, 0.259, 0.035),
++            (0.4, 0.000, 0.026, 0.700, 0.127),
++            (0.6, 0.000, -0.345, 0.700, 0.000),
++            (0.8, 0.000, -0.183, 0.181, 0.035),
++            (1.0, 0.000, 0.026, -0.700, 0.127),
++            (1.2, 0.000, -0.345, -0.700, 0.000),
++            (1.4, 0.000, -0.183, -0.181, 0.035),
++            (1.6, 0.000, 0.026, 0.700, 0.127),
++            (1.8, 0.000, -0.345, 0.700, 0.000),
++            (2.0, 0.000, 0.100, 0.000, 0.000),
++            (2.2, 0.000, -0.143, 0.000, 0.000),
++            (2.4, 0.000, -0.051, 0.000, 0.000)
++        ], true);
++        // The leash release: wide open for 0.4 s around the first bark.
++        for t in [0.3, 0.45, 0.6] {
++            assert!(mouth_at(Kind::Angry, t) > 0.99, "wide at {t}");
++        }
++        assert_eq!(mouth_at(Kind::Angry, 0.1), 0.0);
++        assert_eq!(pose_at(Kind::Angry, ANGRY_LEN), None);
++        for i in 0..(ANGRY_LEN * 100.0) as usize {
++            let h = head_at(Kind::Angry, i as f64 / 100.0);
++            assert_eq!(h.neck_pitch, 0.0, "the neck never moves");
++            assert!(h.head_yaw.abs() <= 0.7 + 1e-9);
++        }
++    }
++
++    #[test]
++    fn closed_quack_keeps_the_beak_shut() {
++        assert_eq!(Expression::sound_at_start(Kind::ClosedQuack), Some(proto::SoundTag::Closed));
++        check_keyframes(Kind::ClosedQuack, &[
++            (0.0, 0.000, 0.000, -0.000, 0.000),
++            (0.2, 0.000, 0.000, -0.000, 0.000),
++            (0.4, 0.000, 0.000, -0.024, 0.000),
++            (0.6, 0.000, 0.000, -0.250, 0.000),
++            (0.8, 0.000, 0.000, -0.043, 0.000),
++            (1.0, 0.000, 0.000, 0.235, 0.000),
++            (1.2, 0.000, 0.000, 0.086, 0.000),
++            (1.4, 0.000, 0.000, 0.000, 0.000),
++            (1.6, 0.000, 0.000, 0.000, 0.000),
++            (1.8, 0.000, 0.000, 0.000, 0.000),
++            (2.0, 0.000, 0.000, 0.000, 0.000)
++        ], false);
++        for i in 0..(CQZ_LEN * 100.0) as usize {
++            assert_eq!(mouth_at(Kind::ClosedQuack, i as f64 / 100.0), 0.0);
++        }
++    }
++
++    #[test]
++    fn excited_wags_six_times_bobbing_with_the_beak_climbing() {
++        assert_eq!(Expression::sound_at_start(Kind::Excited), Some(proto::SoundTag::Excited));
++        assert!(Expression::has_pose(Kind::Excited));
++        assert_eq!(Expression::skill_at_start(Kind::Excited), None);
++        check_keyframes(Kind::Excited, &[
++            (0.0, 0.000, -0.000, 0.000, 0.000),
++            (0.2, 0.000, -0.136, 0.150, 0.000),
++            (0.4, 0.000, -0.150, 0.600, 0.120),
++            (0.6, 0.000, -0.161, 0.249, 0.000),
++            (0.8, 0.000, -0.192, -0.393, 0.000),
++            (1.0, 0.000, -0.241, -0.571, 0.102),
++            (1.2, 0.000, -0.304, -0.000, 0.000),
++            (1.4, 0.000, -0.377, 0.571, 0.090),
++            (1.6, 0.000, -0.454, 0.300, 0.018),
++            (1.8, 0.000, -0.528, -0.460, 0.030),
++            (2.0, 0.000, -0.594, -0.424, 0.060),
++            (2.2, 0.000, -0.647, 0.424, 0.030),
++            (2.4, 0.000, -0.683, 0.374, 0.060),
++            (2.6, 0.000, -0.699, -0.541, 0.090),
++            (2.8, 0.000, -0.700, -0.300, 0.018),
++            (3.0, 0.000, -0.700, 0.000, 0.120),
++            (3.2, 0.000, -0.411, 0.000, 0.060)
++        ], true);
++        for q in EXCITED_Q {
++            let peak = (0..=20).map(|i| mouth_at(Kind::Excited, q + 0.1 + i as f64 * 0.01)).fold(0.0, f64::max);
++            assert!(peak > 0.9, "chirp at {q}: {peak}");
++        }
++        assert_eq!(mouth_at(Kind::Excited, 0.3), 0.0);
++        assert_eq!(pose_at(Kind::Excited, EXCITED_LEN), None);
++        for i in 0..(EXCITED_LEN * 100.0) as usize {
++            let h = head_at(Kind::Excited, i as f64 / 100.0);
++            assert_eq!(h.neck_pitch, 0.0);
++            assert!(h.head_pitch <= 0.0 && h.head_pitch >= -0.7 - 1e-9, "beak never below level");
++            assert!(pose_at(Kind::Excited, i as f64 / 100.0).unwrap().pitch <= 0.26);
++        }
++    }
++
++    #[test]
++    fn play_dead_sits_on_the_shock_throws_the_head_back_and_to_the_side_then_lets_go() {
++        assert_eq!(Expression::skill_at_start(Kind::PlayDead), Some(proto::Skill::SitToggle));
++        assert_eq!(Expression::sound_at_start(Kind::PlayDead), Some(proto::SoundTag::PlayDead));
++        assert_eq!(Expression::soften_at(Kind::PlayDead), Some(2.2));
++        for kind in [Kind::Sad, Kind::Devastated, Kind::Yes, Kind::Angry, Kind::Excited] {
++            assert_eq!(Expression::soften_at(kind), None);
++        }
++        assert!(!Expression::has_pose(Kind::PlayDead));
++        check_keyframes(Kind::PlayDead, &[
++            (0.0, 0.000, -0.000, 0.000, 0.000),
++            (0.4, 0.000, -0.250, 0.000, 0.000),
++            (0.8, 0.000, -0.000, 0.000, 0.000),
++            (1.2, 0.000, -0.095, 0.000, 0.000),
++            (1.6, 0.000, -0.655, 0.300, 0.000),
++            (2.0, 0.000, -1.000, 0.600, 0.000),
++            (2.4, 0.000, -1.000, 0.600, 0.000),
++            (2.8, 0.000, -1.000, 0.600, 0.000),
++            (3.2, 0.000, -1.000, 0.600, 0.000),
++            (3.6, 0.000, -1.000, 0.600, 0.000),
++            (4.0, 0.000, -1.000, 0.600, 0.000),
++            (4.4, 0.000, -1.000, 0.600, 0.000),
++            (4.8, 0.000, -1.000, 0.600, 0.000),
++            (5.2, 0.000, -1.000, 0.600, 0.000),
++            (5.6, 0.000, -1.000, 0.600, 0.000),
++            (6.0, 0.000, -1.000, 0.600, 0.000),
++            (6.4, 0.000, -1.000, 0.600, 0.000),
++            (6.8, 0.000, -1.000, 0.600, 0.000),
++            (7.2, 0.000, -1.000, 0.600, 0.000)
++        ], false);
++        // The head is fully back and to the side before the torque cut, and stays commanded so.
++        let h = head_at(Kind::PlayDead, 2.2);
++        assert!((h.head_pitch + 1.0).abs() < 1e-9 && (h.head_yaw - 0.6).abs() < 1e-9);
++        let h = head_at(Kind::PlayDead, 7.0);
++        assert!((h.head_pitch + 1.0).abs() < 1e-9 && (h.head_yaw - 0.6).abs() < 1e-9);
++        // The beak: wide on the shock, shut through the fall, barely open on the death quack.
++        assert!(mouth_at(Kind::PlayDead, 0.25) > 0.99);
++        assert_eq!(mouth_at(Kind::PlayDead, 3.0), 0.0);
++        assert!((mouth_at(Kind::PlayDead, 5.5) - 0.3).abs() < 1e-9);
++        assert_eq!(mouth_at(Kind::PlayDead, 7.0), 0.0);
++    }
+ }
+diff --git a/robotd/src/intents.rs b/robotd/src/intents.rs
+index 4f916ef..4d77115 100644
+--- a/robotd/src/intents.rs
++++ b/robotd/src/intents.rs
+@@ -336,6 +336,7 @@ impl Intents {
+             SoundTag::Angry,
+             SoundTag::Excited,
+             SoundTag::PlayDead,
++            SoundTag::Closed,
+         ]
+         .into_iter()
+         .filter(|tag| bits & (1u32 << (*tag as u32)) != 0)
 -- 
 2.53.0
 

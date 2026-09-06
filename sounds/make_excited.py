@@ -29,13 +29,13 @@ HAPPY = dict(quackiness=0.75, breath=0.03, vibrato_depth=0.12, attack_sharpness=
 MOTIONS = {
     # A: z bounces at 2 Hz, beak up, yaw wag at 1 Hz; a quack on every top of the bounce
     "excited_bounce": dict(quacks=[0.35, 0.85, 1.35, 1.85, 2.35], total=3.2,
-                           desc="body bobs at 2 Hz (bow pulses 0 -> +0.10, the z slot is dead on the stand net), beak up, head wags left-right at 1 Hz; a quack on every top"),
+                           desc="body bobs at 2 Hz (bow pulses 0 -> +0.16, the z slot is dead on the stand net), beak up, head wags left-right at 1 Hz; a quack on every top"),
     # B: bow pulses ('hops') every 0.55 s with the yaw flipping each hop, beak up
     "excited_hops": dict(quacks=[0.45, 1.0, 1.55, 2.1, 2.65], total=3.4,
                          desc="five bow pulses (pitch 0 -> +0.15) every 0.55 s, the head flips left/right on each, beak up; a quack on each pulse"),
     # C: two big crouch-and-pop 'jumps' with the head thrown up, then a fast wag
     "excited_jumps": dict(quacks=[0.5, 1.4, 2.05, 2.35, 2.65], total=3.6,
-                          desc="two crouch-then-pop jumps (bow +0.22 released fast) with the head thrown up (beak -0.8) and a quack on each pop, then a fast wag with three chirps"),
+                          desc="two crouch-then-pop jumps (bow +0.14 released fast) with the head thrown up (beak -0.8) and a quack on each pop, then a fast wag with three chirps"),
     # D: accelerating wag with the body pumping in sync and the beak rising over the sequence
     "excited_wag_pump": dict(quacks=[0.4, 0.95, 1.45, 1.9, 2.3, 2.65], total=3.4,
                              desc="head wag +-0.6 accelerating (6 swings), the body bobs (bow pulse +0.12) on each swing, the beak rises higher and higher, ends with a bow flourish; a quack on each swing"),

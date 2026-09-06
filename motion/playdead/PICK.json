@@ -1,0 +1,11 @@
+{
+ "motion": "pd_faint",
+ "sound": "D1_alarm_glide_wobble",
+ "wav": "/Users/remi/microduck/notes/emotions/sounds/playdead/pd_faint__D1_alarm_glide_wobble.wav",
+ "duration": 7.5,
+ "keyframes_json": "/Users/remi/microduck/notes/emotions/motion/playdead/pd_faint__D1_alarm_glide_wobble.json",
+ "soften_at": 2.2,
+ "death_at": 4.8,
+ "skill_at_start": "sit_toggle",
+ "robot_wav": "/Users/remi/microduck/notes/emotions/sounds/robot/playdead_a.wav"
+}

@@ -13,7 +13,13 @@ synchronized beat by beat, and the beak opens with the sound.
 | **devastated** | `motion/sadness/v2/devastated_3x1.0__D3v2_sobs_gentler.mp4`: sit (surprise), head droops, three slow head shakes starting while the head is still going down, hold, rise. Beats in `motion/sadness/v2_spec.json` | `sounds/synced_v2/devastated_3x1.0__D3v2_sobs_gentler.wav`: inquire shock at the sit, silence, three soft sobs (gentler voice) on the head extremes, the third dying into the ending | **decided, tested on the robot: "perfect"** (2026-09-04) |
 | **sad** | `motion/sadness/v6/sad_droop2.5__S6_coo_voice_200_140.mp4`: standing, body pitch 0.05, head droops over 2.5 s, two silent slow shakes, hold, rise. Beats in `motion/sadness/v6_spec.json` | `sounds/synced_v6/sad_droop2.5__S6_coo_voice_200_140.wav`: the robot's coo recipe synthesized, gliding 200 -> 140 Hz with the head, silent shakes; robot file `sounds/robot/sad_a.wav` | **decided** (2026-09-04) |
 | **curious** (Y, "what? what?") | `motion/curious/curious_two_tilts_r35_leftboost__Q3_up2.mp4`: standing, head forward (neck -0.8, head_pitch -0.35), tilt right +0.35 on the first quack, tilt left -0.44 on the second, hold, back; 3.0 s. Spec `motion/curious/spec_v3.json` | `sounds/curious/curious_two_tilts_r35_leftboost__Q3_up2.wav`: two of the bank's rising chirp blips at 0.6 / 1.2 s, the second 2 semitones higher; robot file `sounds/robot/curious_a.wav` | **decided** (2026-09-04) |
-| **angry** | RL stomp: three quick stomps on the same foot, head left / right / left (`Mjlab-Stomp-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`) | to design on the trained motion's beats (barks on the foot contacts) | training runs in progress (`motion/anger-rl/REPORT.md`) |
+| **angry** (X) | `motion/angry/` pick `bow_snaps`: standing, beak-up glare, four snaps (yaw +0.7/-0.7/+0.7/centre, a short head jab, a small fast bow pulse on the pose slot), beak forced wide 0.3-0.7 s so a held leash drops; 2.6 s. `REPORT.md` there | `sounds/robot/angry_a.wav` four hard barks on the snaps (`angry_b.wav` = a growl into the same barks) | **sim pick (2026-09-06), shipped in the build, not yet tested on the robot** |
+| **yes** (LB) | `motion/yes/` pick `yes_single`: one nod, head_pitch +0.7 for 0.25 s, back over 0.35 s; 1.5 s | `sounds/robot/yes_a.wav` one quack falling 3 semitones at 0.45 s | sim pick, shipped, to test |
+| **no** (RB) | `motion/no/` pick `no_one`: one yaw shake +0.55 / -0.55 at 0.35 / 0.85 s; 1.8 s | `no_a.wav` "no-ah" (second note a fourth lower), `no_b` nasal, `no_c` drawn-out; the robot picks one | sim pick, shipped, to test |
+| **excited** (DPad-Down) | `motion/excited/` pick `excited_wag_pump`: six accelerating yaw swings +-0.6 with a body bob (bow pulse +0.12) on each, beak climbing to -0.7, a flourish; 3.4 s | `excited_a.wav` six bank chirps in rising pitch order | sim pick, shipped, to test |
+| **play dead** (DPad-Left) | `motion/playdead/` pick `pd_faint`: sit on the press, head back (beak to the sky) and to the side, `robot.soften` at 2.2 s, the duck keels over backwards, flat on its back by 4.8 s, death quack 4.8-6.6 s; 7.5 s, ends limp (Start = the way up) | `play_dead_a.wav` bank alarm, silence, a falling synth glide with a dying wobble | sim pick, shipped, to test on a mat |
+| **closed quack** (scene cue only) | `motion/closed/` pick `closed_grumble`: small yaw shake, beak shut (the leash stays in); 2.2 s | `closed_a.wav` two muffled nasal buzzes | sim pick, shipped |
+| angry stomp (RL) | three small stomps (`Mjlab-Stomp*-Flat-MicroDuck`, branch `emotions-stomp` of `microduck_rl`, patch in `rl/`), r3 small-stomp redesign was in progress | barks on the foot contacts | parked (`motion/anger-rl/REPORT.md`) |
 
 Later: excited, scared (see `HANDOFF.md`). Real-robot lessons: anything that moves the head's mass forward makes the walking policy step forward (sad went to half depth, curious lost its head-forward); the simulation does not show it. The Reachy Mini side (scenes, voice, captions) is https://github.com/RemiFabre/agentic_robot_theater (`microduck/EMOTIONS.md` there is the bridge back here).
 
@@ -24,7 +30,11 @@ An emotion = a motion + a sound designed together, on one pad button in emotion 
 2. a **policy**: a trained network started as a skill (sit, ground pick, kicks, roulade, the RL stomp when it works);
 3. a **combination**: a skill plus a program on top while the skill's policy holds the pose (devastated = sit, then a head program; the head slots track while seated).
 
-Next episode's brief: `EPISODE3-HANDOFF.md` (yes, no, programmatic angry, play dead, excited, a two-robot scripted scene).
+Episode 3 (2026-09-06, brief `EPISODE3-HANDOFF.md`): the six emotions above, the pad's emotion mode extended (A sad, B devastated,
+X angry, Y curious, LB yes, RB no, DPad-Down excited, DPad-Left play dead; Start / Select / sticks / triggers untouched), a
+**cue port** on the pad daemon (TCP 7777, `{"express":"yes"}` etc., see `NOTES.md`) so one script plays both robots, and the
+scene `scenes/episode3` in the theater repo with a simulated preview. Summary page with the six picks and the scene preview:
+`combined/episode3/index.html`. Simulator Space fork: https://huggingface.co/spaces/RemiFabre/microduck-reachy-simulator (bundle only).
 
 ## Layout
 
@@ -45,6 +55,9 @@ Next episode's brief: `EPISODE3-HANDOFF.md` (yes, no, programmatic angry, play d
   (env, mdp functions, tests, spec) so it can be re-applied on `microduck_rl`.
 - `motion/anger-programmatic/` a rejected probe (kept as a record; its two-stomp claims for B4/B5/B8 are wrong).
 - `combined/` sound + motion preview pages, one folder per round (`synced/`, `v2/` ... `v6/`); the decided pairs are named in the table above.
+- `motion/episode3/lib.py` the shared episode 3 renderer (Motion = pure function of time incl. pose z/pitch, twist, skill, soften,
+  relax, mouth; keyframes json, beats sheet, cards); `motion/{yes,no,closed,angry,excited,playdead}/` one renderer + `REPORT.md`
+  (formulas, beat table, rejects, questions) + `PICK.json` each; `combined/episode3/` the summary page.
 
 ## How to make a new emotion (the recipe that worked)
 

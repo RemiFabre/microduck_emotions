@@ -1,0 +1,102 @@
+<!doctype html><meta charset="utf-8"><title>Microduck play dead (episode 3): shock, sit, keel over backwards, death quack</title>
+<style>
+body{font-family:-apple-system,Helvetica,Arial,sans-serif;margin:24px;background:#f6f4ef;color:#222;max-width:1400px}
+h1{margin-bottom:4px} .sub{color:#666;margin-top:0} h2{margin-top:36px}
+.card{background:#fff;border-radius:10px;padding:16px 20px;margin:18px 0;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card h3{margin:0 0 8px} .note{font-size:13px;color:#b06000;font-weight:normal} .beats,.snd,.meas{font-size:14px;margin:6px 0} .meas{color:#555}
+.sheet{width:100%;max-width:1360px;margin-top:10px;border-radius:6px} video{background:#000;border-radius:6px}
+.pick{border:3px solid #2a7} code{background:#eee;padding:1px 4px;border-radius:3px}
+</style>
+<h1>play dead (episode 3): shock, sit, keel over backwards, death quack</h1>
+<p class="sub">Combination emotion: sit_toggle + a head program + robot.soften. The duck is driven only through what the real robot accepts (sit skill, head deltas, body pose, soften). Simulation, side camera, 640x480, 30 fps. The beak follows the wav for the shock; on the death quack it opens to 0.3 at most. <b>After the torque cut the head cannot move any more</b>, so the head goes to its side BEFORE the soften and stays there (the brief's 'then the head straightens' is not achievable without torque, see REPORT.md). Files: <code>/Users/remi/microduck/notes/emotions/motion/playdead/</code> (spec.json, playdead.py, probe.py, REPORT.md), sounds in <code>sounds/playdead/</code>.<h2>Fall probe (probe.py, no video): which client-API recipe puts a seated duck on its back, and how hard</h2>
+<p>Every recipe: sit at t = 0 (the seat lands by ~1 s). "soften" = robot.soften (gain 50 at once, to 0 over 1 s, torque off). The sit itself
+peaks at 2.2 rad/s of trunk rotation and 0.55 m/s of head speed, so those are the floor. ON BACK = the trunk's back on the floor.</p>
+<table><tr><th>recipe</th><th>ends</th><th>leaves upright (s)</th><th>at rest (s)</th><th>peak trunk rot (rad/s)</th><th>peak head speed (m/s)</th><th>head z min (m)</th></tr><tr><td>1_sit_hold1_soften</td><td><b>upright</b></td><td>None</td><td>2.5</td><td>2.2</td><td>0.59</td><td>0.048</td></tr><tr><td>1b_sit_hold2_soften</td><td><b>upright</b></td><td>None</td><td>3.48</td><td>2.2</td><td>0.56</td><td>0.054</td></tr><tr><td>2_sit_headback_yaw_soften</td><td><b>ON BACK</b></td><td>2.98</td><td>4.28</td><td>6.61</td><td>0.82</td><td>0.029</td></tr><tr><td>3_sit_rise0.2_soften</td><td><b>upright</b></td><td>2.68</td><td>4.54</td><td>4.59</td><td>0.75</td><td>0.088</td></tr><tr><td>3_sit_rise0.4_soften</td><td><b>ON BACK</b></td><td>2.9</td><td>3.12</td><td>9.08</td><td>1.39</td><td>0.028</td></tr><tr><td>3_sit_rise0.6_soften</td><td><b>ON BACK</b></td><td>2.94</td><td>3.18</td><td>10.85</td><td>1.45</td><td>0.023</td></tr><tr><td>3_sit_rise0.8_soften</td><td><b>ON BACK</b></td><td>3.0</td><td>3.18</td><td>9.18</td><td>1.45</td><td>0.028</td></tr><tr><td>3_sit_rise1.2_soften</td><td><b>upright</b></td><td>None</td><td>4.46</td><td>3.84</td><td>0.66</td><td>0.056</td></tr><tr><td>4_sit_pose-0.2_soften</td><td><b>ON BACK</b></td><td>3.78</td><td>4.02</td><td>5.69</td><td>0.57</td><td>0.031</td></tr><tr><td>4_sit_pose-0.3_soften</td><td><b>ON BACK</b></td><td>3.94</td><td>4.18</td><td>6.27</td><td>0.55</td><td>0.031</td></tr><tr><td>5_sit_relax</td><td><b>upright</b></td><td>None</td><td>3.96</td><td>2.2</td><td>0.55</td><td>0.067</td></tr><tr><td>6_crouch_headback_soften</td><td><b>face down</b></td><td>2.0</td><td>2.96</td><td>6.82</td><td>1.28</td><td>0.048</td></tr><tr><td>7_headback_backstep_soften</td><td><b>face down</b></td><td>1.62</td><td>2.18</td><td>8.0</td><td>1.26</td><td>0.052</td></tr></table>
+<p>Verdict: the sit-stand RISE cut short (3_) always lands on the back but hardest (9-11 rad/s, head 1.4 m/s); the head thrown back + soften (2_) lands on the
+back at 6.6 rad/s / 0.82 m/s (the head goes first); the seated body-pose lean + soften (4_) is the softest (5.7-6.3 rad/s, the head no faster than the sit itself)
+but relies on the net's neck trade-off leaving the duck on the edge of balance once the torque is gone; plain sit + soften/relax (1_, 5_) just slumps in the seat.</p></p>
+<h2>The pick: pd_faint</h2><p>shock (head up, sit at once), the head goes back and to the side over 1 s, soften at 2.2 s: the duck keels over backwards on its own weight as the torque dies (tips ~3.2 s, still by ~4.5 s), death quack at 4.8 s, beak barely open</p>
+<div class="card pick">
+  <h3>pd_faint + D1_alarm_glide_wobble &nbsp;<span class="note">recommended: the head is the lever (deterministic on the robot: the head slots track seated), the fall happens as the torque dies, the alarm is the surprise and the wobble dies with the duck</span></h3>
+  <p class="snd"><b>motion:</b> shock (head up, sit at once), the head goes back and to the side over 1 s, soften at 2.2 s: the duck keels over backwards on its own weight as the torque dies (tips ~3.2 s, still by ~4.5 s), death quack at 4.8 s, beak barely open</p>
+  <video src="pd_faint__D1_alarm_glide_wobble.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.00 s head back + side &middot; 2.20 s soften &middot; 3.20 s torque off &middot; 4.50 s at rest &middot; 5.20 s death quack &middot; 6.60 s quack ends</p>
+  <p class="snd"><b>sound:</b> the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 3.14 s</b> &middot; trunk drift 14.2 cm &middot; trunk pitch -6..+90 deg &middot;
+     joints: neck -0.19, head_pitch -1.16..+0.08, |yaw| 1.24, |roll| 0.38 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.3 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_faint__D1_alarm_glide_wobble_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_faint__D1_alarm_glide_wobble.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_faint__D1_alarm_glide_wobble.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_faint__D1_alarm_glide_wobble_beats.png" loading="lazy">
+</div>
+<div class="card">
+  <h3>pd_faint + D2_inquire_coo_fall</h3>
+  <p class="snd"><b>motion:</b> shock (head up, sit at once), the head goes back and to the side over 1 s, soften at 2.2 s: the duck keels over backwards on its own weight as the torque dies (tips ~3.2 s, still by ~4.5 s), death quack at 4.8 s, beak barely open</p>
+  <video src="pd_faint__D2_inquire_coo_fall.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.00 s head back + side &middot; 2.20 s soften &middot; 3.20 s torque off &middot; 4.50 s at rest &middot; 5.20 s death quack &middot; 6.60 s quack ends</p>
+  <p class="snd"><b>sound:</b> the bank's inquire shock (as devastated), silence, then the robot's coo voice falling 230 -> 110 Hz with a dying wobble: a breathy last sigh</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 3.14 s</b> &middot; trunk drift 14.3 cm &middot; trunk pitch -5..+90 deg &middot;
+     joints: neck -0.20, head_pitch -1.21..+0.09, |yaw| 1.22, |roll| 0.35 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.89 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_faint__D2_inquire_coo_fall_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_faint__D2_inquire_coo_fall.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_faint__D2_inquire_coo_fall.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_faint__D2_inquire_coo_fall_beats.png" loading="lazy">
+</div>
+<div class="card">
+  <h3>pd_faint + D3_alarm_wheee_tape</h3>
+  <p class="snd"><b>motion:</b> shock (head up, sit at once), the head goes back and to the side over 1 s, soften at 2.2 s: the duck keels over backwards on its own weight as the torque dies (tips ~3.2 s, still by ~4.5 s), death quack at 4.8 s, beak barely open</p>
+  <video src="pd_faint__D3_alarm_wheee_tape.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.00 s head back + side &middot; 2.20 s soften &middot; 3.20 s torque off &middot; 4.50 s at rest &middot; 5.20 s death quack &middot; 6.60 s quack ends</p>
+  <p class="snd"><b>sound:</b> alarm at the press, silence, then the bank's wheee loop backwards on a slowing tape: a real-timbre fall that dies</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 3.14 s</b> &middot; trunk drift 14.2 cm &middot; trunk pitch -6..+90 deg &middot;
+     joints: neck -0.19, head_pitch -1.16..+0.08, |yaw| 1.24, |roll| 0.38 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.3 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_faint__D3_alarm_wheee_tape_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_faint__D3_alarm_wheee_tape.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_faint__D3_alarm_wheee_tape.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_faint__D3_alarm_wheee_tape_beats.png" loading="lazy">
+</div><h2>pd_faint_slow</h2><p>same faint, slower: the head goes back over 1.5 s, soften at 2.8 s, more silence, death quack at 5.6 s</p>
+<div class="card">
+  <h3>pd_faint_slow + D1_alarm_glide_wobble</h3>
+  <p class="snd"><b>motion:</b> same faint, slower: the head goes back over 1.5 s, soften at 2.8 s, more silence, death quack at 5.6 s</p>
+  <video src="pd_faint_slow__D1_alarm_glide_wobble.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.50 s head back + side &middot; 2.80 s soften &middot; 3.80 s torque off &middot; 5.10 s at rest &middot; 6.00 s death quack &middot; 7.60 s quack ends</p>
+  <p class="snd"><b>sound:</b> the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 3.76 s</b> &middot; trunk drift 14.3 cm &middot; trunk pitch -6..+90 deg &middot;
+     joints: neck -0.20, head_pitch -1.23..+0.08, |yaw| 1.25, |roll| 0.37 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.3 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_faint_slow__D1_alarm_glide_wobble_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_faint_slow__D1_alarm_glide_wobble.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_faint_slow__D1_alarm_glide_wobble.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_faint_slow__D1_alarm_glide_wobble_beats.png" loading="lazy">
+</div>
+<div class="card">
+  <h3>pd_faint_slow + D2_inquire_coo_fall</h3>
+  <p class="snd"><b>motion:</b> same faint, slower: the head goes back over 1.5 s, soften at 2.8 s, more silence, death quack at 5.6 s</p>
+  <video src="pd_faint_slow__D2_inquire_coo_fall.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.50 s head back + side &middot; 2.80 s soften &middot; 3.80 s torque off &middot; 5.10 s at rest &middot; 6.00 s death quack &middot; 7.60 s quack ends</p>
+  <p class="snd"><b>sound:</b> the bank's inquire shock (as devastated), silence, then the robot's coo voice falling 230 -> 110 Hz with a dying wobble: a breathy last sigh</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 3.76 s</b> &middot; trunk drift 14.3 cm &middot; trunk pitch -5..+90 deg &middot;
+     joints: neck -0.20, head_pitch -1.21..+0.09, |yaw| 1.25, |roll| 0.38 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.89 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_faint_slow__D2_inquire_coo_fall_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_faint_slow__D2_inquire_coo_fall.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_faint_slow__D2_inquire_coo_fall.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_faint_slow__D2_inquire_coo_fall_beats.png" loading="lazy">
+</div><h2>pd_lean</h2><p>shock + sit, a body-pose lean back (-0.3, seated: the net moves the neck back) with the head to the side, soften at 2.4 s; the duck tips over ~1.3 s after the torque is gone (probe: the softest fall, but a marginal balance)</p>
+<div class="card">
+  <h3>pd_lean + D1_alarm_glide_wobble</h3>
+  <p class="snd"><b>motion:</b> shock + sit, a body-pose lean back (-0.3, seated: the net moves the neck back) with the head to the side, soften at 2.4 s; the duck tips over ~1.3 s after the torque is gone (probe: the softest fall, but a marginal balance)</p>
+  <video src="pd_lean__D1_alarm_glide_wobble.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.00 s lean back &middot; 2.40 s soften &middot; 3.40 s torque off &middot; 4.40 s at rest &middot; 5.40 s death quack &middot; 6.80 s quack ends</p>
+  <p class="snd"><b>sound:</b> the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 3.56 s</b> &middot; trunk drift 12.7 cm &middot; trunk pitch -6..+69 deg &middot;
+     joints: neck -0.19, head_pitch -0.55..+0.08, |yaw| 0.40, |roll| 0.07 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.3 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_lean__D1_alarm_glide_wobble_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_lean__D1_alarm_glide_wobble.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_lean__D1_alarm_glide_wobble.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_lean__D1_alarm_glide_wobble_beats.png" loading="lazy">
+</div><h2>pd_legs</h2><p>shock + sit, head to the side, then the sit-stand RISE for 0.4 s (the legs straighten) and soften: the duck goes over backwards from its heels (the brief's idea; the fastest fall in the probe)</p>
+<div class="card">
+  <h3>pd_legs + D1_alarm_glide_wobble</h3>
+  <p class="snd"><b>motion:</b> shock + sit, head to the side, then the sit-stand RISE for 0.4 s (the legs straighten) and soften: the duck goes over backwards from its heels (the brief's idea; the fastest fall in the probe)</p>
+  <video src="pd_legs__D1_alarm_glide_wobble.mp4" controls playsinline width="640" height="480" preload="metadata"></video>
+  <p class="beats"><b>beats:</b> 0.55 s shock, seat &middot; 2.20 s legs straighten &middot; 2.40 s soften &middot; 3.40 s torque off &middot; 3.40 s at rest &middot; 4.60 s death quack &middot; 6.00 s quack ends</p>
+  <p class="snd"><b>sound:</b> the bank's alarm scream at the press, silence, then a synth death quack 260 -> 120 Hz with a 5 Hz wobble that slows and dies (-6 dB)</p>
+  <p class="meas">measured: <b style='color:#c00'>FELL at 2.80 s</b> &middot; trunk drift 18.2 cm &middot; trunk pitch -6..+99 deg &middot;
+     joints: neck -0.25, head_pitch -0.35..+0.29, |yaw| 1.25, |roll| 0.13 rad &middot;
+     jaw at the quacks [1.0, 0.3], between 0.3 &middot; nets sitstand > soften > relax</p>
+  <p><a href="../../motion/playdead/pd_legs__D1_alarm_glide_wobble_beats.png">beats sheet</a> &middot; <a href="../../motion/playdead/pd_legs__D1_alarm_glide_wobble.json">keyframes json (with mouth)</a> &middot; <a href="../../motion/playdead/pd_legs__D1_alarm_glide_wobble.mp4">silent mp4</a></p>
+  <img class="sheet" src="../../motion/playdead/pd_legs__D1_alarm_glide_wobble_beats.png" loading="lazy">
+</div>

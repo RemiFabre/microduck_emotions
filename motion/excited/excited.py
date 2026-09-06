@@ -31,7 +31,7 @@ def m_bounce(t):
     """z is dead on the stand net (probe: +-0 mm); a 2 Hz train of small bow pulses (pitch 0 -> +0.10) dips the trunk instead."""
     q = SPEC["motions"]["excited_bounce"]["quacks"]
     act = ramp(t, 0.25) * (1.0 - ramp(t - 2.6, 0.5))
-    bow = 0.10 * max(0.0, -math.cos(2 * math.pi * (t - 0.1) / 0.5)) * act      # a dip every 0.5 s, bottom at 0.35, 0.85, ...
+    bow = 0.16 * max(0.0, -math.cos(2 * math.pi * (t - 0.1) / 0.5)) * act      # a dip every 0.5 s, bottom at 0.35, 0.85, ...
     wag = 0.5 * math.sin(2 * math.pi * (t - 0.1) / 1.0) * act
     return dict(body_pitch=bow, head_pitch=-0.5 * ramp(t, 0.3) * (1.0 - ramp(t - 2.7, 0.5)), head_yaw=wag)
 
@@ -65,7 +65,7 @@ def m_jumps(t):
     bow, hp = 0.0, 0.0
     for tpop in q[:2]:
         tc = tpop - 0.45
-        bow += 0.22 * ramp(t - tc, 0.3) * (1.0 - ramp(t - (tc + 0.3), 0.15))
+        bow += 0.14 * ramp(t - tc, 0.3) * (1.0 - ramp(t - (tc + 0.3), 0.15))
         hp += -0.8 * pulse(t, tc + 0.25, 0.2, 0.3, 0.35)
     w0 = q[2] - 0.15
     wag = 0.6 * math.sin(2 * math.pi * (t - w0) / 0.6) * ramp(t - w0, 0.15) * (1.0 - ramp(t - (q[-1] + 0.15), 0.4))
@@ -89,7 +89,7 @@ def m_wag_pump(t):
     # the beak rises over the sequence, then a bow flourish at the end
     hp = -0.15 - 0.55 * ramp(t - q[0], q[-1] - q[0])
     hp *= ramp(t, 0.25) * (1.0 - ramp(t - (q[-1] + 0.35), 0.45))
-    bow = 0.20 * pulse(t, q[-1] + 0.15, 0.2, 0.05, 0.3)
+    bow = 0.12 * pulse(t, q[-1] + 0.15, 0.2, 0.05, 0.3)
     return dict(body_pitch=min(0.26, pump + bow), head_yaw=yaw, head_pitch=hp)
 
 
