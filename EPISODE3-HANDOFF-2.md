@@ -26,7 +26,7 @@ with videos on his screen. Rémi's speech-to-text writes "dog" for "duck" and "R
   `set_torque_ids`; play dead = two stages at 1.8 / 4.0 s), the mouth intent live while the robot holds with torque
   on, a cued sound opens the beak 0.25 s, `padd.service` allows AF_INET (the cue port was sandboxed out: also fixed on
   the robot with a systemd drop-in). Build: the Docker command in `NOTES.md` (or `ship-to-duck.sh` step 1); install:
-  `DUCK_SUDO_PASS=microduck /Users/remi/microduck/notes/emotions/install-on-duck.sh` (robotd keeps a standing robot
+  `DUCK_SUDO_PASS=<the duck sudo password> /Users/remi/microduck/notes/emotions/install-on-duck.sh` (robotd keeps a standing robot
   standing across the restart; padd then believes the duck is down: the next Start is an init).
 - **Theater** `/Users/remi/reachy_mini_apps/agentic_robot_theater` (GitHub `RemiFabre/agentic_robot_theater`, main,
   ~35 commits ahead): `robot/skit.py` (the Reachy player, now with duck cues, `wait: key`, `say_at`, `cap`,
