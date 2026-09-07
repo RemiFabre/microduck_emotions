@@ -458,3 +458,15 @@ The wavs go to `/var/lib/robot/sounds/sad/*.wav` and `/var/lib/robot/sounds/angr
   `combined/episode3/final/laureen_conversation_final.mp4` (23.8 s) + srt; recipe in `motion/episode3/laureen-film/README.md`.
 - The social-media version is Rémi's OBS recording of a hand-driven session (buttons visible): cut, cropped to the
   simulator, captioned from whisper word times (the browser's own voice) -> `combined/episode3/final/laureen_simulator_obs_final.mp4`.
+
+### 2026-09-07: the conclusions published (private) under Pollen Robotics
+
+Rémi (voice): the public home should be BOTH a library and a showcase, conclusions + method only (this workshop repo stays
+his); Hugging Face rather than GitHub (videos with sound play in the card); private for now so the team can review and
+converge on one canonical way. Done: dataset **`pollen-robotics/microduck-emotions`** (private), 14 emotions x
+(`emotions/<name>.json` keyframes, `emotions/<name>.wav` robot sound, `videos/<name>.mp4` render with sound),
+`metadata.jsonl`, a card with one inline video per emotion + the download / cue-port / format sections, `METHOD.md`
+(sound first, the three motion kinds, the loop, the robot lessons), `tools/` (lib.py, quack.py, combine.py, reference
+only). Built from `/private/tmp/.../scratchpad/hf_dataset` by a script in this session; picks = the episode 3 summary page
+plus sad v7 (half depth), devastated v2 (D3v2 gentler), curious v3 (Q3 up2). The `pick` cue has no sound: not included.
+Stale PICK.json files here (laugh, excited) still point at earlier picks; the dataset used the shipped ones.
