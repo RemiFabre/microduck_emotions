@@ -482,5 +482,7 @@ candidate social post, devastated first for the hook. Done, details in `showcase
   https://claude.ai/artifact/8f1DruNGYPgkEWzThm5zCk
 - `combined/showcase/microduck_emotions_compilation.mp4`: 47.9 s, 1080x1920, -14 LUFS. Order: devastated (hook), curious,
   mmh, yes, no, yes!, defiant, impatient, angry, mock, laugh, excited, sad, play dead + end card. The camera continues
-  across the cuts. Handed to the socials session (agentic-socials-ab) as a file path; nothing published.
+  across the cuts. Handed to the socials session (agentic-socials-ab) as a file path; nothing published. Recut the same
+  day at its request: the end card keeps only the labels "Microduck" and "14 emotions" (any on-screen sentence in a
+  public post must be Rémi's own words, and the tagline was an agent's).
 - Lesson: 8 MuJoCo renders at once (2-2.6 GB each) pushed the Mac into swap; `render_all.sh` and `compile.py` now run 3 at a time.
