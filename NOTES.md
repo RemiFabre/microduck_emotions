@@ -470,3 +470,17 @@ converge on one canonical way. Done: dataset **`pollen-robotics/microduck-emotio
 only). Built from `/private/tmp/.../scratchpad/hf_dataset` by a script in this session; picks = the episode 3 summary page
 plus sad v7 (half depth), devastated v2 (D3v2 gentler), curious v3 (Q3 up2). The `pick` cue has no sound: not included.
 Stale PICK.json files here (laugh, excited) still point at earlier picks; the dataset used the shipped ones.
+
+### 2026-10-01: the showcase (clips with an orbit camera + a compilation for social media)
+
+Rémi (voice, through the secretary; brief `notes/SHOWCASE-BRIEF-2026-10-01.md`): short simulated clips of every emotion
+with sound and a slow circular camera, on a page he can share with colleagues, plus a compilation of all of them as a
+candidate social post, devastated first for the hook. Done, details in `showcase/README.md`:
+- `showcase/orbit.py` re-films each of the 14 shipped emotions with its own renderer under three patches (studio look with
+  identical physics, an orbit camera at 1080x1920, no overlay). The printed measurements match the original renders.
+- `combined/showcase/clips/` the 14 clips (1.5-10.6 s), `combined/showcase/index.html` the page, published privately:
+  https://claude.ai/artifact/8f1DruNGYPgkEWzThm5zCk
+- `combined/showcase/microduck_emotions_compilation.mp4`: 47.9 s, 1080x1920, -14 LUFS. Order: devastated (hook), curious,
+  mmh, yes, no, yes!, defiant, impatient, angry, mock, laugh, excited, sad, play dead + end card. The camera continues
+  across the cuts. Handed to the socials session (agentic-socials-ab) as a file path; nothing published.
+- Lesson: 8 MuJoCo renders at once (2-2.6 GB each) pushed the Mac into swap; `render_all.sh` and `compile.py` now run 3 at a time.

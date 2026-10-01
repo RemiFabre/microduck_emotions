@@ -1,0 +1,214 @@
+<title>Microduck Emotions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a screening room in the simulator's own slate. Summary first, then the compilation beside its running
+   order, then the fourteen clips as a contact sheet of vertical shots. Accent = the duck's beak orange. */
+:root {
+  --ground: #131a25;
+  --panel: #1b2432;
+  --line: #2b3747;
+  --ink: #e8edf4;
+  --muted: #9ba8ba;
+  --beak: #f2992e;
+  --beak-ink: #1a1206;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --ground: #edf1f6; --panel: #ffffff; --line: #d3dbe6; --ink: #162030; --muted: #546175;
+    --beak: #b85f05; --beak-ink: #ffffff; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --ground: #edf1f6; --panel: #ffffff; --line: #d3dbe6; --ink: #162030; --muted: #546175;
+  --beak: #b85f05; --beak-ink: #ffffff; color-scheme: light;
+}
+
+body { background: var(--ground); color: var(--ink); font: 400 1rem/1.55 var(--body); }
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 40px 56px;
+  display: flex; flex-direction: column; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+p { margin: 0; }
+a { color: var(--beak); }
+button:focus-visible, video:focus-visible, a:focus-visible { outline: 2px solid var(--beak); outline-offset: 3px; }
+
+/* header */
+header { display: flex; flex-direction: column; gap: 14px; max-width: 46rem; }
+.kicker { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--beak); }
+.lead { font-size: 1.12rem; color: var(--ink); max-width: 40rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 20px; font: 400 0.85rem/1.4 var(--mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+
+/* compilation */
+.comp { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: start; }
+.comp video { width: 100%; aspect-ratio: 9 / 16; max-width: 100%; display: block; background: #000; border-radius: 10px; }
+.comp-text { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -0.01em; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 0.75rem/1 var(--mono); padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); white-space: nowrap; }
+.chip.hot { border-color: var(--beak); color: var(--beak); }
+.why { color: var(--muted); max-width: 40rem; }
+.acts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.act { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 4px 20px; padding-block: 12px; border-bottom: 1px solid var(--line); }
+.act h3 { font: 600 0.95rem/1.35 var(--body); }
+.act p { color: var(--muted); font-size: 0.93rem; grid-column: 2; }
+.stamps { display: flex; flex-wrap: wrap; gap: 6px; grid-column: 2; grid-row: 1; }
+.stamp { font: 500 0.8rem/1 var(--mono); font-variant-numeric: tabular-nums; background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; cursor: pointer; }
+.stamp span { color: var(--beak); margin-right: 6px; }
+.stamp:hover { border-color: var(--beak); }
+
+/* gallery */
+.gallery-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 24px; margin-bottom: 20px; }
+.gallery-head p { color: var(--muted); font-size: 0.93rem; max-width: 34rem; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 28px 16px; }
+.card { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card video { width: 100%; max-width: 100%; aspect-ratio: 9 / 16; display: block; background: #000; border-radius: 8px; }
+.card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.card h3 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+.dur { font: 400 0.75rem/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.card p { font-size: 0.86rem; line-height: 1.45; color: var(--muted); }
+.pad { align-self: flex-start; font: 500 0.7rem/1 var(--mono); color: var(--beak-ink); background: var(--beak); border-radius: 4px; padding: 4px 6px; letter-spacing: 0.02em; }
+
+footer { border-top: 1px solid var(--line); padding-top: 20px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px;
+  color: var(--muted); font-size: 0.85rem; }
+footer code { font-family: var(--mono); font-size: 0.8rem; }
+
+@media (max-width: 1100px) { .grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .comp { grid-template-columns: minmax(0, 1fr); }
+  .comp video { max-width: 340px; margin-inline: auto; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
+  .act { grid-template-columns: minmax(0, 1fr); }
+  .act p, .stamps { grid-column: 1; grid-row: auto; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="kicker">Microduck · simulation clips · October 2026</span>
+    <h1>Microduck <em>emotions</em></h1>
+    <p class="lead">Fourteen emotions for Microduck. Each one is a motion and a sound designed together, beat by beat,
+      and the beak opens with the sound. All fourteen are on the robot's gamepad. These clips are rendered in MuJoCo with the
+      robot's own control policies, its servo model and the same sound files the robot plays.</p>
+    <div class="facts">
+      <span><b>14</b> emotions</span>
+      <span><b>1.5–10.6 s</b> each</span>
+      <span><b>48 s</b> compilation, devastated first</span>
+      <span>sound on: click a clip to play it</span>
+    </div>
+  </header>
+
+  <section class="comp" aria-labelledby="comp-h">
+    <video id="comp" controls playsinline preload="metadata" poster="posters/compilation.jpg"
+      src="microduck_emotions_compilation_720.mp4?v=1"></video>
+    <div class="comp-text">
+      <h2 id="comp-h">All of them, one after another</h2>
+      <div class="status">
+        <span class="chip hot">candidate social post · not published</span>
+        <span class="chip">1080×1920 vertical</span>
+        <span class="chip">47.9 s</span>
+        <span class="chip">−14 LUFS</span>
+      </div>
+      <p class="why">The order tells a small story so people keep watching. It opens on the strongest moment and ends on a
+        punchline. The camera never stops: each shot starts at the angle where the last one ended, so the duck seems to
+        change mood in one continuous take. Click a time to jump there.</p>
+      <ol class="acts">
+        <li class="act">
+          <h3>The hook</h3>
+          <div class="stamps"><button class="stamp" data-t="0"><span>0:00</span>Devastated</button></div>
+          <p>A shock call and a sudden collapse in the first second, then three sobs. A robot crying makes people stay. Cut before it gets up.</p>
+        </li>
+        <li class="act">
+          <h3>The snap</h3>
+          <div class="stamps"><button class="stamp" data-t="6.9"><span>0:07</span>Curious</button><button class="stamp" data-t="9.9"><span>0:10</span>Mmh?</button></div>
+          <p>From tragedy straight to "what? what?". The tonal jump is the joke.</p>
+        </li>
+        <li class="act">
+          <h3>Quick-fire answers</h3>
+          <div class="stamps"><button class="stamp" data-t="11.9"><span>0:12</span>Yes</button><button class="stamp" data-t="13.15"><span>0:13</span>No</button><button class="stamp" data-t="14.75"><span>0:15</span>Yes!</button></div>
+          <p>Three short shots of 1.25 to 1.6 s. The cutting speeds up.</p>
+        </li>
+        <li class="act">
+          <h3>The build-up</h3>
+          <div class="stamps"><button class="stamp" data-t="16.0"><span>0:16</span>Defiant</button><button class="stamp" data-t="18.2"><span>0:18</span>Impatient</button><button class="stamp" data-t="20.8"><span>0:21</span>Angry</button></div>
+          <p>Irritation that climbs until the duck barks.</p>
+        </li>
+        <li class="act">
+          <h3>The release</h3>
+          <div class="stamps"><button class="stamp" data-t="23.4"><span>0:23</span>Mock</button><button class="stamp" data-t="26.0"><span>0:26</span>Laugh</button><button class="stamp" data-t="29.0"><span>0:29</span>Excited</button></div>
+          <p>The anger turns into teasing, then laughter, then the highest energy of the video.</p>
+        </li>
+        <li class="act">
+          <h3>Come-down and punchline</h3>
+          <div class="stamps"><button class="stamp" data-t="32.4"><span>0:32</span>Sad</button><button class="stamp" data-t="37.8"><span>0:38</span>Play dead</button></div>
+          <p>Everything slows down, then the duck keels over and ends on its back with its legs up. The title card holds on that frame.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="gal-h">
+    <div class="gallery-head">
+      <h2 id="gal-h">Each emotion</h2>
+      <p>The full clip of each one, in the order of the compilation, with a slow orbit around the duck. The orange tag is its button on the gamepad (short or long press).</p>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer>
+    <span>Rendered by <code>showcase/orbit.py</code> and <code>showcase/compile.py</code> in RemiFabre/microduck_emotions, 2026-10-01.</span>
+    <a href="http://localhost:7788/focus/e5450c24-4cef-49c7-bde8-4e5c7faa33ea" target="_blank" rel="noopener">Talk to the agent</a>
+  </footer>
+</div>
+
+<script>
+const EMOTIONS = [
+  ["devastated", "Devastated", "A long", 10.6, "A shock call, it sits down hard, then the head droops and shakes 'no' on three soft sobs."],
+  ["curious", "Curious", "Y long", 3.0, "'What? What?': the head comes forward and tilts right, then left, on two rising chirps."],
+  ["mmh", "Mmh?", "Y short", 2.0, "'What do you mean?': a small head tilt with a muffled, rising 'mmh?'."],
+  ["yes", "Yes", "LB short", 1.5, "One clear nod with a quack that falls three semitones."],
+  ["no", "No", "RB short", 1.8, "One head shake with a two-note 'no-ah'."],
+  ["yes_fast", "Yes!", "LB long", 1.5, "The same nod with a curt 'wak'."],
+  ["defiant", "Defiant", "RB long", 2.2, "'Says who?': beak up to the left, then to the right, a curt quack each time."],
+  ["impatient", "Impatient", "B long", 2.6, "'Come on!': four quick shakes with a grumble each, then the beak flicks up on a huff."],
+  ["angry", "Angry", "X short", 2.6, "A beak-up glare, then four head snaps on four hard barks."],
+  ["mock", "Mock", "X long", 2.6, "'Gnagnagna': beak up, the head rolling side to side on a staccato run."],
+  ["laugh", "Laugh", "L3 short", 3.0, "Beak up, head wagging: one long 'haaa', then short ha's dying out."],
+  ["excited", "Excited", "B short", 3.4, "Six faster and faster head swings with a bob each, every quack higher than the last."],
+  ["sad", "Sad", "A short", 8.3, "Still standing, the head droops while a low coo slides down with it, then two slow silent shakes."],
+  ["play_dead", "Play dead", "L3 long", 7.5, "An alarm call, it sits, goes limp and rolls onto its back, legs up, one last quack."],
+];
+const grid = document.getElementById("grid");
+for (const [id, title, pad, dur, line] of EMOTIONS) {
+  const card = document.createElement("article");
+  card.className = "card";
+  card.id = id;
+  card.innerHTML =
+    `<video controls playsinline preload="none" poster="posters/${id}.jpg" src="clips/${id}.mp4?v=1" aria-label="${title}, simulated clip with sound"></video>` +
+    `<div class="card-top"><h3>${title}</h3><span class="dur">${dur.toFixed(1)} s</span></div>` +
+    `<span class="pad">${pad}</span><p>${line}</p>`;
+  grid.appendChild(card);
+}
+// one sound at a time
+const videos = () => document.querySelectorAll("video");
+document.addEventListener("play", (e) => {
+  for (const v of videos()) if (v !== e.target && !v.paused) v.pause();
+}, true);
+// timecodes seek the compilation
+const comp = document.getElementById("comp");
+for (const b of document.querySelectorAll(".stamp")) {
+  b.addEventListener("click", () => {
+    const t = parseFloat(b.dataset.t) + 0.05;
+    const go = () => { comp.currentTime = t; comp.play().catch(() => {}); };
+    if (comp.readyState >= 1) go(); else { comp.addEventListener("loadedmetadata", go, { once: true }); comp.load(); }
+  });
+}
+</script>

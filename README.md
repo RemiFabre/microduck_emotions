@@ -46,6 +46,8 @@ scene `scenes/episode3` in the theater repo with a simulated preview. Summary pa
 ## Layout
 
 - `HANDOFF.md` the original brief; `NOTES.md` the running log (what was tried, what failed, why; Rémi's decisions).
+- `showcase/` (2026-10-01) clean re-renders of the 14 shipped emotions with a slow orbit camera (`orbit.py`) and the
+  social-media compilation (`compile.py`); outputs and the shareable page in `combined/showcase/`. See `showcase/README.md`.
 - `quack.py` Python port of the robot's Rust voice synth (`microduck/sounds`). `Personality(4145077059)` = this robot;
   the random generator is ported exactly (verified sample-exact against the robot's bank). `quack()` renders one
   vocalisation from a pitch contour + envelope + per-sound personality mods.
